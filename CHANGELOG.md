@@ -1,3 +1,18 @@
+## [1.0.1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.0...v1.0.1) (2026-07-01)
+
+### Bug Fixes
+
+* set Authentik brand default application to `cig-dashboard` via SQL in the host provisioning script ([user_data.sh.tftpl](packages/iac/modules/authentik-host/user_data.sh.tftpl))
+* document account-guard check in migrate-cig-account.mjs
+
+### Chores
+
+* add `CLAUDE.md` — project conventions for Claude Code, including the two-remote push policy
+* add `TODO` to `.gitignore`
+* move `UPGRADE_SUMMARY.md` and `VERSIONING_GUIDE.md` from repo root into `docs/`
+* update docs primary domain note in `apps/docs/IMPLEMENTATION_STATUS.md`
+
+
 ## [1.0.0](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v0.3.11...v1.0.0) (2026-07-01)
 
 First stable release of Compute Intelligence Graph. The production API is live at `https://api.cig.technology`, the full GitHub Actions CI/CD pipeline is operational, Authentik SSO is wired end-to-end, and the repository has migrated to the CIG-TECHNOLOGY GitHub organisation.

@@ -301,6 +301,20 @@ sleep 180
 if ! docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T worker ak apply_blueprint /blueprints/cig-dashboard.yaml >/dev/console 2>&1; then
   exit 1
 fi
+
+DASHBOARD_APP_ID="$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T postgresql psql -U authentik -d authentik -A -t -c "select policybindingmodel_ptr_id::text from authentik_core_application where slug = 'cig-dashboard' limit 1;" | tr -d '[:space:]')"
+if [ -z "$DASHBOARD_APP_ID" ]; then
+  echo "Failed to resolve the CIG Dashboard application id" >&2
+  exit 1
+fi
+
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T postgresql psql -U authentik -d authentik -v app_id="$DASHBOARD_APP_ID" <<'SQL'
+update authentik_brands_brand
+set default_application_id = :'app_id'::uuid
+where default = true
+  and coalesce(default_application_id, '00000000-0000-0000-0000-000000000000'::uuid) <> :'app_id'::uuid;
+SQL
+
 sleep 10
 
 wait_for_url() {

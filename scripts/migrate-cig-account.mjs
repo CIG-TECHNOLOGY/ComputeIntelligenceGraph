@@ -97,6 +97,7 @@ What it does:
 
 The script expects AWS credentials in the env file (for example AWS_KEY_ID / AWS_SECRET_ACCESS_KEY).
 It ignores AWS_PROFILE/default and derives the active account from STS after loading the explicit keys.
+It refuses to mutate any Authentik or production API resources unless STS resolves to AWS account 520900722378.
 It also expects the Authentik social-login credentials:
   GOOGLE_AUTH_CLIENT_ID / GOOGLE_AUTH_CLIENT_SECRET
   GITHUB_AUTH_CLIENT_ID / GITHUB_AUTH_CLIENT_SECRET
