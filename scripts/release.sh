@@ -245,7 +245,7 @@ verify_dashboard_container_build() {
   fi
 
   docker build \
-    -f infra/docker/Dockerfile.dashboard \
+    -f packages/infra/docker/Dockerfile.dashboard \
     -t "${image_tag}" \
     --build-arg "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}" \
     --build-arg "NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://cig.lat}" \
@@ -504,7 +504,7 @@ else
     success "Wizard-UI build OK"
   else
     info "[dry-run] Would run: pnpm --filter @cig/landing build"
-    info "[dry-run] Would run: docker build -f infra/docker/Dockerfile.dashboard ..."
+    info "[dry-run] Would run: docker build -f packages/infra/docker/Dockerfile.dashboard ..."
     info "[dry-run] Would run: pnpm --filter @cig/wizard-ui build"
   fi
 fi
@@ -594,15 +594,17 @@ fi
 
 if $SKIP_PUSH; then
   warn "Push skipped (--no-push). Run manually:"
-  echo "  git push origin \"${BRANCH}\""
-  echo "  git push origin \"${RELEASE_TAG}\""
+  echo "  git push origin \"${BRANCH}\" && git push upstream \"${BRANCH}\""
+  echo "  git push origin \"${RELEASE_TAG}\" && git push upstream \"${RELEASE_TAG}\""
 elif ! $DRY_RUN; then
   info "Pushing only ${BRANCH} and ${RELEASE_TAG}; do not push --tags from release runs."
   git push origin "$BRANCH"
+  git push upstream "$BRANCH"
   git push origin "${RELEASE_TAG}"
-  success "Pushed ${BRANCH} + tag ${RELEASE_TAG}"
+  git push upstream "${RELEASE_TAG}"
+  success "Pushed ${BRANCH} + tag ${RELEASE_TAG} to origin and upstream"
 else
-  info "[dry-run] Would push branch + tag to origin"
+  info "[dry-run] Would push branch + tag to origin and upstream"
 fi
 
 # ── Done ────────────────────────────────────────────────────────────────────

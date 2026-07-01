@@ -25,14 +25,33 @@ git push upstream v1.0.1
 
 Never push only to one remote and call the work done.
 
-## Release process
+## Release process — always use the script
 
-1. Stage all relevant changes (exclude `node_modules`, `dist`, `.next`, `.turbo`, `tfstate`, `tsbuildinfo`).
-2. Prepend a new block to `CHANGELOG.md` and update `README.md` badge + Latest Changes block.
-3. Bump `package.json` version field.
-4. Commit with `chore(release): vX.Y.Z`.
-5. Tag `vX.Y.Z`.
-6. Push branch and tag to **both** remotes.
+**Never** manually edit `package.json` version, `CHANGELOG.md`, or `README.md` version references, and **never** manually run `git tag` or `git push` for a release. The release script does all of this atomically and correctly.
+
+```bash
+pnpm release:patch   # bug fixes and docs only
+pnpm release:minor   # new features
+pnpm release:major   # breaking changes or significant milestones
+pnpm release:dry     # preview without writing anything
+```
+
+The script (`scripts/release.sh`) handles in order:
+1. Branch state and working tree checks
+2. `pnpm install --frozen-lockfile`
+3. Full test suite
+4. Production builds (landing, dashboard container, wizard-ui)
+5. Version bump via `@edcalderon/versioning` across all packages
+6. CHANGELOG.md generation from conventional commits
+7. README.md badge + Latest Changes update
+8. `git commit` + `git tag`
+9. `git push` to **both** `origin` and `upstream`
+
+**Hard rules — enforced by this file:**
+- Do not run `git push origin main` alone; the script always pushes both remotes
+- Do not create a release commit by hand; `chore(release): vX.Y.Z` commits come only from the script
+- Do not edit `package.json` version manually; that is the script's job
+- `--no-build` and `--no-tests` flags exist for CI emergencies only, not routine use
 
 Patch = bug fixes and docs only. Minor = new features. Major = breaking changes or significant milestones.
 
