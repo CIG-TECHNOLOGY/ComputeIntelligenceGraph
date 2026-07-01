@@ -34,6 +34,24 @@ This package is also the canonical translation layer from deploy inputs to the A
 - `src/deployers/ApiDeployer.ts` — programmatic deploy wrapper for SST
 - `src/deployers/apiRuntime.ts` — Terraform-output parsing and runtime config resolution
 - `config/pipelines.example.json` — optional native pipeline config example
+- `docker/Dockerfile.api` — production container for `packages/api`
+- `docker/Dockerfile.dashboard` — production container for `apps/dashboard`
+- `docker/Dockerfile.discovery` — production container for `packages/discovery`
+- `docker/Dockerfile.chatbot` — production container for `packages/chatbot`
+
+## Docker Builds
+
+Container build definitions live in `packages/infra/docker/` alongside the deployment package that owns them. Docker contexts are always the monorepo root so cross-package `COPY` instructions work correctly.
+
+```bash
+# API (from repo root)
+docker build -f packages/infra/docker/Dockerfile.api -t cig-api:local .
+
+# Dashboard
+docker build -f packages/infra/docker/Dockerfile.dashboard -t cig-dashboard:local .
+```
+
+All four images are also built and published by `.github/workflows/publish-images.yml` and the per-service deploy workflows. The `docker-compose.yml` at the repo root references these Dockerfiles by their new paths.
 
 ## API Config Surface
 

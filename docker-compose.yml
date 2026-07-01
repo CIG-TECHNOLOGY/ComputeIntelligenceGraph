@@ -91,7 +91,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.api
+      dockerfile: packages/infra/docker/Dockerfile.api
       target: production
     image: docker.io/cigtechnology/cig-api:latest
     container_name: cig-api
@@ -190,7 +190,7 @@ services:
   discovery:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.discovery
+      dockerfile: packages/infra/docker/Dockerfile.discovery
       target: production
     image: docker.io/cigtechnology/cig-discovery:latest
     container_name: cig-discovery
@@ -228,7 +228,7 @@ services:
   chatbot:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.chatbot
+      dockerfile: packages/infra/docker/Dockerfile.chatbot
       target: production
     image: docker.io/cigtechnology/cig-chatbot:latest
     container_name: cig-chatbot
@@ -274,7 +274,7 @@ services:
   dashboard:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.dashboard
+      dockerfile: packages/infra/docker/Dockerfile.dashboard
       target: production
     image: docker.io/cigtechnology/cig-dashboard:latest
     container_name: cig-dashboard

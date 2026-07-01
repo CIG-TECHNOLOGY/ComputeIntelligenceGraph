@@ -197,6 +197,42 @@ What to fix:
 
 If the failure only happens in production and the logs mention a redirect URI mismatch, also confirm `NEXT_PUBLIC_DASHBOARD_URL` resolves to the public dashboard origin (`https://app.cig.lat`) so the login-callback bridge exchanges the code against the registered callback URL.
 
+### Authentik client ID: build-time requirement and error path
+
+`NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` is baked into the Next.js bundle at build time. Unlike the Supabase runtime vars above, setting it after build has no effect — the value in the deployed bundle controls which OIDC client ID the frontend uses.
+
+**Where it comes from:**
+
+- Local builds: falls back to `'cig-dashboard'` (the Authentik application slug)
+- CI builds: the deploy workflow sets it from `vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` with the same `'cig-dashboard'` fallback
+- If `NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` is absent in CI (`process.env.CI === 'true'`), `next.config.js` throws `NEXT_PUBLIC_AUTHENTIK_CLIENT_ID is required to build the [dashboard|landing] app` and aborts the build
+
+**Previous incident — wrong client ID in the fallback:**
+
+Before commit `d4aea56` (2026-06-30), the fallback in both `apps/dashboard/next.config.js` and `apps/landing/next.config.js` was set to a non-slug value (`G4D6S7WXUoCNZxY7uZSbD08zO3cuXEZwSyUATw2v`) instead of the Authentik application slug. When `NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` was not provided to a build, that stale value was baked in.
+
+Authentik checks the `client_id` parameter in the OIDC authorization request against registered applications. An unrecognised value causes Authentik to immediately return:
+
+```
+error=invalid_client&error_description=No+matching+client+was+found
+```
+
+The browser is redirected back to the callback URL with this error, and the login-callback bridge logs:
+
+```
+[auth/login-callback] Authentik callback failed — Authentik returned an error during authorization: invalid_client
+```
+
+**How the fix works:**
+
+The correct client ID is the Authentik **application slug** (`cig-dashboard`), not the OIDC client secret or any other credential. The fallback is now `'cig-dashboard'` so a build without the env var still uses the right value in non-CI environments. In CI the guard throws, forcing the deploy workflow to supply the value explicitly.
+
+**What to check if the error recurs:**
+
+1. Confirm the Authentik provider for `CIG Dashboard` is still registered with slug `cig-dashboard` in the live tenant.
+2. Confirm the deploy workflow `vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` matches that slug.
+3. If a new Authentik application is registered with a different slug, update both the GitHub variable and the fallback in `apps/dashboard/next.config.js` and `apps/landing/next.config.js`.
+
 ## Current logout flow
 
 Logout is intentionally centralized in the landing app, even when the user clicks logout inside the dashboard.
@@ -441,7 +477,9 @@ Before trusting this document after Authentik admin changes, re-check these live
 - `default-provider-invalidation-flow` stage bindings
 - `cig-google-login` and `cig-github-login` redirect stages
 - `default-source-authentication` and `cig-source-enrollment` bindings
+- default brand `default_application_id` points to `CIG Dashboard`; if this is blank, external users can hit the Authentik "Interface can only be accessed by internal users" denial page after login/enrollment
 - dashboard runtime env includes `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_AUTHENTIK_CLIENT_ID` build-time var matches the live Authentik application slug (`cig-dashboard`); a mismatch causes `invalid_client` on the first OIDC authorization redirect
 
 This is the minimum audit set that caught the March 22, 2026 GitHub login regression, where the live sources had drifted from `identifier` to `email_link`.
 

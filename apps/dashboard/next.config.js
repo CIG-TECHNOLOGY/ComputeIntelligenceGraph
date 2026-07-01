@@ -58,7 +58,7 @@ writeServiceWorkerAsset();
 
 const nextConfig = {
   // Standalone output bundles server.js + node_modules into .next/standalone/
-  // Required by infra/docker/Dockerfile.dashboard for production containers.
+  // Required by packages/infra/docker/Dockerfile.dashboard for production containers.
   output: 'standalone',
   transpilePackages: ['@cig/auth', '@cig/ui', '@edcalderon/auth'],
   env: {

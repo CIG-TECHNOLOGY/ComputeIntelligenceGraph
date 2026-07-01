@@ -45,7 +45,7 @@ curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/inst
 **Scan the API image:**
 
 ```bash
-docker build -f infra/docker/Dockerfile.api -t cig-api:latest .
+docker build -f packages/infra/docker/Dockerfile.api -t cig-api:latest .
 trivy image cig-api:latest
 ```
 
@@ -155,7 +155,7 @@ Results appear in the GitHub Security tab under "Code scanning alerts".
 
 ### Critical / High CVEs (Trivy)
 
-1. Update the base image in `infra/docker/Dockerfile.api` to the latest patch version.
+1. Update the base image in `packages/infra/docker/Dockerfile.api` to the latest patch version.
 2. Run `pnpm update <package>` for affected npm dependencies.
 3. If no fix is available, evaluate whether the vulnerable code path is reachable and apply a compensating control.
 

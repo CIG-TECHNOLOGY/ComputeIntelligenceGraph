@@ -1,7 +1,5 @@
-# Infra Assets
+# Infra Assets — moved
 
-The root `infra/` directory is reserved for non-TypeScript infrastructure assets.
+Container build definitions have moved to `packages/infra/docker/`.
 
-- `infra/docker/` contains container build definitions.
-
-Terraform modules are currently kept in `packages/iac/` because the TypeScript deployment wrapper in `packages/infra/` references that directory directly.
+This directory is kept only to preserve git history. All content and tooling references now point to the new location.

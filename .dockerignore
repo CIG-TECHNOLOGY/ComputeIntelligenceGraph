@@ -24,7 +24,7 @@ node_modules
 
 # Docker files themselves
 docker-compose*.yml
-infra/docker
+packages/infra/docker
 
 # Docs
 docs

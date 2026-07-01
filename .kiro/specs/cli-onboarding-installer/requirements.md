@@ -726,8 +726,8 @@ The broader CIG system is 75% complete with working API (Fastify + JWT auth), da
 
 #### Acceptance Criteria
 
-1. THE infra/docker directory SHALL include docker-compose.core.yml template for core profile
-2. THE infra/docker directory SHALL include docker-compose.full.yml template for full profile
+1. THE packages/infra/docker directory SHALL include docker-compose.core.yml template for core profile
+2. THE packages/infra/docker directory SHALL include docker-compose.full.yml template for full profile
 3. THE core template SHALL include services: api, neo4j, dashboard, discovery, cartography
 4. THE full template SHALL include all core services plus: chatbot, chroma, agents
 5. THE templates SHALL use environment variable placeholders for secrets (e.g., ${NEO4J_PASSWORD})

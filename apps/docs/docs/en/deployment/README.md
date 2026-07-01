@@ -22,9 +22,9 @@ This page summarizes the current deployment surfaces for CIG.
 
 - `docker-compose.yml` for the full local or single-host stack
 - `docker-compose.dev.yml` for development overrides
-- `infra/docker/` for container build definitions
-- `infra/docker/Dockerfile.dashboard` for the deployable dashboard container
-- `infra/docker/Dockerfile.api` for the deployable Fastify API container
+- `packages/infra/docker/` for container build definitions
+- `packages/infra/docker/Dockerfile.dashboard` for the deployable dashboard container
+- `packages/infra/docker/Dockerfile.api` for the deployable Fastify API container
 - `packages/iac/` for Terraform modules and environment layouts
 - `packages/infra/` for the TypeScript deployment wrapper plus the SST AWS runtime stack
 

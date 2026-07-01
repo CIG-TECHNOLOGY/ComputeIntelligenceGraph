@@ -269,6 +269,57 @@ INFRA_CREATE_PIPELINES=false
 - Autoscaling is deferred until WebSocket fan-out and the heartbeat worker are moved out of the API process.
 - Lambda is intentionally not used for this runtime because the API is a long-running Fastify service with WebSocket support and an in-process background job.
 
+## Troubleshooting
+
+### OTP email 502 — `otp_send_failed`
+
+**Symptom:** `POST /api/v1/auth/send-otp` returns `{"error":"Failed to send OTP email","code":"otp_send_failed","statusCode":502}`.
+
+**Root cause:** The API's `sendOtpViaSmtp()` function failed. The ECS task catches any error from nodemailer and converts it to a 502. The actual reason is in the CloudWatch logs.
+
+**Check the logs first:**
+
+```bash
+aws logs filter-log-events \
+  --log-group-name /ecs/cig-api \
+  --filter-pattern '"otp_send_failed" OR "SMTP credentials" OR "sendMail"' \
+  --region us-east-2 \
+  --profile prod
+```
+
+The log entry includes the raw `err` object. Two common cases:
+
+| Log message | Cause | Fix |
+| ----------- | ----- | --- |
+| `SMTP credentials not configured (SMTP_PASSWORD)` | Secret missing or empty | Create / update `/cig/prod/api/smtp-password` in Secrets Manager and redeploy |
+| `SMTP credentials not configured (SMTP_HOST / SMTP_FROM_EMAIL)` | Secret missing or empty | Create / update `/cig/prod/api/smtp-from-email` in Secrets Manager and redeploy |
+| `535 Authentication credentials invalid` or `ECONNREFUSED` | Wrong password or server unreachable | Update the secret with the correct value, then redeploy |
+
+**SMTP server facts (verified 2026-07-01):**
+
+- Host: `mail.xn--tlo-fla.com` (Stalwart ESMTP, `15.204.116.157`)
+- Port 587 with STARTTLS is reachable
+- After STARTTLS the server advertises `AUTH PLAIN LOGIN XOAUTH2 OAUTHBEARER`
+- nodemailer uses `PLAIN` or `LOGIN` by default, which the server accepts after TLS
+
+**Updating credentials without a full redeploy:**
+
+1. Update the secret value in Secrets Manager:
+
+   ```bash
+   aws secretsmanager put-secret-value \
+     --secret-id "/cig/prod/api/smtp-password" \
+     --secret-string "CORRECT_PASSWORD" \
+     --region us-east-2 \
+     --profile prod
+   ```
+
+2. Force the ECS service to pick up the new secret by triggering a new task revision. The simplest path is a no-op redeploy (re-run the deploy workflow without a source change), which replaces the running task with a fresh one that re-fetches all `valueFrom` secrets.
+
+**Env-var mapping summary:**
+
+The GitHub Actions workflow reads `vars.SMTP_HOST`, `vars.SMTP_PORT`, etc., prefixes them as `API_SMTP_*`, and passes them to SST. SST strips the prefix and injects them into the ECS container as plain `SMTP_*` vars. The password is injected via `SMTP_PASSWORD` using `valueFrom` against the `/cig/prod/api/smtp-password` secret ARN.
+
 ## Follow-Up
 
 `packages/sdk` remains an optional higher-level follow-up area. The current foundation keeps authoritative business rules in `packages/api`, while `packages/sdk` can later expand from typed transport helpers into richer CIG workflow clients without becoming the server-side source of truth.

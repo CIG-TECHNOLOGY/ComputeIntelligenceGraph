@@ -11,7 +11,7 @@ const SOURCE_EXACT_PATHS = new Set([
   'pnpm-workspace.yaml',
   'turbo.json',
   'tsconfig.base.json',
-  'infra/docker/Dockerfile.api',
+  'packages/infra/docker/Dockerfile.api',
   'packages/api/package.json',
   'packages/api/tsconfig.json',
   'packages/api/scripts/copy-migrations.mjs',

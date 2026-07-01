@@ -159,7 +159,7 @@ The script outputs two values. Add them as **GitHub Actions secrets**:
 
 **Registry:** `us-central1-docker.pkg.dev/cig-technology/cig/dashboard`
 
-**Dockerfile:** `infra/docker/Dockerfile.dashboard`
+**Dockerfile:** `packages/infra/docker/Dockerfile.dashboard`
 
 The build uses Next.js [standalone output](https://nextjs.org/docs/pages/api-reference/next-config-js/output#automatically-copying-traced-files):
 - Build produces `apps/dashboard/.next/standalone/` with a self-contained `server.js`
@@ -243,7 +243,7 @@ gcloud auth configure-docker us-central1-docker.pkg.dev
 
 # 3. Build image
 docker build \
-  -f infra/docker/Dockerfile.dashboard \
+  -f packages/infra/docker/Dockerfile.dashboard \
   -t us-central1-docker.pkg.dev/cig-technology/cig/dashboard:manual \
   .
 
@@ -272,7 +272,7 @@ docker build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://cig.lat \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=... \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=... \
-  -f infra/docker/Dockerfile.dashboard \
+  -f packages/infra/docker/Dockerfile.dashboard \
   -t ... .
 ```
 
@@ -338,7 +338,7 @@ Cloud Run pricing (us-central1, as of 2025):
 
 | File | Purpose |
 |---|---|
-| `infra/docker/Dockerfile.dashboard` | Container build definition |
+| `packages/infra/docker/Dockerfile.dashboard` | Container build definition |
 | `apps/dashboard/next.config.js` | Next.js build config (must have `output: standalone`) |
 | `.github/workflows/deploy-dashboard.yml` | CI/CD pipeline |
 | `.github/workflows/publish.yml` | Existing GHCR image publish (kept for dev) |

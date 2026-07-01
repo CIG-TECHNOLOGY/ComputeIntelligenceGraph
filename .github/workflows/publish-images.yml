@@ -160,7 +160,7 @@ jobs:
             }
 
             if (
-              filePath.startsWith('infra/docker/Dockerfile.api') ||
+              filePath.startsWith('packages/infra/docker/Dockerfile.api') ||
               filePath.startsWith('packages/api/') ||
               filePath.startsWith('packages/auth/') ||
               filePath.startsWith('packages/config/') ||
@@ -172,7 +172,7 @@ jobs:
             }
 
             if (
-              filePath.startsWith('infra/docker/Dockerfile.dashboard') ||
+              filePath.startsWith('packages/infra/docker/Dockerfile.dashboard') ||
               filePath.startsWith('apps/dashboard/') ||
               filePath.startsWith('packages/auth/') ||
               filePath.startsWith('packages/ui/') ||
@@ -183,7 +183,7 @@ jobs:
             }
 
             if (
-              filePath.startsWith('infra/docker/Dockerfile.discovery') ||
+              filePath.startsWith('packages/infra/docker/Dockerfile.discovery') ||
               filePath.startsWith('packages/discovery/') ||
               filePath.startsWith('packages/config/') ||
               filePath.startsWith('packages/graph/')
@@ -196,7 +196,7 @@ jobs:
             }
 
             if (
-              filePath.startsWith('infra/docker/Dockerfile.chatbot') ||
+              filePath.startsWith('packages/infra/docker/Dockerfile.chatbot') ||
               filePath.startsWith('packages/chatbot/') ||
               filePath.startsWith('packages/config/') ||
               filePath.startsWith('packages/graph/')
@@ -254,7 +254,7 @@ jobs:
             api)
               {
                 echo 'image_name=cig-api'
-                echo 'dockerfile=infra/docker/Dockerfile.api'
+                echo 'dockerfile=packages/infra/docker/Dockerfile.api'
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo
@@ -264,7 +264,7 @@ jobs:
             dashboard)
               {
                 echo 'image_name=cig-dashboard'
-                echo 'dockerfile=infra/docker/Dockerfile.dashboard'
+                echo 'dockerfile=packages/infra/docker/Dockerfile.dashboard'
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo "NEXT_PUBLIC_API_URL=https://api.cig.technology"
@@ -281,7 +281,7 @@ jobs:
             dashboard-selfhosted)
               {
                 echo 'image_name=cig-dashboard-selfhosted'
-                echo 'dockerfile=infra/docker/Dockerfile.dashboard'
+                echo 'dockerfile=packages/infra/docker/Dockerfile.dashboard'
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo "NEXT_PUBLIC_API_URL=http://localhost:3003"
@@ -296,7 +296,7 @@ jobs:
             discovery)
               {
                 echo 'image_name=cig-discovery'
-                echo 'dockerfile=infra/docker/Dockerfile.discovery'
+                echo 'dockerfile=packages/infra/docker/Dockerfile.discovery'
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo
@@ -316,7 +316,7 @@ jobs:
             chatbot)
               {
                 echo 'image_name=cig-chatbot'
-                echo 'dockerfile=infra/docker/Dockerfile.chatbot'
+                echo 'dockerfile=packages/infra/docker/Dockerfile.chatbot'
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo
