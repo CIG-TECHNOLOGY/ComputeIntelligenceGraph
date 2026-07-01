@@ -15,7 +15,7 @@ This package now owns two related concerns:
   - security groups
   - Neo4j instance and storage
 - `packages/infra` owns runtime delivery:
-  - ECR repository
+  - existing ECR repository reference and lifecycle policy
   - ECS/Fargate service
   - ALB
   - ACM
@@ -23,7 +23,7 @@ This package now owns two related concerns:
   - optional native pipeline scaffolding
 
 GitHub Actions is the primary production deployment entrypoint. Release tags and `release-metadata.json` are bookkeeping only; they do not decide whether the API is rebuilt or redeployed. Native SST pipeline creation remains optional and disabled during normal deploys.
-The bootstrap helpers are safe to re-run: if the production SST stage already exists, they only ensure the ECR repository is present and do not prune the runtime stack.
+The bootstrap helpers are safe to re-run: if the production SST stage already exists, they only ensure the ECR repository is present and do not prune the runtime stack. The runtime deploy then reuses that repository instead of creating a second copy.
 
 This package is also the canonical translation layer from deploy inputs to the API runtime contract. Workflow callers should treat it as the single source of truth for runtime environment variables, secret ARN mapping, and defaults.
 

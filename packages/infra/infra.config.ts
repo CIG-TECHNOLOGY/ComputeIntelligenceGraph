@@ -261,13 +261,8 @@ export function createInfrastructure() {
     managedBy: 'sst',
   };
 
-  const repository = new aws.ecr.Repository(`${namePrefix}-repository`, {
+  const repository = aws.ecr.getRepositoryOutput({
     name: config.imageRepository,
-    imageScanningConfiguration: {
-      scanOnPush: true,
-    },
-    imageTagMutability: 'MUTABLE',
-    tags,
   });
 
   const repositoryLifecyclePolicy = new aws.ecr.LifecyclePolicy(

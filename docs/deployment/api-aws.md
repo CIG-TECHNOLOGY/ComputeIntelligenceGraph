@@ -1,6 +1,6 @@
 # API on AWS
 
-Last synchronized with the API ECS/Fargate delivery foundation on `2026-03-25`.
+Last synchronized with the API ECS/Fargate delivery foundation on `2026-07-01`.
 
 ## Scope
 
@@ -51,7 +51,7 @@ Release tags are workflow triggers and bookkeeping only. The detector decides wh
   - ALB, API, and Neo4j security groups
   - Neo4j EC2 instance, EBS volume, and password secret
 - `packages/infra` owns runtime delivery:
-  - ECR repository
+  - ECR repository reuse and lifecycle policy
   - ECS cluster
   - task definition and service
   - CloudWatch log group
@@ -87,7 +87,7 @@ Outputs consumed by runtime deploy:
 
 Resources created:
 
-- ECR repository for the API image
+- ECR repository lookup plus lifecycle policy for the API image
 - ECS cluster and single Fargate service
 - CloudWatch log group
 - public ALB
@@ -137,6 +137,13 @@ During production deploys, the actual sender/login is read from AWS Secrets Mana
 The GitHub Actions deploy workflow resolves the Authentik values from the live tenant in the production AWS account `520900722378` and its `authentik/auth.cig.technology/v2/oidc-client` secret in `us-east-2`, then syncs those along with the GitHub-managed Supabase/JWT, OpenAI, and SMTP password secrets into deterministic AWS Secrets Manager names under `/cig/prod/api/*` before the ECS deploy.
 
 The prod `github-actions-role` must also have `secretsmanager:GetSecretValue` access to that live Authentik secret ARN, or the deploy job will fail during runtime-value resolution before the ECS stack updates.
+
+For a first-time production rollout, that same role also needs write access to the ECS delivery surface in account `520900722378`, including:
+
+- `ecr:*` for the API image repository
+- `ecs:*` for the cluster, task definition, and service lifecycle
+- `elasticloadbalancing:*` for the public ALB, target group, listener, and rule management
+- `ec2:Describe*` plus security-group mutation actions such as `ec2:CreateSecurityGroup`, `ec2:AuthorizeSecurityGroupIngress`, `ec2:AuthorizeSecurityGroupEgress`, `ec2:RevokeSecurityGroupIngress`, `ec2:RevokeSecurityGroupEgress`, and `ec2:DeleteSecurityGroup`
 
 Production auth infrastructure for CIG lives in AWS account `520900722378`. Any script or workflow that mutates Authentik or its secrets should verify the caller account before making changes. The migration script (`scripts/migrate-cig-account.mjs`) enforces this guard and aborts if STS resolves to a different account.
 
