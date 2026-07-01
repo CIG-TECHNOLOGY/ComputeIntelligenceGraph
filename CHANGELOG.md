@@ -1,3 +1,30 @@
+## [1.0.0](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v0.3.11...v1.0.0) (2026-07-01)
+
+First stable release of Compute Intelligence Graph. The production API is live at `https://api.cig.technology`, the full GitHub Actions CI/CD pipeline is operational, Authentik SSO is wired end-to-end, and the repository has migrated to the CIG-TECHNOLOGY GitHub organisation.
+
+### Features
+
+* production API live at `https://api.cig.technology` — ECS/Fargate behind public ALB, Route 53, and ACM
+* full GitHub Actions CI/CD pipeline: detect → validate → build → migrate → deploy → smoke-test
+* Authentik OIDC SSO with PKCE — social login (Google, GitHub) fully wired through dashboard relay and login-callback bridge
+* email OTP authentication path with SMTP via nodemailer; troubleshooting runbook added to deployment docs
+* Authentik client ID error path documented end-to-end with CI guard, wrong-fallback incident, and drift-check list
+
+### Bug Fixes
+
+* reuse existing ECR repository instead of creating a duplicate ([db590ce](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/db590ce))
+* fix API core-data Terraform job gating ([69b049e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/69b049e), [0489778](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0489778))
+* fix Authentik secret lookup to use correct AWS Secrets Manager path ([8a1ba39](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/8a1ba39))
+* restore github-actions-role ECS/ECR/ELB permissions in prod account 520900722378 ([e80f4d5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/e80f4d5))
+* fix Authentik client ID default fallback (`G4D6S7WX…` → `cig-dashboard`) and add account guard ([d4aea56](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d4aea56))
+* fix API deploy recovery path and workflow app name ([899f282](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/899f282), [99ca728](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/99ca728))
+
+### Chores
+
+* move container build definitions from `infra/docker/` to `packages/infra/docker/` — all workflow, compose, and doc references updated ([fbed0ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fbed0ed))
+* migrate canonical repository to `CIG-TECHNOLOGY/ComputeIntelligenceGraph` — 43 files updated across source, workflows, Terraform, docs, and scripts ([c6aaf35](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c6aaf35))
+
+
 ## [0.3.11](https://github.com/edwardcalderon/ComputeIntelligenceGraph/compare/v0.3.5...v0.3.11) (2026-05-02)
 
 
