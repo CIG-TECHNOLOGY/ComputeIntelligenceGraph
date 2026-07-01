@@ -134,7 +134,7 @@ During production deploys, the actual sender/login is read from AWS Secrets Mana
 - `SMTP_PASSWORD`
 - `OPENAI_API_KEY`
 
-The GitHub Actions deploy workflow resolves the Authentik values from the live tenant in `us-east-1` and its `authentik/auth.cig.technology/oidc-client` secret, then syncs those along with the GitHub-managed Supabase/JWT, OpenAI, and SMTP password secrets into deterministic AWS Secrets Manager names under `/cig/prod/api/*` before the ECS deploy.
+The GitHub Actions deploy workflow resolves the Authentik values from the live tenant in the production AWS account `520900722378` and its `authentik/auth.cig.technology/v2/oidc-client` secret in `us-east-2`, then syncs those along with the GitHub-managed Supabase/JWT, OpenAI, and SMTP password secrets into deterministic AWS Secrets Manager names under `/cig/prod/api/*` before the ECS deploy.
 
 Production auth infrastructure for CIG lives in AWS account `520900722378`. Any script or workflow that mutates Authentik or its secrets should verify the caller account before making changes. The migration script (`scripts/migrate-cig-account.mjs`) enforces this guard and aborts if STS resolves to a different account.
 

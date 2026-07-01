@@ -26,7 +26,7 @@ concurrency:
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-2' }}
   AUTHENTIK_DOMAIN: ${{ vars.AUTHENTIK_DOMAIN || 'auth.cig.technology' }}
-  AUTHENTIK_AWS_REGION: ${{ vars.AUTHENTIK_AWS_REGION || 'us-east-1' }}
+  AUTHENTIK_AWS_REGION: ${{ vars.AUTHENTIK_AWS_REGION || 'us-east-2' }}
   AUTHENTIK_OIDC_APP_SLUG: ${{ vars.AUTHENTIK_OIDC_APP_SLUG || 'cig-dashboard' }}
   API_DOMAIN: ${{ vars.API_DOMAIN || 'api.cig.technology' }}
   API_IMAGE_REPOSITORY: ${{ vars.API_IMAGE_REPOSITORY || 'cig-api-production' }}
@@ -520,7 +520,7 @@ jobs:
           DISCOVERY_JSON=$(curl --fail --silent --show-error "$DISCOVERY_URL")
 
           OIDC_CLIENT_JSON=$(aws secretsmanager get-secret-value \
-            --secret-id "authentik/${AUTHENTIK_DOMAIN}/oidc-client" \
+            --secret-id "authentik/${AUTHENTIK_DOMAIN}/v2/oidc-client" \
             --region "$AUTHENTIK_AWS_REGION" \
             --query SecretString \
             --output text)
