@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.2-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.3-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,16 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.2)
+## 📋 Latest Changes (v1.0.3)
 
 ### Bug Fixes
 
-* add `https://app.cig.lat` to production CORS origins — dashboard OTP and verify-otp flows were blocked by missing `Access-Control-Allow-Origin` header ([6d1b4d9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/6d1b4d9))
-* add `GET /api/v1/health/db` endpoint (`SELECT 1` probe, 200/503) for external DB connectivity checks
-
-### Chores
-
-* add keep-alive GitHub Actions cron (every 3 days) that pings both health endpoints and errors if Supabase is paused ([6d1b4d9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/6d1b4d9))
+* **release:** push to both remotes and fix stale Dockerfile path in release.sh ([f271582](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f27158251ea4ca8c04a61a92fb863d237c37364d))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

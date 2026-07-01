@@ -1,6 +1,6 @@
 {
   "name": "@cig/agents",
-  "version": "0.3.11",
+  "version": "1.0.3",
   "description": "CIG agents: OpenClaw (query reasoning) and OpenFang (action execution)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

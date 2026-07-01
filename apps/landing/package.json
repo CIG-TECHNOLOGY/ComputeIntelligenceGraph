@@ -1,6 +1,6 @@
 {
   "name": "@cig/landing",
-  "version": "0.3.11",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "dev": "next dev",

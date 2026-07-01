@@ -40,6 +40,7 @@ describe('resolveCorsOrigins', () => {
     expect(resolveCorsOrigins({ NODE_ENV: 'production' })).toEqual([
       'https://cig.lat',
       'https://www.cig.lat',
+      'https://app.cig.lat',
       'https://edwardcalderon.github.io',
     ]);
   });

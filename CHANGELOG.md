@@ -1,3 +1,25 @@
+## [1.0.3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.2...v1.0.3) (2026-07-01)
+
+
+### Bug Fixes
+
+* **release:** push to both remotes and fix stale Dockerfile path in release.sh ([f271582](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f27158251ea4ca8c04a61a92fb863d237c37364d))
+
+
+
+
+
+## [1.0.3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.2...v1.0.3) (2026-07-01)
+
+
+### Bug Fixes
+
+* **release:** push to both remotes and fix stale Dockerfile path in release.sh ([f271582](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f27158251ea4ca8c04a61a92fb863d237c37364d))
+
+
+
+
+
 ## [1.0.2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.1...v1.0.2) (2026-07-01)
 
 ### Bug Fixes
