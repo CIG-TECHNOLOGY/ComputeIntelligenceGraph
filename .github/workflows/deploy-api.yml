@@ -34,7 +34,7 @@ env:
   DOCKERHUB_API_IMAGE: ${{ vars.DOCKERHUB_API_IMAGE || 'cig-api' }}
   API_HOSTED_ZONE_DOMAIN: ${{ vars.API_HOSTED_ZONE_DOMAIN || 'cig.technology' }}
   API_CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'https://app.cig.lat,https://cig.lat' }}
-  INFRA_APP_NAME: ${{ vars.INFRA_APP_NAME || 'cig-api' }}
+  INFRA_APP_NAME: cig-api
   INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'edwardcalderon/ComputeIntelligenceGraph' }}
   INFRA_PIPELINE_PREFIX: ${{ vars.INFRA_PIPELINE_PREFIX || 'cig-api' }}
   INFRA_PROJECT_TAG: ${{ vars.INFRA_PROJECT_TAG || 'cig-api' }}

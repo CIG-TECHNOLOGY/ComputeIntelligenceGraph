@@ -11,7 +11,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-2' }}
   API_DOMAIN: ${{ vars.API_DOMAIN || 'api.cig.technology' }}
   API_IMAGE_REPOSITORY: ${{ vars.API_IMAGE_REPOSITORY || 'cig-api-production' }}
-  INFRA_APP_NAME: ${{ vars.INFRA_APP_NAME || 'cig-api' }}
+  INFRA_APP_NAME: cig-api
   INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'edwardcalderon/ComputeIntelligenceGraph' }}
   INFRA_PIPELINE_PREFIX: ${{ vars.INFRA_PIPELINE_PREFIX || 'cig-api' }}
   INFRA_PROJECT_TAG: ${{ vars.INFRA_PROJECT_TAG || 'cig-api' }}
