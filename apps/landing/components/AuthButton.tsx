@@ -1224,10 +1224,7 @@ export function AuthButton() {
 
   const handlePostAuthSuccess = useCallback(() => {
     setShowModal(false);
-    const dashboardRedirect = consumePendingDashboardRedirect();
-    if (!dashboardRedirect) {
-      return;
-    }
+    const dashboardRedirect = consumePendingDashboardRedirect() ?? "/";
 
     window.requestAnimationFrame(() => {
       void goToDashboard(dashboardRedirect).catch(() => {

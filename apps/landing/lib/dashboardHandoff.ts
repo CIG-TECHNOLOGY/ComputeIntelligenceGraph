@@ -196,6 +196,42 @@ async function getSupabaseDashboardCallbackHash(): Promise<string | null> {
   return null;
 }
 
+// Handles email OTP sessions: persistEmailSession() stores the CIG JWT directly
+// in sessionStorage with cig_auth_source="supabase". The Supabase-client path
+// above won't find it (no real Supabase session), so we read sessionStorage
+// directly and build the same hash the dashboard /auth/callback expects.
+function getEmailOtpDashboardCallbackHash(): string | null {
+  try {
+    const authSource = sessionStorage.getItem("cig_auth_source");
+    if (authSource !== "supabase") {
+      return null;
+    }
+    const accessToken = sessionStorage.getItem("cig_access_token");
+    if (!accessToken) {
+      return null;
+    }
+    const expiresAt = sessionStorage.getItem("cig_expires_at");
+    if (expiresAt) {
+      const parsed = Number.parseInt(expiresAt, 10);
+      if (Number.isFinite(parsed) && Date.now() >= parsed) {
+        return null;
+      }
+    }
+    const idToken = sessionStorage.getItem("cig_id_token") ?? "";
+    const expiresIn = sessionStorage.getItem("cig_expires_in") ?? "3600";
+    const socialProvider = sessionStorage.getItem("cig_social_provider") ?? "";
+    return buildDashboardCallbackHash({
+      access_token: accessToken,
+      ...(idToken && { id_token: idToken }),
+      expires_in: expiresIn,
+      ...(socialProvider && { social_provider: socialProvider }),
+      auth_source: "supabase",
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function goToDashboard(path = "/"): Promise<void> {
   const normalizedPath = normalizeDashboardRedirectPath(path, "/");
   const dashboardHostname = (() => {
@@ -221,6 +257,15 @@ export async function goToDashboard(path = "/"): Promise<void> {
     clearPendingDashboardRedirect();
     window.location.replace(
       `${DASHBOARD_URL}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${supabaseHash}`,
+    );
+    return;
+  }
+
+  const emailOtpHash = getEmailOtpDashboardCallbackHash();
+  if (emailOtpHash) {
+    clearPendingDashboardRedirect();
+    window.location.replace(
+      `${DASHBOARD_URL}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${emailOtpHash}`,
     );
     return;
   }
