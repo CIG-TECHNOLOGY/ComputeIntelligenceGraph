@@ -15,7 +15,7 @@ import { startSemanticIndexSync, stopSemanticIndexSync } from './jobs/semantic-i
 import { ensureDemoWorkspaceProvisioned } from './demo-workspace';
 import { seedSelfHostedBootstrapTokens } from './bootstrap/self-hosted-bootstrap';
 import { applyMigrations } from './db/migrate';
-import { closeDatabase } from './db/client';
+import { closeDatabase, query } from './db/client';
 import { resolveCorsOrigins } from './cors';
 import { probeInferenceHealth } from '@cig/chatbot';
 
@@ -182,6 +182,18 @@ export async function createServer(): Promise<FastifyInstance> {
       timestamp: new Date().toISOString(),
       chat,
     });
+  });
+
+  // DB keep-alive — external cron pings this to prevent Supabase from pausing on inactivity
+  RATE_LIMIT_EXEMPT_ROUTES.add('GET /api/v1/health/db');
+  app.get('/api/v1/health/db', async (_request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await query('SELECT 1');
+      return reply.send({ db: 'ok' });
+    } catch (err) {
+      app.log.warn({ err }, 'DB keep-alive ping failed');
+      return reply.status(503).send({ db: 'unavailable' });
+    }
   });
 
   // Prometheus metrics endpoint (no auth — internal scraping, Requirement 25.1)

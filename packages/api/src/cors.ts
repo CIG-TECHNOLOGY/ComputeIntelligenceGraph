@@ -1,6 +1,7 @@
 const PRODUCTION_CORS_ORIGINS = [
   'https://cig.lat',
   'https://www.cig.lat',
+  'https://app.cig.lat',
   'https://edwardcalderon.github.io',
 ];
 
