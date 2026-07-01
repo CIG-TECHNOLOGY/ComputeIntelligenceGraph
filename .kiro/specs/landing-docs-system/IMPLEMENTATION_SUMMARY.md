@@ -203,7 +203,7 @@ pnpm dev:docs
 The documentation is automatically deployed to GitHub Pages when changes are pushed to the main branch.
 
 **Workflow**: `.github/workflows/docs-deploy.yml`
-**URL**: https://edwardcalderon.github.io/ComputeIntelligenceGraph/
+**URL**: https://cig-technology.github.io/ComputeIntelligenceGraph/
 
 ## Key Features
 
@@ -313,7 +313,7 @@ The following property-based tests are ready for implementation:
 1. Ensure GitHub Pages is enabled in repository settings
 2. Push changes to main branch
 3. GitHub Actions workflow automatically builds and deploys
-4. Documentation available at: https://edwardcalderon.github.io/ComputeIntelligenceGraph/
+4. Documentation available at: https://cig-technology.github.io/ComputeIntelligenceGraph/
 
 ### Deploy to Custom Domain
 

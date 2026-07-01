@@ -2,7 +2,7 @@ const PRODUCTION_CORS_ORIGINS = [
   'https://cig.lat',
   'https://www.cig.lat',
   'https://app.cig.lat',
-  'https://edwardcalderon.github.io',
+  'https://cig-technology.github.io',
 ];
 
 const SELF_HOSTED_LOCAL_CORS_ORIGINS = [

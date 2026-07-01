@@ -316,7 +316,7 @@ function HeroSection() {
         <Search size={18} /> {t("resources.installGuide")}
       </Link>
       <a
-        href="https://github.com/edwardcalderon/ComputeIntelligenceGraph"
+        href="https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 px-8 py-3.5 text-base font-semibold text-zinc-800 dark:text-zinc-200 shadow transition-all duration-300 hover:scale-105 hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-zinc-500"
@@ -549,7 +549,7 @@ function ResourcesBlock() {
   const docsUrl = useResolvedDocsUrl();
   const { ref, visible } = useReveal<HTMLDivElement>();
   const resourceLinks: ResourceLink[] = [
-    { href: "https://github.com/edwardcalderon/ComputeIntelligenceGraph", labelKey: "resources.github", icon: <Github size={22} /> },
+    { href: "https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph", labelKey: "resources.github", icon: <Github size={22} /> },
     { href: docsUrl, labelKey: "resources.docs", icon: <BookOpen size={22} /> },
     { href: "/install", labelKey: "resources.installGuide", icon: <Search size={22} /> },
     { href: "/install.sh", labelKey: "resources.installScript", icon: <Terminal size={22} /> },

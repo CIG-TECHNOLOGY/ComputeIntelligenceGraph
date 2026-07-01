@@ -162,7 +162,7 @@ The documentation is automatically deployed to GitHub Pages when changes are pus
 
 **Workflow**: `.github/workflows/deploy-pages.yml`
 
-**URL**: https://edwardcalderon.github.io/ComputeIntelligenceGraph/
+**URL**: https://cig-technology.github.io/ComputeIntelligenceGraph/
 
 ### Custom Domains
 

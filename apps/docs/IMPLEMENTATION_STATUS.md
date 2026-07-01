@@ -218,6 +218,6 @@ git push origin main
 
 ## Documentation URLs
 
-- **GitHub Pages**: https://edwardcalderon.github.io/ComputeIntelligenceGraph/
+- **GitHub Pages**: https://cig-technology.github.io/ComputeIntelligenceGraph/
 - **Primary Domain**: https://cig.lat/documentation (served through the `cig.lat` GitHub Pages custom domain)
 - **Secondary Domain**: https://docs.cig.lat (pending GCloud setup)

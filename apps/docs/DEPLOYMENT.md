@@ -9,9 +9,9 @@ The CIG Documentation is deployed to GitHub Pages at `/documentation` path as pa
 ```
 GitHub Pages
 ├── Landing Page (root)
-│   └── https://edwardcalderon.github.io/ComputeIntelligenceGraph/
+│   └── https://cig-technology.github.io/ComputeIntelligenceGraph/
 └── Documentation (/documentation)
-    └── https://edwardcalderon.github.io/ComputeIntelligenceGraph/documentation/
+    └── https://cig-technology.github.io/ComputeIntelligenceGraph/documentation/
 ```
 
 ## Build Process
@@ -49,7 +49,7 @@ Documentation is deployed when:
 
 After deployment:
 
-- **URL**: https://edwardcalderon.github.io/ComputeIntelligenceGraph/documentation/
+- **URL**: https://cig-technology.github.io/ComputeIntelligenceGraph/documentation/
 - **Sections**: Getting Started, Architecture, API Reference, User Guide, Developer Guide, Troubleshooting, Resources
 
 ## Configuration

@@ -41,7 +41,7 @@ describe('resolveCorsOrigins', () => {
       'https://cig.lat',
       'https://www.cig.lat',
       'https://app.cig.lat',
-      'https://edwardcalderon.github.io',
+      'https://cig-technology.github.io',
     ]);
   });
 });
