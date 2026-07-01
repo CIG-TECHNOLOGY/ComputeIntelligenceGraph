@@ -29,8 +29,9 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id   = data.aws_caller_identity.current.account_id
-  state_bucket = "${var.state_bucket_prefix}-${local.account_id}"
+  account_id                   = data.aws_caller_identity.current.account_id
+  state_bucket                 = "${var.state_bucket_prefix}-${local.account_id}"
+  prod_github_actions_role_arn = "arn:aws:iam::520900722378:role/github-actions-role"
 
   common_tags = merge(var.tags, {
     cig-managed = "true"
@@ -73,6 +74,50 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
   }
 }
 
+resource "aws_s3_bucket_policy" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowProdGithubActionsListState"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.prod_github_actions_role_arn
+        }
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:ListBucket",
+          "s3:ListBucketVersions"
+        ]
+        Resource = aws_s3_bucket.terraform_state.arn
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "prod/*"
+            ]
+          }
+        }
+      },
+      {
+        Sid    = "AllowProdGithubActionsStateObjectAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.prod_github_actions_role_arn
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.terraform_state.arn}/prod/*"
+      }
+    ]
+  })
+}
+
 resource "aws_dynamodb_table" "terraform_locks" {
   name         = var.lock_table_name
   billing_mode = "PAY_PER_REQUEST"
@@ -85,6 +130,36 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
   tags = merge(local.common_tags, {
     Name = var.lock_table_name
+  })
+}
+
+resource "aws_dynamodb_resource_policy" "terraform_locks" {
+  resource_arn = aws_dynamodb_table.terraform_locks.arn
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowProdGithubActionsTerraformLocks"
+        Effect = "Allow"
+        Principal = {
+          AWS = local.prod_github_actions_role_arn
+        }
+        Action = [
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:ConditionCheckItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = aws_dynamodb_table.terraform_locks.arn
+      }
+    ]
   })
 }
 

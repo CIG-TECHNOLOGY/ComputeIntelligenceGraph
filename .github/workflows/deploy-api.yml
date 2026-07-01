@@ -34,6 +34,7 @@ env:
   DOCKERHUB_API_IMAGE: ${{ vars.DOCKERHUB_API_IMAGE || 'cig-api' }}
   API_HOSTED_ZONE_DOMAIN: ${{ vars.API_HOSTED_ZONE_DOMAIN || 'cig.technology' }}
   API_CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'https://app.cig.lat,https://cig.lat' }}
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::520900722378:role/github-actions-role
   INFRA_APP_NAME: cig-api
   INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'edwardcalderon/ComputeIntelligenceGraph' }}
   INFRA_PIPELINE_PREFIX: ${{ vars.INFRA_PIPELINE_PREFIX || 'cig-api' }}
@@ -132,7 +133,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
       - name: Setup Terraform
         if: ${{ needs.detect-api-impact.outputs.api_runtime_changed == 'true' }}
@@ -215,7 +216,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
       - name: Resolve repository URI
         id: meta
@@ -358,7 +359,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -392,7 +393,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -467,7 +468,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

@@ -138,6 +138,8 @@ The GitHub Actions deploy workflow resolves the Authentik values from the live t
 
 Production auth infrastructure for CIG lives in AWS account `520900722378`. Any script or workflow that mutates Authentik or its secrets should verify the caller account before making changes. The migration script (`scripts/migrate-cig-account.mjs`) enforces this guard and aborts if STS resolves to a different account.
 
+The API core-data Terraform backend lives in the bootstrap account state bucket `cig-terraform-state-058264267235` with lock table `cig-terraform-locks`. The prod GitHub Actions role needs explicit cross-account access to that backend so `terraform output` and `terraform apply` can read and update the shared state.
+
 `OPENAI_API_KEY` is injected into the API task because the `/api/v1/chat` handler probes OpenAI and uses it when available. If the secret is missing, the runtime falls back to the non-OpenAI response path and the health badge reports fallback mode.
 
 ## GitHub Actions Pipelines
