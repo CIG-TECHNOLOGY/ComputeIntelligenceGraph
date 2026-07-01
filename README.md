@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.3-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.4-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.3)
+## 📋 Latest Changes (v1.0.4)
 
 ### Bug Fixes
 
-* **release:** push to both remotes and fix stale Dockerfile path in release.sh ([f271582](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f27158251ea4ca8c04a61a92fb863d237c37364d))
+* **dashboard:** replace sun icon with gear icon in header settings button ([21c06ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/21c06ede2ac8b7679cf7575082430d18d992a21d))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

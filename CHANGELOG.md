@@ -1,3 +1,25 @@
+## [1.0.4](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.3...v1.0.4) (2026-07-01)
+
+
+### Bug Fixes
+
+* **dashboard:** replace sun icon with gear icon in header settings button ([21c06ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/21c06ede2ac8b7679cf7575082430d18d992a21d))
+
+
+
+
+
+## [1.0.4](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.3...v1.0.4) (2026-07-01)
+
+
+### Bug Fixes
+
+* **dashboard:** replace sun icon with gear icon in header settings button ([21c06ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/21c06ede2ac8b7679cf7575082430d18d992a21d))
+
+
+
+
+
 ## [1.0.3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.2...v1.0.3) (2026-07-01)
 
 
