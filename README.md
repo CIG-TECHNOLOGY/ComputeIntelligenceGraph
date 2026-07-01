@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.1-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.2-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,31 +35,16 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.1)
-
-First stable release. Production API live at `https://api.cig.technology`, full CI/CD pipeline operational, Authentik SSO wired end-to-end, and repo migrated to the CIG-TECHNOLOGY GitHub organisation.
-
-### Features
-
-* production API live at `https://api.cig.technology` — ECS/Fargate behind public ALB, Route 53, and ACM
-* full GitHub Actions CI/CD pipeline: detect → validate → build → migrate → deploy → smoke-test
-* Authentik OIDC SSO with PKCE — social login (Google, GitHub) fully wired through dashboard relay and login-callback bridge
-* email OTP authentication path with SMTP; troubleshooting runbook added to deployment docs
-* Authentik client ID error path documented end-to-end with CI guard and drift-check list
+## 📋 Latest Changes (v1.0.2)
 
 ### Bug Fixes
 
-* reuse existing ECR repository instead of creating a duplicate ([db590ce](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/db590ce))
-* fix API core-data Terraform job gating ([69b049e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/69b049e), [0489778](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0489778))
-* fix Authentik secret lookup to use correct AWS Secrets Manager path ([8a1ba39](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/8a1ba39))
-* restore github-actions-role ECS/ECR/ELB permissions in prod account 520900722378 ([e80f4d5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/e80f4d5))
-* fix Authentik client ID default fallback (`G4D6S7WX…` → `cig-dashboard`) and add account guard ([d4aea56](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d4aea56))
-* fix API deploy recovery path and workflow app name ([899f282](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/899f282), [99ca728](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/99ca728))
+* add `https://app.cig.lat` to production CORS origins — dashboard OTP and verify-otp flows were blocked by missing `Access-Control-Allow-Origin` header ([6d1b4d9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/6d1b4d9))
+* add `GET /api/v1/health/db` endpoint (`SELECT 1` probe, 200/503) for external DB connectivity checks
 
 ### Chores
 
-* move container build definitions from `infra/docker/` to `packages/infra/docker/` ([fbed0ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fbed0ed))
-* migrate canonical repository to `CIG-TECHNOLOGY/ComputeIntelligenceGraph` — 43 files updated ([c6aaf35](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c6aaf35))
+* add keep-alive GitHub Actions cron (every 3 days) that pings both health endpoints and errors if Supabase is paused ([6d1b4d9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/6d1b4d9))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

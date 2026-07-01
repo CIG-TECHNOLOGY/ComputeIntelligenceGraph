@@ -1,3 +1,15 @@
+## [1.0.2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.1...v1.0.2) (2026-07-01)
+
+### Bug Fixes
+
+* add `https://app.cig.lat` to production CORS origins — dashboard OTP and verify-otp flows were blocked by missing `Access-Control-Allow-Origin` header ([packages/api/src/cors.ts](packages/api/src/cors.ts))
+* add `GET /api/v1/health/db` endpoint (`SELECT 1` probe, returns 200/503) to provide an external DB connectivity check independent of the heartbeat monitor
+
+### Chores
+
+* add `.github/workflows/keep-alive.yml` — scheduled every 3 days to ping `/api/v1/health` and `/api/v1/health/db`; emits workflow error if DB is unreachable so Supabase free-tier pause is caught before users report it
+
+
 ## [1.0.1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.0...v1.0.1) (2026-07-01)
 
 ### Bug Fixes
