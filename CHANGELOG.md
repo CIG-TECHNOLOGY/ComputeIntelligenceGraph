@@ -1,3 +1,25 @@
+## [1.0.6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.5...v1.0.6) (2026-07-01)
+
+
+### Bug Fixes
+
+* **auth:** redirect to dashboard after email OTP verification ([7d5e31c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7d5e31cd66d6bc27107e79bef5aac716a189f50a))
+
+
+
+
+
+## [1.0.6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.5...v1.0.6) (2026-07-01)
+
+
+### Bug Fixes
+
+* **auth:** redirect to dashboard after email OTP verification ([7d5e31c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7d5e31cd66d6bc27107e79bef5aac716a189f50a))
+
+
+
+
+
 ## [1.0.5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.4...v1.0.5) (2026-07-01)
 
 
