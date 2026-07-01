@@ -136,6 +136,8 @@ During production deploys, the actual sender/login is read from AWS Secrets Mana
 
 The GitHub Actions deploy workflow resolves the Authentik values from the live tenant in the production AWS account `520900722378` and its `authentik/auth.cig.technology/v2/oidc-client` secret in `us-east-2`, then syncs those along with the GitHub-managed Supabase/JWT, OpenAI, and SMTP password secrets into deterministic AWS Secrets Manager names under `/cig/prod/api/*` before the ECS deploy.
 
+The prod `github-actions-role` must also have `secretsmanager:GetSecretValue` access to that live Authentik secret ARN, or the deploy job will fail during runtime-value resolution before the ECS stack updates.
+
 Production auth infrastructure for CIG lives in AWS account `520900722378`. Any script or workflow that mutates Authentik or its secrets should verify the caller account before making changes. The migration script (`scripts/migrate-cig-account.mjs`) enforces this guard and aborts if STS resolves to a different account.
 
 The API core-data Terraform backend lives in the bootstrap account state bucket `cig-terraform-state-058264267235` with lock table `cig-terraform-locks`. The prod GitHub Actions role needs explicit cross-account access to that backend so `terraform output` and `terraform apply` can read and update the shared state.
