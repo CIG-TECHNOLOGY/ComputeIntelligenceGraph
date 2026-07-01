@@ -261,7 +261,9 @@ jobs:
       - name: Resolve build policy
         id: policy
         run: |
-          if [[ "${{ github.event_name }}" == "push" && "${{ needs.detect-api-impact.outputs.api_source_changed }}" == "true" ]]; then
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "build_allowed=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -z "${{ github.event.inputs.image_tag }}" ]]; then
             echo "build_allowed=true" >> "$GITHUB_OUTPUT"
           else
             echo "build_allowed=false" >> "$GITHUB_OUTPUT"

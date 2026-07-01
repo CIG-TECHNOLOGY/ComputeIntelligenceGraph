@@ -100,7 +100,7 @@ pnpm --filter @cig/infra bootstrap:api:pipelines
 2. GitHub Actions syncs runtime secrets into AWS Secrets Manager.
 3. GitHub Actions detects API impact from the tagged commit and skips release-noise-only tags entirely.
 4. If the API source changed, GitHub Actions resolves an existing `api-src-<hash>` digest or builds and pushes that immutable image once with `sha-<commit>` and `api-src-<hash>` tags.
-5. If only runtime wiring changed, GitHub Actions reuses the last published digest for that source fingerprint and skips rebuilding.
+5. If only runtime wiring changed, GitHub Actions reuses the last published digest for that source fingerprint and skips rebuilding. A manual dispatch without `image_tag` can also seed a missing digest instead of failing.
 6. If the API source changed, GitHub Actions runs `pnpm --filter @cig/api migrate:up` against Supabase Postgres.
 7. If deploy wiring changed, GitHub Actions applies the API core-data Terraform stack.
 8. GitHub Actions runs the full SST deploy for the ECS/Fargate runtime using the resolved ECR digest.
