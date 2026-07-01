@@ -379,7 +379,7 @@ jobs:
     name: Apply API core-data infrastructure
     runs-on: ubuntu-latest
     needs: [detect-api-impact, build-image]
-    if: ${{ inputs.dry_run != true && needs.detect-api-impact.result == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.apply_core_data != false) || (github.event_name == 'push' && needs.detect-api-impact.outputs.api_runtime_changed == 'true')) && needs.build-image.result == 'success' }}
+    if: ${{ inputs.dry_run != true && needs.detect-api-impact.result == 'success' && (github.event_name == 'workflow_dispatch' || needs.detect-api-impact.outputs.api_runtime_changed == 'true') && needs.build-image.result == 'success' }}
     permissions:
       contents: read
       id-token: write
