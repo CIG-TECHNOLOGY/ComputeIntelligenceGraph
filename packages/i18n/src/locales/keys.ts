@@ -381,6 +381,7 @@ export type TranslationKey =
   | "graph.title"
   | "header.changeLanguage"
   | "header.pendingDeviceApprovals"
+  | "header.settings"
   | "header.toggleDarkMode"
   | "header.toggleSidebar"
   | "hero.backToTop"
