@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-0.3.11-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,26 +35,31 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v0.3.11)
+## 📋 Latest Changes (v1.0.0)
 
-### Bug Fixes
-
-* add concurrent build limits to CodeBuild projects and update pipeline documentation ([2d192b1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/2d192b19d75550cd15a265ee706ed6b92f09dbf4))
-* clean node_modules before pnpm install in CodeBuild to avoid EISDIR errors ([c5ce5d6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c5ce5d6b39d58a3ef740fcb31e5138d671161752))
-* deploy stage uses SourceOutput for full repo + BuildOutput for image URI ([6a89253](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/6a892533aa18eda275f3dbc5ea3d26338f3db3d9))
-* enforce AWS_PROFILE in SST config and redeploy pipelines to CIG account (520900722378) ([0e47035](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0e470351e7ccf3940aaa28fab5ae2c7c4fad38e9))
-* fix CodeBuild buildspec YAML errors and add AWS account guardrails ([75db725](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/75db725536c55031c78404e86579d28cf90ac737))
-* remove Route 53 DNS management from Pulumi (already managed separately) ([179e68d](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/179e68d60c0d8261f38503a0173f2d267a19cff4))
-* remove Validate stage from pipeline to work around CodeBuild quota issue ([b4c18ce](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b4c18cedbdd02ef65749ec69fdca6a4e84852376))
-* use --no-frozen-lockfile in all CodeBuild buildspecs ([ea078ea](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ea078ea730cef6d1a3374836c910332f2309603c))
-* use --no-frozen-lockfile in Dockerfile and update lockfile ([4dbed38](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/4dbed381885728df1adc874d8f3e16ac9770f471))
-* use filtered pnpm install in buildspecs to avoid monorepo conflicts ([113405c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/113405caf4459080060adadf0b7d27ca20510852))
-
+First stable release. Production API live at `https://api.cig.technology`, full CI/CD pipeline operational, Authentik SSO wired end-to-end, and repo migrated to the CIG-TECHNOLOGY GitHub organisation.
 
 ### Features
 
-* add proper SST infrastructure configuration for LLM Proxy using Pulumi ([cdd4270](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/cdd4270ff3a39ebd2c92693889abe5c2db4d79dd))
-* replace CodePipeline with GitHub Actions for CI/CD (workaround for CodeBuild quota issue) ([be62240](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/be62240b6250163e91ac2c7935d87ad1f914f2e5))
+* production API live at `https://api.cig.technology` — ECS/Fargate behind public ALB, Route 53, and ACM
+* full GitHub Actions CI/CD pipeline: detect → validate → build → migrate → deploy → smoke-test
+* Authentik OIDC SSO with PKCE — social login (Google, GitHub) fully wired through dashboard relay and login-callback bridge
+* email OTP authentication path with SMTP; troubleshooting runbook added to deployment docs
+* Authentik client ID error path documented end-to-end with CI guard and drift-check list
+
+### Bug Fixes
+
+* reuse existing ECR repository instead of creating a duplicate ([db590ce](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/db590ce))
+* fix API core-data Terraform job gating ([69b049e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/69b049e), [0489778](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0489778))
+* fix Authentik secret lookup to use correct AWS Secrets Manager path ([8a1ba39](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/8a1ba39))
+* restore github-actions-role ECS/ECR/ELB permissions in prod account 520900722378 ([e80f4d5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/e80f4d5))
+* fix Authentik client ID default fallback (`G4D6S7WX…` → `cig-dashboard`) and add account guard ([d4aea56](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d4aea56))
+* fix API deploy recovery path and workflow app name ([899f282](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/899f282), [99ca728](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/99ca728))
+
+### Chores
+
+* move container build definitions from `infra/docker/` to `packages/infra/docker/` ([fbed0ed](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fbed0ed))
+* migrate canonical repository to `CIG-TECHNOLOGY/ComputeIntelligenceGraph` — 43 files updated ([c6aaf35](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c6aaf35))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
