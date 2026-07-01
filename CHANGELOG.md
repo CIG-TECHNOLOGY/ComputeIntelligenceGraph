@@ -1,3 +1,25 @@
+## [1.0.5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.4...v1.0.5) (2026-07-01)
+
+
+### Bug Fixes
+
+* update all repo references from edwardcalderon to CIG-TECHNOLOGY ([c5913e8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c5913e8e82b0da2c93608b215bf4550808ec5b92))
+
+
+
+
+
+## [1.0.5](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.4...v1.0.5) (2026-07-01)
+
+
+### Bug Fixes
+
+* update all repo references from edwardcalderon to CIG-TECHNOLOGY ([c5913e8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/c5913e8e82b0da2c93608b215bf4550808ec5b92))
+
+
+
+
+
 ## [1.0.4](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.3...v1.0.4) (2026-07-01)
 
 
