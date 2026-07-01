@@ -14,6 +14,7 @@ const DEFAULT_REGION = 'us-east-2';
 const DEFAULT_DOMAIN = 'cig.technology';
 const DEFAULT_API_REPOSITORY = 'cig-api';
 const DEFAULT_DOCKERHUB_USERNAME = 'cigtechnology';
+const MAIN_CIG_AWS_ACCOUNT_ID = '520900722378';
 
 function parseArgs(argv) {
   const result = {
@@ -207,6 +208,12 @@ function buildAwsEnv(parsedEnv, region) {
 
   if (!accountId) {
     throw new Error('Unable to resolve the AWS account id for the migration account.');
+  }
+
+  if (accountId !== MAIN_CIG_AWS_ACCOUNT_ID) {
+    throw new Error(
+      `CIG migration must run against AWS account ${MAIN_CIG_AWS_ACCOUNT_ID}; resolved ${accountId}.`,
+    );
   }
 
   env.AWS_ACCOUNT_ID = accountId;

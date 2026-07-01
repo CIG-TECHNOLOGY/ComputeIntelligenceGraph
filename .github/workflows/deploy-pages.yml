@@ -36,7 +36,7 @@ jobs:
               - 'packages/auth/**'
               - 'packages/ui/**'
               - 'release-metadata.json'
-              - '.github/workflows/deploy-landing.yml'
+              - '.github/workflows/deploy-pages.yml'
             docs:
               - 'apps/docs/**'
               - '.github/workflows/deploy-pages.yml'
@@ -93,7 +93,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_DASHBOARD_URL: ${{ secrets.NEXT_PUBLIC_DASHBOARD_URL }}
           NEXT_PUBLIC_AUTHENTIK_URL: ${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
-          NEXT_PUBLIC_AUTHENTIK_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'G4D6S7WXUoCNZxY7uZSbD08zO3cuXEZwSyUATw2v' }}
+          NEXT_PUBLIC_AUTHENTIK_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'cig-dashboard' }}
 
       - name: Build Docusaurus docs
         run: pnpm --filter @cig/docs build

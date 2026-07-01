@@ -63,7 +63,7 @@ function resolveReleaseMetadata() {
 const { releaseTag, buildNumber } = resolveReleaseMetadata();
 // Local builds should stay on localhost; the deploy workflow sets production explicitly.
 const defaultSiteUrl = 'http://localhost:3000';
-const authentikClientIdFallback = 'G4D6S7WXUoCNZxY7uZSbD08zO3cuXEZwSyUATw2v';
+const authentikClientIdFallback = 'cig-dashboard';
 const authentikClientId = process.env.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID?.trim();
 const resolvedAuthentikClientId = authentikClientId || authentikClientIdFallback;
 

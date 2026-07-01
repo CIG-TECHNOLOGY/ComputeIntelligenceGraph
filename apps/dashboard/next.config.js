@@ -13,7 +13,7 @@ const buildNumber = process.env.NEXT_PUBLIC_APP_BUILD
   || (metaOk && meta.buildNumber != null ? String(meta.buildNumber) : '');
 const releaseTag = process.env.NEXT_PUBLIC_RELEASE_TAG
   || (metaOk ? meta.releaseTag : `v${version}`);
-const authentikClientIdFallback = 'G4D6S7WXUoCNZxY7uZSbD08zO3cuXEZwSyUATw2v';
+const authentikClientIdFallback = 'cig-dashboard';
 const authentikClientId = process.env.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID?.trim();
 const resolvedAuthentikClientId = authentikClientId || authentikClientIdFallback;
 

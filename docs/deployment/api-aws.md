@@ -136,6 +136,8 @@ During production deploys, the actual sender/login is read from AWS Secrets Mana
 
 The GitHub Actions deploy workflow resolves the Authentik values from the live tenant in `us-east-1` and its `authentik/auth.cig.technology/oidc-client` secret, then syncs those along with the GitHub-managed Supabase/JWT, OpenAI, and SMTP password secrets into deterministic AWS Secrets Manager names under `/cig/prod/api/*` before the ECS deploy.
 
+Production auth infrastructure for CIG lives in AWS account `520900722378`. Any script or workflow that mutates Authentik or its secrets should verify the caller account before making changes.
+
 `OPENAI_API_KEY` is injected into the API task because the `/api/v1/chat` handler probes OpenAI and uses it when available. If the secret is missing, the runtime falls back to the non-OpenAI response path and the health badge reports fallback mode.
 
 ## GitHub Actions Pipelines
