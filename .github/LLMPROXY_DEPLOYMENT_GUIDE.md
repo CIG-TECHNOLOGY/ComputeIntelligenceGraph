@@ -287,6 +287,6 @@ To configure rate limiting:
 
 For issues or questions:
 
-1. Check the [GitHub Issues](https://github.com/edwardcalderon/ComputeIntelligenceGraph/issues)
+1. Check the [GitHub Issues](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues)
 2. Review the [LLM Proxy Design Document](.kiro/specs/aws-native-llm-proxy/design.md)
 3. Check the [LLM Proxy Requirements](.kiro/specs/aws-native-llm-proxy/requirements.md)

@@ -26,7 +26,7 @@ Updated the pipeline configuration to use the new, authorized CodeStar connectio
 - **Execution ID**: d516de8d-345a-4e6a-ba30-713e9cb134fa
 - **Source Stage**: ✅ Succeeded
 - **Commit**: 335cbb8be712d7b410225e68b3b5abfdec2d96a6 (chore(llm-proxy): release v0.2.2)
-- **Repository**: edwardcalderon/ComputeIntelligenceGraph
+- **Repository**: CIG-TECHNOLOGY/ComputeIntelligenceGraph
 - **Branch**: main
 
 ## Next Steps

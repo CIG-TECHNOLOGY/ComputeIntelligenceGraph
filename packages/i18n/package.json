@@ -21,12 +21,12 @@
   "author": "Edward Calderon <edward@cig.lat>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/edwardcalderon/ComputeIntelligenceGraph.git",
+    "url": "https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph.git",
     "directory": "packages/i18n"
   },
-  "homepage": "https://github.com/edwardcalderon/ComputeIntelligenceGraph/tree/main/packages/i18n#readme",
+  "homepage": "https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/tree/main/packages/i18n#readme",
   "bugs": {
-    "url": "https://github.com/edwardcalderon/ComputeIntelligenceGraph/issues"
+    "url": "https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues"
   },
   "publishConfig": {
     "access": "public",

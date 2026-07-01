@@ -5,7 +5,7 @@ description: Development conventions and patterns for ComputeIntelligenceGraph. 
 
 # Computeintelligencegraph Conventions
 
-> Generated from [edwardcalderon/ComputeIntelligenceGraph](https://github.com/edwardcalderon/ComputeIntelligenceGraph) on 2026-03-18
+> Generated from [CIG-TECHNOLOGY/ComputeIntelligenceGraph](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph) on 2026-03-18
 
 ## Overview
 

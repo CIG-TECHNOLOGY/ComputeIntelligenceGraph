@@ -65,7 +65,7 @@ API Live at: https://llm-proxy.cig.technology
 ### GitHub Connection
 - **ARN**: `arn:aws:codestar-connections:us-east-2:520900722378:connection/3ee9f8cd-a6b9-482c-8c41-109c277a4fae`
 - **Status**: AVAILABLE
-- **Repository**: edwardcalderon/ComputeIntelligenceGraph
+- **Repository**: CIG-TECHNOLOGY/ComputeIntelligenceGraph
 - **Branch**: main
 
 ### CodeBuild Projects

@@ -24,7 +24,7 @@ Common issues and solutions for the current CIG stack.
 If you encounter an issue not listed here:
 
 1. Check the [FAQ](../faq/index.md)
-2. Search existing [GitHub Issues](https://github.com/edwardcalderon/ComputeIntelligenceGraph/issues)
+2. Search existing [GitHub Issues](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues)
 3. Create a new issue with detailed information
 
 ## Support Channels

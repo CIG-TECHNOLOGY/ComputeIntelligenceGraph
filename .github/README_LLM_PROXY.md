@@ -37,7 +37,7 @@ aws iam create-role \
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
         },
         "StringLike": {
-          "token.actions.githubusercontent.com:sub": "repo:edwardcalderon/ComputeIntelligenceGraph:*"
+          "token.actions.githubusercontent.com:sub": "repo:CIG-TECHNOLOGY/ComputeIntelligenceGraph:*"
         }
       }
     }]
@@ -141,7 +141,7 @@ After deployment:
 
 ```bash
 # Check GitHub Actions
-open https://github.com/edwardcalderon/ComputeIntelligenceGraph/actions
+open https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/actions
 
 # Verify AWS resources
 aws sqs list-queues --region us-east-2 | grep llm-proxy

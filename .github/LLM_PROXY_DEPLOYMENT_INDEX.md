@@ -101,7 +101,7 @@
 | **Name** | `github-cig` |
 | **ARN** | `arn:aws:codestar-connections:us-east-2:520900722378:connection/876488de-c75b-4f86-9e7d-2a268bf24e70` |
 | **Status** | PENDING → AVAILABLE |
-| **Repository** | `edwardcalderon/ComputeIntelligenceGraph` |
+| **Repository** | `CIG-TECHNOLOGY/ComputeIntelligenceGraph` |
 | **Branch** | `main` |
 
 ---

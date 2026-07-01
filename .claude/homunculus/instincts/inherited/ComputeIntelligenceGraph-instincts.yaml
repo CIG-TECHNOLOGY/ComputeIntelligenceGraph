@@ -1,4 +1,4 @@
-# Instincts generated from https://github.com/edwardcalderon/ComputeIntelligenceGraph
+# Instincts generated from https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 # Generated: 2026-03-18T03:58:21.946Z
 # Version: 2.0
 
@@ -8,7 +8,7 @@ trigger: "when writing a commit message"
 confidence: 0.85
 domain: git
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Commit Conventional
@@ -29,7 +29,7 @@ trigger: "when writing a commit message"
 confidence: 0.6
 domain: git
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Commit Length
@@ -49,7 +49,7 @@ trigger: "when creating a new file"
 confidence: 0.8
 domain: code-style
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Naming Files
@@ -69,7 +69,7 @@ trigger: "when importing modules"
 confidence: 0.75
 domain: code-style
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Import Relative
@@ -89,7 +89,7 @@ trigger: "when exporting from a module"
 confidence: 0.7
 domain: code-style
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Export Style
@@ -109,7 +109,7 @@ trigger: "when writing tests"
 confidence: 0.9
 domain: testing
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Test Framework
@@ -129,7 +129,7 @@ trigger: "when creating a test file"
 confidence: 0.85
 domain: testing
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Test Naming
@@ -149,7 +149,7 @@ trigger: "when mocking dependencies in tests"
 confidence: 0.75
 domain: testing
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Test Mocking
@@ -169,7 +169,7 @@ trigger: "when planning tests for a feature"
 confidence: 0.7
 domain: testing
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Test Types
@@ -189,7 +189,7 @@ trigger: "when implementing a new feature"
 confidence: 0.9
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Feature Development
@@ -213,7 +213,7 @@ trigger: "when doing add or update app feature"
 confidence: 0.7
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Add Or Update App Feature
@@ -238,7 +238,7 @@ trigger: "when doing add or update auth or api package"
 confidence: 0.6
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Add Or Update Auth Or Api Package
@@ -264,7 +264,7 @@ trigger: "when doing linting and type fix sweep"
 confidence: 0.6
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Linting And Type Fix Sweep
@@ -290,7 +290,7 @@ trigger: "when doing docs restructure or update"
 confidence: 0.6
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Docs Restructure Or Update
@@ -314,7 +314,7 @@ trigger: "when doing ci cd or github actions workflow update"
 confidence: 0.6
 domain: workflow
 source: repo-analysis
-source_repo: https://github.com/edwardcalderon/ComputeIntelligenceGraph
+source_repo: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph
 ---
 
 # ComputeIntelligenceGraph Workflow Ci Cd Or Github Actions Workflow Update

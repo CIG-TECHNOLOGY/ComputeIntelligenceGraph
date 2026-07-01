@@ -185,7 +185,7 @@ if (/^\s*[-*]\s+/m.test(sectionBody)) {
   process.exit(0);
 }
 
-const compareUrl = `https://github.com/edwardcalderon/ComputeIntelligenceGraph/compare/v${previousVersion}...v${nextVersion}`;
+const compareUrl = `https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v${previousVersion}...v${nextVersion}`;
 const releaseDate = new Date().toISOString().slice(0, 10);
 const groupedFiles = new Map();
 

@@ -14,7 +14,7 @@ NC='\033[0m'
 
 # Configuration
 PACKAGE_JSON="packages/llm-proxy/package.json"
-GITHUB_REPO="edwardcalderon/ComputeIntelligenceGraph"
+GITHUB_REPO="CIG-TECHNOLOGY/ComputeIntelligenceGraph"
 
 # Functions
 print_header() {

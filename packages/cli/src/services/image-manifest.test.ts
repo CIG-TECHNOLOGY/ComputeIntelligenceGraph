@@ -11,7 +11,7 @@ describe('image manifest resolver', () => {
 
   it('builds the release asset URL from the CLI version', () => {
     expect(resolveImageManifestUrl('0.1.11')).toBe(
-      'https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases/download/cli-v0.1.11/images.json'
+      'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases/download/cli-v0.1.11/images.json'
     );
   });
 

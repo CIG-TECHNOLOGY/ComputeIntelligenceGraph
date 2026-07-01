@@ -169,5 +169,5 @@ If the pipeline doesn't trigger on push:
 
 1. Verify connection status is AVAILABLE
 2. Check that you're pushing to the `main` branch
-3. Verify repository name: `edwardcalderon/ComputeIntelligenceGraph`
+3. Verify repository name: `CIG-TECHNOLOGY/ComputeIntelligenceGraph`
 4. Check CodePipeline execution history for errors

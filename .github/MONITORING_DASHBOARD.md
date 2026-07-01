@@ -46,7 +46,7 @@
 ### View Workflows
 
 **GitHub Actions Dashboard:**
-https://github.com/edwardcalderon/ComputeIntelligenceGraph/actions
+https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/actions
 
 **Steps:**
 1. Go to Actions tab

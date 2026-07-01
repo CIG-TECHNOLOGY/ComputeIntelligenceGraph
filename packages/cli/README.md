@@ -45,7 +45,7 @@ created after the API seeds the bootstrap token state.
 - Install guide: https://cig.lat/install
 - Dashboard: https://app.cig.lat
 - Package: https://www.npmjs.com/package/@cig-technology/cli
-- GitHub releases: https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases
+- GitHub releases: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases
 
 ## 📋 Latest Changes (v0.1.30)
 
@@ -53,7 +53,7 @@ created after the API seeds the bootstrap token state.
 
 * **cli:** add install diagnostics for self-hosted health timeouts and extend the wait window
 
-For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases)
+For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
 ## Install
 

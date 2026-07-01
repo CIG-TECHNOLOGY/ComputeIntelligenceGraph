@@ -15,7 +15,7 @@
 | **Connection ARN** | `arn:aws:codestar-connections:us-east-2:520900722378:connection/3ee9f8cd-a6b9-482c-8c41-109c277a4fae` |
 | **Provider** | GitHub |
 | **Status** | ✅ **AVAILABLE** |
-| **Repository** | `edwardcalderon/ComputeIntelligenceGraph` |
+| **Repository** | `CIG-TECHNOLOGY/ComputeIntelligenceGraph` |
 | **Branch** | `main` |
 | **Account** | 520900722378 (CIG) |
 | **Region** | us-east-2 |
@@ -107,7 +107,7 @@ curl https://llm-proxy.cig.technology/health
 |-----------|-------|
 | **Pipeline Name** | `llm-proxy-production-pipeline` |
 | **GitHub Connection** | `github-cig` (AVAILABLE) |
-| **Repository** | `edwardcalderon/ComputeIntelligenceGraph` |
+| **Repository** | `CIG-TECHNOLOGY/ComputeIntelligenceGraph` |
 | **Branch** | `main` |
 | **Trigger** | Push to main branch |
 | **Stages** | Source → Validate → Build → Deploy |

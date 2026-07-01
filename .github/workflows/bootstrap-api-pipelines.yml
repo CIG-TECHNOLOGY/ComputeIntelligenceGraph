@@ -13,7 +13,7 @@ env:
   API_IMAGE_REPOSITORY: ${{ vars.API_IMAGE_REPOSITORY || 'cig-api-production' }}
   AWS_ROLE_TO_ASSUME: arn:aws:iam::520900722378:role/github-actions-role
   INFRA_APP_NAME: cig-api
-  INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'edwardcalderon/ComputeIntelligenceGraph' }}
+  INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'CIG-TECHNOLOGY/ComputeIntelligenceGraph' }}
   INFRA_PIPELINE_PREFIX: ${{ vars.INFRA_PIPELINE_PREFIX || 'cig-api' }}
   INFRA_PROJECT_TAG: ${{ vars.INFRA_PROJECT_TAG || 'cig-api' }}
   INFRA_PIPELINE_BRANCH_PROD: ${{ vars.INFRA_PIPELINE_BRANCH_PROD || 'main' }}

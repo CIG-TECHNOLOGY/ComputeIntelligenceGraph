@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const pkgDir = resolve(scriptDir, '..');
 const readmePath = resolve(pkgDir, 'README.md');
-const githubReleasesUrl = 'https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases';
+const githubReleasesUrl = 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases';
 
 execFileSync(
   'versioning',

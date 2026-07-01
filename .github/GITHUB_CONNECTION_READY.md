@@ -15,7 +15,7 @@
 | **Connection ARN** | `arn:aws:codestar-connections:us-east-2:520900722378:connection/876488de-c75b-4f86-9e7d-2a268bf24e70` |
 | **Provider** | GitHub |
 | **Status** | **PENDING** (awaiting authorization) |
-| **Repository** | `edwardcalderon/ComputeIntelligenceGraph` |
+| **Repository** | `CIG-TECHNOLOGY/ComputeIntelligenceGraph` |
 | **Branch** | `main` |
 | **Pipeline** | `llm-proxy-production-pipeline` |
 
@@ -136,7 +136,7 @@ The pipeline is already configured with:
 ```
 Source Stage:
   Provider: CodeStarSourceConnection
-  Repository: edwardcalderon/ComputeIntelligenceGraph
+  Repository: CIG-TECHNOLOGY/ComputeIntelligenceGraph
   Branch: main
   Connection: github-cig (PENDING)
 
@@ -184,7 +184,7 @@ If the pipeline doesn't trigger on push:
 
 1. Verify connection status is AVAILABLE
 2. Check that you're pushing to the `main` branch
-3. Verify repository name: `edwardcalderon/ComputeIntelligenceGraph`
+3. Verify repository name: `CIG-TECHNOLOGY/ComputeIntelligenceGraph`
 4. Check CodePipeline execution history for errors
 
 ### Build Failures

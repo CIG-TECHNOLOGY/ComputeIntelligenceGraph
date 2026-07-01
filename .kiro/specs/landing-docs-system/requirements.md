@@ -108,7 +108,7 @@ The Landing Docs System is a comprehensive documentation platform built with Doc
 4. THE GitHub_Actions workflow SHALL run tests and linting before deployment
 5. IF tests or linting fail, THEN THE GitHub_Actions workflow SHALL halt deployment
 6. WHEN build succeeds, THE GitHub_Actions workflow SHALL deploy to GitHub Pages
-7. THE Docs_System SHALL be accessible at https://github.com/edwardcalderon/ComputeIntelligenceGraph/pages
+7. THE Docs_System SHALL be accessible at https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/pages
 8. THE GitHub_Actions workflow SHALL support manual deployment trigger
 9. THE GitHub_Actions workflow SHALL cache dependencies for faster builds
 10. THE GitHub_Actions workflow SHALL generate deployment logs and status reports

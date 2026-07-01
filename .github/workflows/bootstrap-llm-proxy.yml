@@ -17,7 +17,7 @@ env:
   LLM_PROXY_DOMAIN: ${{ vars.LLM_PROXY_DOMAIN || 'llm-proxy.cig.technology' }}
   LLM_PROXY_IMAGE_REPOSITORY: ${{ vars.LLM_PROXY_IMAGE_REPOSITORY || 'llm-proxy-production' }}
   INFRA_APP_NAME: ${{ vars.INFRA_APP_NAME || 'llm-proxy' }}
-  INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'edwardcalderon/ComputeIntelligenceGraph' }}
+  INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'CIG-TECHNOLOGY/ComputeIntelligenceGraph' }}
   INFRA_PIPELINE_PREFIX: ${{ vars.INFRA_PIPELINE_PREFIX || 'llm-proxy' }}
   INFRA_PROJECT_TAG: ${{ vars.INFRA_PROJECT_TAG || 'llm-proxy' }}
   INFRA_PIPELINE_BRANCH_PROD: ${{ vars.INFRA_PIPELINE_BRANCH_PROD || 'main' }}

@@ -17,7 +17,7 @@ import { setupWorkloadIdentity } from '../src/gcp/WorkloadIdentity';
 
 setupWorkloadIdentity({
   project: 'cig-technology',
-  githubRepo: 'edwardcalderon/ComputeIntelligenceGraph',
+  githubRepo: 'CIG-TECHNOLOGY/ComputeIntelligenceGraph',
   serviceAccount: 'cig-lat@cig-technology.iam.gserviceaccount.com',
 })
   .then(() => process.exit(0))

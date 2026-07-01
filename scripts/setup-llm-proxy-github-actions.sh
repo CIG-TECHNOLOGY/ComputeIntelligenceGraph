@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-GITHUB_REPO="${GITHUB_REPO:-edwardcalderon/ComputeIntelligenceGraph}"
+GITHUB_REPO="${GITHUB_REPO:-CIG-TECHNOLOGY/ComputeIntelligenceGraph}"
 AWS_REGION="${AWS_REGION:-us-east-2}"
 IAM_ROLE_NAME="github-actions-llm-proxy-role"
 

@@ -7,7 +7,7 @@ export interface PublishedImageManifest {
   images: Record<string, string>;
 }
 
-const DEFAULT_RELEASE_BASE_URL = 'https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases/download';
+const DEFAULT_RELEASE_BASE_URL = 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases/download';
 const DEFAULT_DOCKERHUB_NAMESPACE = 'cigtechnology';
 const DEFAULT_DOCKERHUB_REGISTRY = `docker.io/${DEFAULT_DOCKERHUB_NAMESPACE}`;
 const DEFAULT_DOCKERHUB_ACCEPT =

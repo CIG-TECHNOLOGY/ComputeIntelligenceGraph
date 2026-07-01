@@ -24,7 +24,7 @@ CIG is a modern TypeScript monorepo. Ensure your machine meets these requirement
 ### 1. Repository Access
 Clone the repository and enter the director:
 ```bash
-git clone https://github.com/edwardcalderon/ComputeIntelligenceGraph.git
+git clone https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph.git
 cd ComputeIntelligenceGraph
 ```
 

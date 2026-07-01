@@ -20,7 +20,7 @@ provider "aws" {
       Project     = "CIG"
       Environment = "bootstrap"
       ManagedBy   = "terraform"
-      Repository  = "edwardcalderon/ComputeIntelligenceGraph"
+      Repository  = "CIG-TECHNOLOGY/ComputeIntelligenceGraph"
       Stack       = "bootstrap-account"
     }
   }

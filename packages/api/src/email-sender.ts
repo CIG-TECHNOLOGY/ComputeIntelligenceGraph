@@ -314,7 +314,7 @@ export async function sendWelcomeNewsletter(opts: SendWelcomeEmailOptions): Prom
   const siteUrl = process.env.SITE_URL ?? 'https://cig.lat';
   const dashboardUrl = process.env.DASHBOARD_URL ?? 'https://app.cig.lat';
   const docsUrl = process.env.DOCS_URL ?? 'https://cig.lat/documentation';
-  const githubUrl = 'https://github.com/edwardcalderon/ComputeIntelligenceGraph';
+  const githubUrl = 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph';
   const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${opts.unsubscribeToken}`;
 
   const html = buildHtml({

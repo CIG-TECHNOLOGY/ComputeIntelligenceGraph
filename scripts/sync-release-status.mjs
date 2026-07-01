@@ -32,7 +32,7 @@ const rootDir = process.cwd();
 const readmePath = path.join(rootDir, 'README.md');
 const projectStatusPath = path.join(rootDir, 'PROJECT_STATUS.md');
 const docsProjectStatusPath = path.join(rootDir, 'apps/docs/docs/en/project-status.md');
-const githubReleasesUrl = 'https://github.com/edwardcalderon/ComputeIntelligenceGraph/releases';
+const githubReleasesUrl = 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases';
 
 function readText(filePath) {
   return fs.readFileSync(filePath, 'utf8');

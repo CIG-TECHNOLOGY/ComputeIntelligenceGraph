@@ -1,7 +1,7 @@
 const CIG_CLI_PACKAGE_NAME = "@cig-technology/cli";
 
 export const CIG_CLI_NPM_URL = `https://www.npmjs.com/package/${encodeURIComponent(CIG_CLI_PACKAGE_NAME)}`;
-export const CIG_CLI_SOURCE_URL = "https://github.com/edwardcalderon/ComputeIntelligenceGraph/tree/main/packages/cli";
+export const CIG_CLI_SOURCE_URL = "https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/tree/main/packages/cli";
 
 export async function getPublishedCliVersion(): Promise<string | null> {
   try {

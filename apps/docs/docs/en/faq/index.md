@@ -48,7 +48,7 @@ Chat combines the selected graph source, linked resources, discovery status, and
 
 ### How do I report a bug?
 
-Create an issue on [GitHub](https://github.com/edwardcalderon/ComputeIntelligenceGraph/issues).
+Create an issue on [GitHub](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues).
 
 ## Support
 

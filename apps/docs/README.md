@@ -160,7 +160,7 @@ function example() {
 
 The documentation is automatically deployed to GitHub Pages when changes are pushed to the main branch.
 
-**Workflow**: `.github/workflows/docs-deploy.yml`
+**Workflow**: `.github/workflows/deploy-pages.yml`
 
 **URL**: https://edwardcalderon.github.io/ComputeIntelligenceGraph/
 
@@ -168,7 +168,9 @@ The documentation is automatically deployed to GitHub Pages when changes are pus
 
 To deploy to custom domains:
 
-1. **cig.lat/documentation**: Configure DNS CNAME to GitHub Pages
+1. **cig.lat**: Keep the GitHub Pages custom domain set to `cig.lat` and publish the apex through Cloud DNS `A` and `AAAA` records pointed at GitHub Pages:
+   - `A`: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - `AAAA`: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
 2. **docs.cig.lat**: Configure GCloud Load Balancer with Cloud CDN
 
 ## Testing
@@ -252,7 +254,7 @@ For questions or issues:
 
 - Check the [FAQ](docs/en/faq/index.md)
 - Review [Troubleshooting](docs/en/troubleshooting/index.md)
-- Open an issue on [GitHub](https://github.com/edwardcalderon/ComputeIntelligenceGraph/issues)
+- Open an issue on [GitHub](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues)
 
 ## Resources
 

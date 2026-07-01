@@ -3,7 +3,7 @@
     "production": {
       "enabled": true,
       "branch": "main",
-      "repo": "edwardcalderon/ComputeIntelligenceGraph"
+      "repo": "CIG-TECHNOLOGY/ComputeIntelligenceGraph"
     }
   }
 }

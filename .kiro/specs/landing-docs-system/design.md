@@ -188,7 +188,7 @@ module.exports = {
     ['classic', {
       docs: {
         sidebarPath: require.resolve('./sidebars.js'),
-        editUrl: 'https://github.com/edwardcalderon/ComputeIntelligenceGraph/edit/main/apps/docs/',
+        editUrl: 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/edit/main/apps/docs/',
       },
       theme: {
         customCss: require.resolve('./src/css/custom.css'),

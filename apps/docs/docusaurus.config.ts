@@ -61,7 +61,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/edwardcalderon/ComputeIntelligenceGraph/edit/main/apps/docs/',
+            'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/edit/main/apps/docs/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -102,7 +102,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/edwardcalderon/ComputeIntelligenceGraph',
+          href: 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph',
           label: 'GitHub',
           position: 'right',
         },

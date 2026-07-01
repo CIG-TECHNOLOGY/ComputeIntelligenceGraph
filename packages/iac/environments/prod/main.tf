@@ -29,7 +29,7 @@ provider "aws" {
       Project     = "CIG"
       Environment = "prod"
       ManagedBy   = "terraform"
-      Repository  = "edwardcalderon/ComputeIntelligenceGraph"
+      Repository  = "CIG-TECHNOLOGY/ComputeIntelligenceGraph"
     }
   }
 }
