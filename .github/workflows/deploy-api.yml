@@ -349,7 +349,7 @@ jobs:
     name: Run API migrations against Supabase Postgres
     runs-on: ubuntu-latest
     needs: [detect-api-impact, build-image]
-    if: ${{ github.event_name == 'push' && needs.detect-api-impact.outputs.api_source_changed == 'true' && github.event.inputs.dry_run != 'true' }}
+    if: ${{ github.event_name == 'push' && needs.detect-api-impact.outputs.api_source_changed == 'true' && inputs.dry_run != true }}
     permissions:
       contents: read
       id-token: write
@@ -378,7 +378,7 @@ jobs:
     name: Apply API core-data infrastructure
     runs-on: ubuntu-latest
     needs: [detect-api-impact, build-image]
-    if: ${{ github.event.inputs.dry_run != 'true' && needs.detect-api-impact.result == 'success' && ((github.event_name == 'workflow_dispatch' && github.event.inputs.apply_core_data != 'false') || (github.event_name == 'push' && needs.detect-api-impact.outputs.api_runtime_changed == 'true')) && needs.build-image.result == 'success' }}
+    if: ${{ inputs.dry_run != true && needs.detect-api-impact.result == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.apply_core_data != false) || (github.event_name == 'push' && needs.detect-api-impact.outputs.api_runtime_changed == 'true')) && needs.build-image.result == 'success' }}
     permissions:
       contents: read
       id-token: write
@@ -419,7 +419,7 @@ jobs:
     name: Deploy API runtime to ECS/Fargate
     runs-on: ubuntu-latest
     needs: [build-image, migrate-db, apply-core-data]
-    if: ${{ always() && github.event.inputs.dry_run != 'true' && needs.build-image.result == 'success' && (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') && (needs.apply-core-data.result == 'success' || needs.apply-core-data.result == 'skipped') }}
+    if: ${{ always() && inputs.dry_run != true && needs.build-image.result == 'success' && (needs.migrate-db.result == 'success' || needs.migrate-db.result == 'skipped') && (needs.apply-core-data.result == 'success' || needs.apply-core-data.result == 'skipped') }}
     permissions:
       contents: read
       id-token: write
