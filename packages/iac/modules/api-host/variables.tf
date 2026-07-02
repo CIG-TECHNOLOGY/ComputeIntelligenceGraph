@@ -133,3 +133,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "infisical_token" {
+  description = "The non-expiring Service Token to authenticate with Infisical"
+  type        = string
+  sensitive   = true
+}
+
+variable "infisical_url" {
+  description = "The domain URL of our self-hosted Infisical instance"
+  type        = string
+  default     = "https://secrets.cig.technology"
+}

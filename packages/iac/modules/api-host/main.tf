@@ -65,6 +65,8 @@ locals {
     smtp_user            = var.smtp_user
     smtp_otp_subject     = var.smtp_otp_subject
     neo4j_volume_size_gb = var.neo4j_volume_size_gb
+    infisical_token      = var.infisical_token
+    infisical_url        = var.infisical_url
   })
 }
 

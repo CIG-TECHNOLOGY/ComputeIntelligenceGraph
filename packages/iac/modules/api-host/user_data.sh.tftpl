@@ -20,6 +20,9 @@ dnf update -y
 dnf install -y awscli docker jq xfsprogs
 systemctl enable --now docker
 
+# Install Infisical CLI
+curl -1sLf 'https://dl.infisical.com/cli/get.sh' | bash
+
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
@@ -72,9 +75,8 @@ cat > /usr/local/bin/cig-api-refresh <<'REFRESH'
 set -euo pipefail
 
 REGION="${region}"
-SECRET_PREFIX="${secret_prefix}"
-SMTP_FROM_EMAIL_SECRET_SUFFIX="${smtp_from_email}"
-SMTP_USER_DEFAULT="${smtp_user}"
+INFISICAL_TOKEN="${infisical_token}"
+INFISICAL_URL="${infisical_url}"
 IMAGE_URI_FILE="/opt/cig/api-image-uri"
 API_ENV_FILE="/opt/cig/api.env"
 COMPOSE_FILE="/opt/cig/docker-compose.yml"
@@ -95,56 +97,22 @@ aws ecr get-login-password --region "$REGION" \
   | docker login --username AWS --password-stdin \
     "$${ACCOUNT_ID}.dkr.ecr.$${REGION}.amazonaws.com"
 
-secret() {
-  aws secretsmanager get-secret-value \
-    --secret-id "$${SECRET_PREFIX}$1" \
-    --region "$REGION" \
-    --query SecretString \
-    --output text
-}
+# Fetch all secrets in dotenv format directly from Infisical using the Service Token
+export INFISICAL_TOKEN="$INFISICAL_TOKEN"
+infisical export --domain "$INFISICAL_URL" --format=dotenv --silent > "$API_ENV_FILE"
 
-DATABASE_URL="$(secret database-url)"
-JWT_SECRET="$(secret jwt-secret)"
-OPENAI_API_KEY="$(secret openai-api-key)"
-AUTHENTIK_ISSUER_URL="$(secret authentik-issuer-url)"
-AUTHENTIK_JWKS_URI="$(secret authentik-jwks-uri)"
-AUTHENTIK_TOKEN_ENDPOINT="$(secret authentik-token-endpoint)"
-OIDC_CLIENT_ID="$(secret oidc-client-id)"
-OIDC_CLIENT_SECRET="$(secret oidc-client-secret)"
-SUPABASE_URL="$(secret supabase-url)"
-SUPABASE_SERVICE_ROLE_KEY="$(secret supabase-service-role-key)"
-SMTP_PASSWORD="$(secret smtp-password)"
-SMTP_FROM_EMAIL="$(secret "$SMTP_FROM_EMAIL_SECRET_SUFFIX")"
-SMTP_USER="$SMTP_FROM_EMAIL"
-if [ -n "$SMTP_USER_DEFAULT" ]; then
-  SMTP_USER="$SMTP_USER_DEFAULT"
-fi
-NEO4J_PASSWORD="$(secret neo4j-password)"
-
-cat > "$API_ENV_FILE" <<ENV
+# Append additional non-secret configurations
+cat >> "$API_ENV_FILE" <<ENV
 API_IMAGE_URI=$API_IMAGE_URI
-DATABASE_URL=$DATABASE_URL
-JWT_SECRET=$JWT_SECRET
-OPENAI_API_KEY=$OPENAI_API_KEY
-AUTHENTIK_ISSUER_URL=$AUTHENTIK_ISSUER_URL
-AUTHENTIK_JWKS_URI=$AUTHENTIK_JWKS_URI
-AUTHENTIK_TOKEN_ENDPOINT=$AUTHENTIK_TOKEN_ENDPOINT
-OIDC_CLIENT_ID=$OIDC_CLIENT_ID
-OIDC_CLIENT_SECRET=$OIDC_CLIENT_SECRET
-SUPABASE_URL=$SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
 SMTP_HOST=${smtp_host}
 SMTP_PORT=${smtp_port}
 SMTP_SECURE=${smtp_secure}
-SMTP_FROM_EMAIL=$SMTP_FROM_EMAIL
 SMTP_AUTH_ENABLED=${smtp_auth_enabled}
-SMTP_USER=$SMTP_USER
 SMTP_OTP_SUBJECT=${smtp_otp_subject}
-SMTP_PASSWORD=$SMTP_PASSWORD
+SMTP_USER=\$SMTP_FROM_EMAIL
 CIG_AUTH_MODE=managed
 CIG_AUTO_MIGRATE=true
 CORS_ORIGINS=${cors_origins}
-NEO4J_PASSWORD=$NEO4J_PASSWORD
 NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
 PORT=${api_container_port}

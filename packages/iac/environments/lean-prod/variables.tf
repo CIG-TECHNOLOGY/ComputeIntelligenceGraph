@@ -163,7 +163,7 @@ variable "smtp_from" {
 variable "infisical_domain" {
   description = "FQDN for the Infisical instance"
   type        = string
-  default     = "secrets.internal.cig.lat"
+  default     = "secrets.cig.technology"
 }
 
 variable "infisical_image_tag" {
@@ -182,4 +182,17 @@ variable "infisical_multi_tenant" {
   description = "Whether to enable multi-tenant workspace isolation features"
   type        = bool
   default     = true
+}
+
+variable "infisical_token" {
+  description = "The non-expiring Service Token to authenticate with Infisical"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "infisical_url" {
+  description = "The domain URL of our self-hosted Infisical instance"
+  type        = string
+  default     = "https://secrets.cig.technology"
 }

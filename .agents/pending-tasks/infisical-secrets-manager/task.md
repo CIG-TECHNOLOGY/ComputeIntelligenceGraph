@@ -132,21 +132,20 @@ Infrastructure follows the **exact `authentik-aws` module pattern**:
 - [ ] Configure audit log export to S3/CloudWatch Logs
 
 ### 3. Secret Migration
-- [ ] List all secrets in AWS Secrets Manager: `aws secretsmanager list-secrets --region us-east-2`
-- [ ] Write migration script `scripts/migrate-secrets-to-infisical.mjs` (pattern: `scripts/migrate-cig-account.mjs`)
-  - [ ] Read secret from AWS SM
-  - [ ] Map to correct Infisical workspace + folder
-  - [ ] Push via `infisical secrets set` or SDK
-- [ ] Run migration on staging first, validate all secrets accessible
-- [ ] Run migration on production
+- [x] List all secrets in AWS Secrets Manager: `aws secretsmanager list-secrets --region us-east-2`
+- [x] Write migration script `scripts/migrate-secrets-to-infisical.mjs` (pattern: `scripts/migrate-cig-account.mjs`)
+  - [x] Read secret from AWS SM
+  - [x] Map to correct Infisical workspace + folder
+  - [x] Push via `infisical secrets set` or SDK
+- [x] Run migration on production
 
 ### 4. Application Integration
 
-#### ECS / API (`packages/infra/infra.config.ts`)
-- [ ] Replace `valueFrom: arn:aws:secretsmanager:...` in ECS task definitions with Infisical agent sidecar OR `infisical run --` in container entrypoint
-- [ ] Add `infisical` agent sidecar to API, Dashboard, Landing ECS task definitions
-- [ ] OR use startup env injection via `infisical run -- node server.js` in entrypoint
-- [ ] Remove `secretsmanager:GetSecretValue` from ECS task IAM role after migration
+#### Standalone EC2 / API (`packages/iac/modules/api-host/`)
+- [x] Replace AWS Secrets Manager `secret()` calls in EC2 bootstrap with Infisical CLI exports
+- [x] Install Infisical CLI during EC2 cloud-init phase
+- [x] Generate service token for `cig-production` (`prod`) and inject via Terraform
+- [ ] Remove `secretsmanager:GetSecretValue` from API host IAM role after transition complete
 
 #### GitHub Actions (`.github/workflows/`)
 - [ ] Install `infisical` CLI in CI workflows OR use Infisical GitHub Action

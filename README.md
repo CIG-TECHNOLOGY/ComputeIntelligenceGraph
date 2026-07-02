@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.6-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.8-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.6)
+## 📋 Latest Changes (v1.0.8)
 
-### Bug Fixes
+### Features
 
-* **auth:** redirect to dashboard after email OTP verification ([7d5e31c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7d5e31cd66d6bc27107e79bef5aac716a189f50a))
+* **iac:** provision standalone infisical secrets manager ([0650633](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/06506337608f2f5bbd104a0384bb7cae4bb13583))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

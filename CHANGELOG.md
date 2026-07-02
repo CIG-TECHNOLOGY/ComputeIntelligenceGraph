@@ -1,3 +1,36 @@
+## [1.0.8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.6...v1.0.8) (2026-07-02)
+
+
+### Features
+
+* **iac:** provision standalone infisical secrets manager ([0650633](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/06506337608f2f5bbd104a0384bb7cae4bb13583))
+
+
+
+
+
+## [1.0.8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.6...v1.0.8) (2026-07-02)
+
+
+### Features
+
+* **iac:** provision standalone infisical secrets manager ([0650633](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/06506337608f2f5bbd104a0384bb7cae4bb13583))
+
+
+
+
+
+## [1.0.7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.6...v1.0.7) (2026-07-02)
+
+
+### Features
+
+* **iac:** provision standalone infisical secrets manager ([0650633](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/06506337608f2f5bbd104a0384bb7cae4bb13583))
+
+
+
+
+
 ## [1.0.6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.5...v1.0.6) (2026-07-01)
 
 

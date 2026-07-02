@@ -53,6 +53,8 @@ module "api_host" {
   neo4j_volume_size_gb = var.neo4j_volume_size_gb
   neo4j_version        = var.neo4j_version
   ssh_public_key       = var.ssh_public_key
+  infisical_token      = var.infisical_token
+  infisical_url        = var.infisical_url
   tags                 = merge(local.tags, { Service = "api-core" })
 }
 
