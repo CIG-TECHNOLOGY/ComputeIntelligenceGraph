@@ -1,0 +1,149 @@
+#!/bin/bash
+set -euo pipefail
+
+# ── Swap (2 GB) — prevents OOM on t3.small ────────────────────────────────
+if [ ! -f /swapfile ]; then
+  fallocate -l 2G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+# ── System setup ─────────────────────────────────────────────────────────
+dnf update -y
+dnf install -y docker aws-cli jq
+systemctl enable --now docker
+
+# Docker Compose v2
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# ── Fetch secrets from Secrets Manager ────────────────────────────────────
+REGION="${region}"
+ENCRYPTION_KEY=$(aws secretsmanager get-secret-value \
+  --secret-id "${encryption_key_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+AUTH_SECRET=$(aws secretsmanager get-secret-value \
+  --secret-id "${auth_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+DB_PASS=$(aws secretsmanager get-secret-value \
+  --secret-id "${db_password_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+
+# ── Infisical directories ─────────────────────────────────────────────────
+mkdir -p /opt/infisical
+
+# ── .env file ─────────────────────────────────────────────────────────────
+cat > /opt/infisical/.env <<ENV
+# Database configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=$${DB_PASS}
+POSTGRES_DB=infisical
+DB_CONNECTION_URI=postgresql://postgres:$${DB_PASS}@db:5432/infisical?sslmode=disable
+
+# Redis configuration
+REDIS_URL=redis://redis:6379
+
+# Infisical core configurations
+ENCRYPTION_KEY=$${ENCRYPTION_KEY}
+AUTH_SECRET=$${AUTH_SECRET}
+SITE_URL=https://${domain}
+TELEMETRY_ENABLED=false
+
+# SMTP Configuration (optional)
+SMTP_HOST=${smtp_host}
+SMTP_PORT=${smtp_port}
+SMTP_USERNAME=${smtp_username}
+SMTP_PASSWORD=${smtp_password}
+SMTP_FROM=${smtp_from}
+
+# Compose project settings
+COMPOSE_PROJECT_NAME=infisical
+ENV
+
+chmod 600 /opt/infisical/.env
+
+# ── docker-compose.yml ────────────────────────────────────────────────────
+cat > /opt/infisical/docker-compose.yml <<'COMPOSE'
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: infisical-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: $${POSTGRES_PASSWORD}
+      POSTGRES_DB: infisical
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d infisical"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: infisical-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: infisical/infisical:${infisical_image_tag}
+    container_name: infisical-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: /opt/infisical/.env
+    ports:
+      - "80:8080"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/status"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  pg_data:
+  redis_data:
+COMPOSE
+
+# ── systemd service ───────────────────────────────────────────────────────
+cat > /etc/systemd/system/infisical.service <<SVC
+[Unit]
+Description=Infisical Secrets Manager Stack
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/infisical
+ExecStart=/usr/local/lib/docker/cli-plugins/docker-compose up -d
+ExecStop=/usr/local/lib/docker/cli-plugins/docker-compose down
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target
+SVC
+
+systemctl daemon-reload
+systemctl enable --now infisical
+
+echo "Infisical host bootstrap complete" > /var/log/infisical-init.log

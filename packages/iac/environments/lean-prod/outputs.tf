@@ -76,3 +76,41 @@ output "authentik_elastic_ip" {
   description = "Elastic IP assigned to the Authentik host"
   value       = module.authentik_host.elastic_ip
 }
+
+output "infisical_url" {
+  description = "Canonical HTTPS URL for Infisical"
+  value       = module.infisical_host.infisical_url
+}
+
+output "infisical_alb_dns_name" {
+  description = "DNS name of the Application Load Balancer for Infisical"
+  value       = module.infisical_host.alb_dns_name
+}
+
+output "infisical_instance_id" {
+  description = "EC2 instance ID for the Infisical host"
+  value       = module.infisical_host.instance_id
+}
+
+output "infisical_elastic_ip" {
+  description = "Elastic IP assigned to the Infisical host"
+  value       = module.infisical_host.elastic_ip
+}
+
+output "infisical_encryption_key_secret_arn" {
+  description = "Secrets Manager ARN for the Infisical encryption key"
+  value       = module.infisical_host.encryption_key_secret_arn
+  sensitive   = true
+}
+
+output "infisical_auth_secret_secret_arn" {
+  description = "Secrets Manager ARN for the Infisical auth secret"
+  value       = module.infisical_host.auth_secret_secret_arn
+  sensitive   = true
+}
+
+output "infisical_db_password_secret_arn" {
+  description = "Secrets Manager ARN for the Infisical DB password"
+  value       = module.infisical_host.db_password_secret_arn
+  sensitive   = true
+}

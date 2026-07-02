@@ -159,3 +159,27 @@ variable "smtp_from" {
   type        = string
   default     = ""
 }
+
+variable "infisical_domain" {
+  description = "FQDN for the Infisical instance"
+  type        = string
+  default     = "secrets.internal.cig.lat"
+}
+
+variable "infisical_image_tag" {
+  description = "Infisical Docker image tag"
+  type        = string
+  default     = "v0.161.0"
+}
+
+variable "infisical_instance_type" {
+  description = "EC2 instance type for the Infisical host"
+  type        = string
+  default     = "t3.small"
+}
+
+variable "infisical_multi_tenant" {
+  description = "Whether to enable multi-tenant workspace isolation features"
+  type        = bool
+  default     = true
+}

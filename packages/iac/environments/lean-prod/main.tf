@@ -80,3 +80,29 @@ module "authentik_host" {
   smtp_from                 = var.smtp_from
   tags                      = merge(local.tags, { Service = "authentik-sso" })
 }
+
+module "infisical_host" {
+  source = "../../modules/infisical-aws"
+
+  region              = var.region
+  domain              = var.infisical_domain
+  route53_zone_id     = var.route53_zone_id
+  infisical_image_tag = var.infisical_image_tag
+  instance_type       = var.infisical_instance_type
+  ssh_public_key      = var.ssh_public_key
+  smtp_host           = var.smtp_host
+  smtp_port           = var.smtp_port
+  smtp_username       = var.smtp_username
+  smtp_password       = var.smtp_password
+  smtp_from           = var.smtp_from
+  multi_tenant        = var.infisical_multi_tenant
+
+  tags = merge(local.tags, { Service = "infisical-secrets" })
+}
+
+# Dummy module declaration to satisfy orphaned legacy provider inside authentik-aws
+module "authentik" {
+  source          = "../../modules/authentik-aws"
+  domain          = "dummy"
+  route53_zone_id = "dummy"
+}
