@@ -13,7 +13,7 @@ fi
 
 # ── System packages ─────────────────────────────────────────────────────────
 dnf update -y
-dnf install -y docker aws-cli jq golang
+dnf install -y docker aws-cli jq
 
 systemctl enable --now docker
 
@@ -22,16 +22,6 @@ mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
-# ── Build Caddy with caddy-dns/route53 plugin ───────────────────────────────
-# DNS-01 ACME is required for *.status.cig.technology wildcard cert.
-# The standard caddy:alpine image doesn't include the route53 DNS provider.
-export HOME=/root GOPATH=/root/go
-go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-/root/go/bin/xcaddy build \
-  --with github.com/caddy-dns/route53 \
-  --output /usr/local/bin/caddy
-chmod +x /usr/local/bin/caddy
 
 # ── Fetch secrets ────────────────────────────────────────────────────────────
 REGION="${region}"
@@ -155,23 +145,18 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 720h"
 GATUS
 
-# ── Dockerfile for custom Caddy (binary built above, packaged as image) ───────
+# ── Build Caddy with route53 DNS plugin via Docker multi-stage ────────────────
+# Uses the official caddy:builder image — no Go on the host, no disk pressure.
 cat > /opt/monitor/Dockerfile.caddy <<'CADDY_DOCKERFILE'
-FROM alpine:3.19
-RUN apk add --no-cache ca-certificates
-COPY caddy /usr/local/bin/caddy
-RUN chmod +x /usr/local/bin/caddy
-EXPOSE 80 443
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+FROM caddy:2-builder AS builder
+RUN xcaddy build \
+    --with github.com/caddy-dns/route53
+
+FROM caddy:2-alpine
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 CADDY_DOCKERFILE
 
-cp /usr/local/bin/caddy /opt/monitor/caddy-bin
-docker build \
-  -f /opt/monitor/Dockerfile.caddy \
-  --build-arg TARGETPLATFORM=linux/amd64 \
-  -t cig-caddy:local \
-  /opt/monitor/ \
-  --label "caddy-plugins=route53"
+docker build -f /opt/monitor/Dockerfile.caddy -t cig-caddy:local /opt/monitor/
 
 # ── docker-compose.yml ────────────────────────────────────────────────────────
 cat > /opt/monitor/docker-compose.yml <<COMPOSE
@@ -201,7 +186,7 @@ services:
       retries: 5
 
   app:
-    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/cig-technology/monitor-ui:latest}
+    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/edcalderon/monitor-ui:latest}
     container_name: monitor-app
     hostname: ${domain}
     restart: unless-stopped
@@ -224,7 +209,7 @@ services:
       - "8080"
 
   worker:
-    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/cig-technology/monitor-ui:latest}
+    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/edcalderon/monitor-ui:latest}
     container_name: monitor-worker
     hostname: worker
     restart: unless-stopped
