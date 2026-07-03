@@ -64,6 +64,15 @@ docker build -f packages/infra/docker/Dockerfile.api -t cig-api:local .
 docker build -f packages/infra/docker/Dockerfile.dashboard -t cig-dashboard:local .
 ```
 
+## Secret management — Infisical first
+
+**Mandate (2026-07-03):** Use the CIG self-hosted Infisical instance at `secrets.cig.technology` for all new internal secrets. Do **not** create new AWS Secrets Manager secrets unless acting as a single bootstrap vehicle (e.g. storing one Infisical service token so an EC2 can authenticate on first boot).
+
+Specifically:
+- Any new Terraform module or script that would add an `aws_secretsmanager_secret` resource must instead pull from Infisical.
+- AWS Secrets Manager already holds legacy secrets for Authentik and monitor bootstrap — those stay until the [infisical-secrets-manager task](`.agents/pending-tasks/infisical-secrets-manager/task.md`) migrates them.
+- When writing bootstrap scripts for new EC2s: store **one** Infisical service token in Secrets Manager, then use `infisical run --env=production -- <command>` to inject all other secrets at runtime.
+
 ## AWS account guard
 
 Production resources live in AWS account `520900722378` (region `us-east-2`). Scripts that mutate production Authentik or Secrets Manager must verify `aws sts get-caller-identity` resolves to that account before proceeding.
