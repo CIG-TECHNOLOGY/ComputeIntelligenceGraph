@@ -12,11 +12,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
-# Compile the worker entry point separately
-RUN npx tsc --outDir .next/standalone --module commonjs --target es2022 \
-    --moduleResolution node --esModuleInterop --skipLibCheck \
-    src/workers/index.ts && \
-    mv .next/standalone/src/workers/index.js .next/standalone/worker.js
+# Bundle the BullMQ worker into a single CommonJS file using esbuild
+# (ships with Next.js, no type-checking needed — Next build already did that)
+RUN npx esbuild src/workers/index.ts \
+    --bundle \
+    --platform=node \
+    --target=node20 \
+    --outfile=.next/standalone/worker.js \
+    --external:pg-native
 
 FROM base AS runner
 WORKDIR /app
