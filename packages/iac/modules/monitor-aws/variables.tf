@@ -78,6 +78,13 @@ variable "authentik_client_secret" {
   sensitive   = true
 }
 
+variable "ghcr_pull_token" {
+  description = "GHCR PAT for pulling ghcr.io/cig-technology private images"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "tags" {
   description = "Additional tags to apply to all resources"
   type        = map(string)

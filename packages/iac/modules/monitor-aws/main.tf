@@ -35,6 +35,7 @@ locals {
     db_password_secret_id   = aws_secretsmanager_secret.db_password.id
     nextauth_secret_id      = aws_secretsmanager_secret.nextauth_secret.id
     route53_zone_id         = var.route53_zone_id
+    ghcr_pull_token         = var.ghcr_pull_token
   })
 }
 
@@ -216,7 +217,7 @@ resource "aws_instance" "monitor" {
 
   root_block_device {
     volume_type           = "gp3"
-    volume_size           = 30
+    volume_size           = 80
     delete_on_termination = true
     encrypted             = true
   }

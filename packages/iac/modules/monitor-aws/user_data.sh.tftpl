@@ -26,6 +26,11 @@ chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 # ── Fetch secrets ────────────────────────────────────────────────────────────
 REGION="${region}"
 
+# Authenticate to GHCR so Docker can pull private cig-technology images
+if [ -n "${ghcr_pull_token}" ]; then
+  printf '%s' "${ghcr_pull_token}" | docker login ghcr.io -u cig-technology --password-stdin
+fi
+
 DB_PASS=$(aws secretsmanager get-secret-value \
   --secret-id "${db_password_secret_id}" \
   --region "$REGION" --query SecretString --output text)
@@ -186,7 +191,7 @@ services:
       retries: 5
 
   app:
-    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/edcalderon/monitor-ui:latest}
+    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/cig-technology/monitor-ui:latest}
     container_name: monitor-app
     hostname: ${domain}
     restart: unless-stopped
@@ -209,7 +214,7 @@ services:
       - "8080"
 
   worker:
-    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/edcalderon/monitor-ui:latest}
+    image: \$${MONITOR_UI_IMAGE_TAG:-ghcr.io/cig-technology/monitor-ui:latest}
     container_name: monitor-worker
     hostname: worker
     restart: unless-stopped

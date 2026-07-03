@@ -118,6 +118,7 @@ module "monitor_host" {
   authentik_url           = var.monitor_authentik_url
   authentik_client_id     = var.monitor_authentik_client_id
   authentik_client_secret = var.monitor_authentik_client_secret
+  ghcr_pull_token         = var.ghcr_pull_token
 
   tags = merge(local.tags, { Service = "monitor" })
 }

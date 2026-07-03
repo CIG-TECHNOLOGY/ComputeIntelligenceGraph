@@ -222,6 +222,13 @@ variable "monitor_authentik_client_secret" {
   sensitive   = true
 }
 
+variable "ghcr_pull_token" {
+  description = "GHCR PAT for pulling ghcr.io/cig-technology private images on the monitor EC2"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "infisical_token" {
   description = "The non-expiring Service Token to authenticate with Infisical"
   type        = string
