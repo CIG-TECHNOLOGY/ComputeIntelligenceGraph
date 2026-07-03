@@ -191,6 +191,7 @@ worker.on("completed", (job) => {
 });
 
 // Start the scheduler
-await schedulerLoop();
-
-console.log(`Check runner worker started (concurrency=20)`);
+(async () => {
+  await schedulerLoop();
+  console.log(`Check runner worker started (concurrency=20)`);
+})();

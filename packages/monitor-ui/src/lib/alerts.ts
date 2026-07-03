@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
-import { alertChannels, monitors, organizations } from "@/lib/db/schema";
+import { db } from "./db";
+import { alertChannels, monitors, organizations } from "./db/schema";
 import { eq, and } from "drizzle-orm";
-import { sendMail } from "@/lib/mailer";
+import { sendMail } from "./mailer";
 
 interface AlertPayload {
   monitorId: string;
