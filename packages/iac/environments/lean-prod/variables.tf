@@ -191,9 +191,9 @@ variable "monitor_domain" {
 }
 
 variable "monitor_ui_image_tag" {
-  description = "Docker image tag for the monitor-ui Next.js app (ECR or GHCR)"
+  description = "Full image reference for monitor-ui (e.g. ghcr.io/cig-technology/monitor-ui:sha-abc1234)"
   type        = string
-  default     = "latest"
+  default     = "ghcr.io/cig-technology/monitor-ui:latest"
 }
 
 variable "gatus_image_tag" {
