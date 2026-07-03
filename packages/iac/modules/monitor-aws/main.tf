@@ -216,7 +216,7 @@ resource "aws_instance" "monitor" {
 
   root_block_device {
     volume_type           = "gp3"
-    volume_size           = 20
+    volume_size           = 10
     delete_on_termination = true
     encrypted             = true
   }
