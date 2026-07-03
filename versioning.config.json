@@ -24,7 +24,15 @@
   ],
   "extensionConfig": {
     "secrets-check": {
-      "enabled": true
+      "enabled": true,
+      "allowlist": [
+        "=$${",
+        "$${DB_PASS}",
+        "$${NEXTAUTH_SECRET}",
+        "$${SMTP_PASS}",
+        "$${AUTHENTIK_CLIENT_ID_VAL}",
+        "$${AUTHENTIK_CLIENT_SECRET_VAL}"
+      ]
     },
     "workspace-env": {
       "enabled": true,

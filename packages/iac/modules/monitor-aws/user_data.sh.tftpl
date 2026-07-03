@@ -23,13 +23,8 @@ curl -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-c
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-# ── Fetch secrets ────────────────────────────────────────────────────────────
+# ── Fetch secrets from Secrets Manager (no plaintext in user_data) ────────────
 REGION="${region}"
-
-# Authenticate to GHCR so Docker can pull private cig-technology images
-if [ -n "${ghcr_pull_token}" ]; then
-  printf '%s' "${ghcr_pull_token}" | docker login ghcr.io -u cig-technology --password-stdin
-fi
 
 DB_PASS=$(aws secretsmanager get-secret-value \
   --secret-id "${db_password_secret_id}" \
@@ -38,6 +33,36 @@ DB_PASS=$(aws secretsmanager get-secret-value \
 NEXTAUTH_SECRET=$(aws secretsmanager get-secret-value \
   --secret-id "${nextauth_secret_id}" \
   --region "$REGION" --query SecretString --output text)
+
+SMTP_PASS=""
+%{ if smtp_password_secret_id != "" ~}
+SMTP_PASS=$(aws secretsmanager get-secret-value \
+  --secret-id "${smtp_password_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+%{ endif ~}
+
+AUTHENTIK_CLIENT_ID_VAL=""
+%{ if authentik_client_id_secret_id != "" ~}
+AUTHENTIK_CLIENT_ID_VAL=$(aws secretsmanager get-secret-value \
+  --secret-id "${authentik_client_id_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+%{ endif ~}
+
+AUTHENTIK_CLIENT_SECRET_VAL=""
+%{ if authentik_client_secret_secret_id != "" ~}
+AUTHENTIK_CLIENT_SECRET_VAL=$(aws secretsmanager get-secret-value \
+  --secret-id "${authentik_client_secret_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+%{ endif ~}
+
+# GHCR login — token fetched at runtime, never stored in user_data
+%{ if ghcr_pull_token_secret_id != "" ~}
+GHCR_TOKEN=$(aws secretsmanager get-secret-value \
+  --secret-id "${ghcr_pull_token_secret_id}" \
+  --region "$REGION" --query SecretString --output text)
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u cig-technology --password-stdin
+unset GHCR_TOKEN
+%{ endif ~}
 
 # ── Directories ──────────────────────────────────────────────────────────────
 mkdir -p /opt/monitor/gatus /opt/monitor/caddy/data /opt/monitor/caddy/config
@@ -60,14 +85,14 @@ NEXT_PUBLIC_APP_URL=https://${domain}
 
 # Authentik OIDC
 AUTHENTIK_ISSUER=${authentik_url}
-AUTHENTIK_CLIENT_ID=${authentik_client_id}
-AUTHENTIK_CLIENT_SECRET=${authentik_client_secret}
+AUTHENTIK_CLIENT_ID=$${AUTHENTIK_CLIENT_ID_VAL}
+AUTHENTIK_CLIENT_SECRET=$${AUTHENTIK_CLIENT_SECRET_VAL}
 
 # SMTP
 SMTP_HOST=${smtp_host}
 SMTP_PORT=${smtp_port}
 SMTP_USERNAME=${smtp_username}
-SMTP_PASSWORD=${smtp_password}
+SMTP_PASSWORD=$${SMTP_PASS}
 SMTP_FROM_ADDRESS=${smtp_from}
 SMTP_FROM_NAME=CIG Monitor
 SMTP_SECURE=false
@@ -81,6 +106,9 @@ GATUS_IMAGE_TAG=${gatus_image_tag}
 ENV
 
 chmod 600 /opt/monitor/.env
+
+# Clear sensitive vars from shell after writing .env
+unset DB_PASS NEXTAUTH_SECRET SMTP_PASS AUTHENTIK_CLIENT_ID_VAL AUTHENTIK_CLIENT_SECRET_VAL
 
 # ── Caddyfile ─────────────────────────────────────────────────────────────────
 # Wildcard block uses DNS-01 via the EC2 instance role (no keys in config).

@@ -1,6 +1,6 @@
 # Feature: Multi-Tenant Uptime Monitoring SaaS — `packages/monitor-ui`
 
-**Status:** in_progress
+**Status:** in_progress — EC2 running, bootstrap re-run pending after Secrets Manager apply
 **Priority:** high
 **Package:** `packages/monitor-ui` (new standalone CIG package, Next.js SaaS app)
 **Infrastructure:** `packages/iac/modules/monitor-aws/` (Terraform module, complete)
@@ -218,13 +218,20 @@ Custom domain (premium): tenant CNAMEs status.hashpass.tech → status.cig.techn
 - [x] API routes — `GET+POST /api/admin/orgs`, `GET+POST /api/v1/monitors`, `GET+POST /api/v1/alerts`, `POST /api/v1/deployments`
 - [x] HTTP check runner — BullMQ worker, concurrency 20, auto-reschedule, incident create/resolve, alert dispatch (`src/workers/check-runner.ts`)
 - [x] `monitor-worker` container added to docker-compose in `user_data.sh.tftpl`
-- [x] Dockerfile — multi-stage, standalone Next.js + compiled worker.js
-- [x] GitHub Actions CI — `.github/workflows/monitor-ui-publish.yml` (push to GHCR on `packages/monitor-ui/**` changes)
+- [x] Dockerfile — multi-stage, standalone Next.js + compiled worker.js (`packages/monitor-ui/docker/Dockerfile`)
+- [x] GitHub Actions CI — `.github/workflows/monitor-ui-publish.yml` — pushes to `ghcr.io/cig-technology/monitor-ui` using `GHCR_TOKEN_WRITE` PAT
 - [x] `provision-org.mjs` — create tenant via API + call Gatus sync
 - [x] `provision-gatus.mjs` — build Gatus YAML from DB monitors + push via SSM + restart Gatus
 - [x] `patch-env.mjs` — SSM live-patch `.env` + recreate app container
 - [x] `migrate.mjs` — SSM migration runner (`drizzle-kit migrate` inside running container)
 - [x] Root `package.json` scripts — `monitor:provision:org`, `monitor:gatus:sync`, `monitor:patch:env`, `monitor:db:migrate`
+- [x] Authentik OIDC provider registered — provider id=3, `cig-admins` group, `cig-monitor` application
+- [x] Docker image published — `ghcr.io/cig-technology/monitor-ui:latest` (sha-867fc9c)
+- [x] EC2 provisioned — `i-05cfeb88bfe32e14e` @ EIP `3.17.211.229`
+- [x] Route53 wildcard DNS — `*.status.cig.technology` + `status.cig.technology` → EIP
+- [x] EBS upgraded to 80 GB in-place (live `modify-volume` + `xfs_growfs`) — 72 GB free
+- [x] Bootstrap fixed — replaced host xcaddy build with Docker multi-stage Caddy build (no disk exhaustion)
+- [x] Secrets Manager refactor — SMTP password, Authentik client ID/secret, GHCR PAT moved to Secrets Manager; user_data contains only secret IDs; no plaintext credentials in EC2 metadata or Terraform state
 
 ---
 
@@ -254,22 +261,27 @@ git push origin main && git push upstream main
 ### Step 3 — Terraform apply
 ```bash
 make apply ENV=lean-prod
-# Provisions: EC2 t3.micro, EIP, SG, IAM, wildcard Route53 records, S3 backup bucket
-# First boot takes ~5 min (xcaddy build + Docker pulls)
+# ✅ DONE — EC2 i-05cfeb88bfe32e14e @ 3.17.211.229
+# This must be re-run after the Secrets Manager refactor to create the 4 new secrets
+# and update the IAM role policy (additive — no EC2 replacement)
 ```
 
 ### Step 4 — Capture outputs into .env
 ```bash
 pnpm monitor:capture:outputs
-# Reads terraform output, writes MONITOR_INSTANCE_ID + MONITOR_URL + MONITOR_ELASTIC_IP to .env
+# ✅ DONE — .env has MONITOR_INSTANCE_ID, MONITOR_URL, MONITOR_ELASTIC_IP
 ```
 
-### Step 5 — Verify bootstrap
+### Step 5 — Re-run bootstrap via SSM (bootstrap previously failed — xcaddy disk exhaustion, now fixed)
 ```bash
-aws ssm start-session --target $MONITOR_INSTANCE_ID --region us-east-2
-# Inside: journalctl -u monitor -f  (watch for "bootstrap complete")
-# Inside: docker compose -f /opt/monitor/docker-compose.yml ps
-# Expect: caddy, app, worker, gatus, db, redis all Up
+# ⏳ PENDING: after `make apply ENV=lean-prod` creates the Secrets Manager secrets:
+# The rendered bootstrap script will contain only secret IDs (no plaintext creds).
+# Upload to private S3 bucket and run via SSM:
+#   aws s3 cp /tmp/bootstrap-clean.sh s3://cig-monitor-backups-cf08cd0d/bootstrap.sh
+#   aws ssm send-command --document-name AWS-RunShellScript \
+#     --parameters 'commands=["aws s3 cp s3://cig-monitor-backups-cf08cd0d/bootstrap.sh /tmp/bootstrap.sh && bash /tmp/bootstrap.sh"]'
+# Monitor: aws ssm get-command-invocation ...
+# Expect: "Monitor host bootstrap complete" in /var/log/monitor-init.log
 ```
 
 ### Step 6 — Run DB migrations

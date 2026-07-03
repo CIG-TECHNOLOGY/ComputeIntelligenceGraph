@@ -22,6 +22,14 @@
     "version:bump:major": "versioning major",
     "version:changelog": "versioning changelog",
     "check:secrets": "versioning check-secrets",
+    "infisical:provision:hashpass": "node scripts/provision-hashpass-infisical.mjs",
+    "infisical:patch:smtp": "node scripts/patch-infisical-smtp.mjs",
+    "monitor:provision:org": "node packages/monitor-ui/scripts/provision-org.mjs",
+    "monitor:gatus:sync": "node packages/monitor-ui/scripts/provision-gatus.mjs",
+    "monitor:patch:env": "node packages/monitor-ui/scripts/patch-env.mjs",
+    "monitor:db:migrate": "node packages/monitor-ui/scripts/migrate.mjs",
+    "monitor:capture:outputs": "node scripts/capture-monitor-outputs.mjs",
+    "monitor:provision:authentik": "node scripts/provision-authentik-monitor.mjs",
     "test:api-impact": "node --test scripts/api-impact.test.mjs",
     "test:release-version": "node --test scripts/validate-release-version.test.mjs && bash scripts/validate-release-ref.test.sh",
     "release": "./scripts/release.sh release",
@@ -75,7 +83,7 @@
     "__workspace_scripts_managed": "[\"dev:dashboard\",\"dev:landing\",\"dev:wizard-ui\",\"dev:api\",\"dev:agents\",\"dev:chatbot\",\"dev:cli\",\"dev:config\",\"dev:discovery\",\"dev:graph\",\"dev:sdk\",\"dev:all\",\"dev\",\"build:dashboard\",\"build:landing\",\"build:wizard-ui\",\"build:api\",\"build:agents\",\"build:chatbot\",\"build:cli\",\"build:config\",\"build:discovery\",\"build:graph\",\"build:sdk\",\"build:all\",\"build\"]"
   },
   "devDependencies": {
-    "@edcalderon/versioning": "^1.5.5",
+    "@edcalderon/versioning": "^1.5.11",
     "concurrently": "^9.2.1",
     "husky": "^9.1.7",
     "turbo": "^1.13.0",
