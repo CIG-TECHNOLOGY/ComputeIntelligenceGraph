@@ -1,0 +1,40 @@
+{
+  "name": "@cig/monitor-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "worker": "node --loader ts-node/esm src/workers/check-runner.ts",
+    "db:migrate": "drizzle-kit migrate --config src/lib/db/drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config src/lib/db/drizzle.config.ts"
+  },
+  "dependencies": {
+    "bullmq": "^5.12.0",
+    "drizzle-orm": "^0.41.0",
+    "next": "14.2.29",
+    "next-auth": "^5.0.0-beta.25",
+    "nodemailer": "^6.9.14",
+    "postgres": "^3.4.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.17",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/nodemailer": "^6.4.16",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "dotenv": "^16.4.7",
+    "drizzle-kit": "^0.30.4",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.29",
+    "postcss": "^8.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  }
+}

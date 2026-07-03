@@ -102,6 +102,26 @@ module "infisical_host" {
   tags = merge(local.tags, { Service = "infisical-secrets" })
 }
 
+module "monitor_host" {
+  source = "../../modules/monitor-aws"
+
+  region                  = var.region
+  domain                  = var.monitor_domain
+  route53_zone_id         = var.route53_zone_id
+  monitor_ui_image_tag    = var.monitor_ui_image_tag
+  gatus_image_tag         = var.gatus_image_tag
+  smtp_host               = var.smtp_host
+  smtp_port               = var.smtp_port
+  smtp_username           = var.smtp_username
+  smtp_password           = var.smtp_password
+  smtp_from               = var.smtp_from
+  authentik_url           = var.monitor_authentik_url
+  authentik_client_id     = var.monitor_authentik_client_id
+  authentik_client_secret = var.monitor_authentik_client_secret
+
+  tags = merge(local.tags, { Service = "monitor" })
+}
+
 # Dummy module declaration to satisfy orphaned legacy provider inside authentik-aws
 module "authentik" {
   source          = "../../modules/authentik-aws"

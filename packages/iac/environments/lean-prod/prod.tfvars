@@ -7,4 +7,15 @@
 #   Authentik host: t3.small
 #   Neo4j data: 25 GiB
 #
-# Secrets are resolved by the host bootstraps; SMTP settings are optional.
+# Sensitive values (smtp_username, smtp_password) live in secrets.auto.tfvars
+# which is gitignored. Copy secrets.auto.tfvars.example and fill in the values.
+
+smtp_host = "mail.xn--tlo-fla.com"
+smtp_port = 587
+smtp_from = "notifications@cig.technology"
+
+# Monitor SaaS
+monitor_domain       = "status.cig.technology"
+monitor_ui_image_tag = "latest"
+gatus_image_tag      = "latest"
+monitor_authentik_url = "https://auth.cig.technology/application/o/monitor/"

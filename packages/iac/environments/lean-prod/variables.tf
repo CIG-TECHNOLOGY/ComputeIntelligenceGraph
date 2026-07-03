@@ -184,6 +184,44 @@ variable "infisical_multi_tenant" {
   default     = true
 }
 
+variable "monitor_domain" {
+  description = "Base domain for the uptime monitor SaaS"
+  type        = string
+  default     = "status.cig.technology"
+}
+
+variable "monitor_ui_image_tag" {
+  description = "Docker image tag for the monitor-ui Next.js app (ECR or GHCR)"
+  type        = string
+  default     = "latest"
+}
+
+variable "gatus_image_tag" {
+  description = "Gatus Docker image tag"
+  type        = string
+  default     = "latest"
+}
+
+variable "monitor_authentik_url" {
+  description = "Authentik OIDC issuer URL for the monitor app"
+  type        = string
+  default     = ""
+}
+
+variable "monitor_authentik_client_id" {
+  description = "OIDC client ID for the monitor app registered in Authentik"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "monitor_authentik_client_secret" {
+  description = "OIDC client secret for the monitor app from Authentik"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "infisical_token" {
   description = "The non-expiring Service Token to authenticate with Infisical"
   type        = string

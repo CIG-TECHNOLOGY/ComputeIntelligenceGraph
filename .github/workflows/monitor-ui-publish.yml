@@ -1,0 +1,60 @@
+name: monitor-ui — build & publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/monitor-ui/**"
+      - ".github/workflows/monitor-ui-publish.yml"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: ghcr.io/cig-technology/monitor-ui
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: packages/monitor-ui
+          file: packages/monitor-ui/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Output image tag
+        run: |
+          echo "Published: ${{ env.IMAGE }}@${{ steps.meta.outputs.version }}"
+          echo "Update lean-prod/prod.tfvars:"
+          echo "  monitor_ui_image_tag = \"sha-$(git rev-parse --short HEAD)\""
