@@ -5,6 +5,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { buildDashboardRequestPath, isProtectedDashboardHostname, resolveLandingSignInUrl } from "../lib/siteUrl";
 import { clearBrowserSession, getBrowserAccessToken } from "../lib/cigClient";
 
+const SILENT_AUTH_ATTEMPTED_KEY = "cig_silent_auth_attempted";
+
 function getRedirectUrl(pathname: string, search: string): string | null {
   if (typeof window === "undefined") {
     return null;
@@ -19,6 +21,28 @@ function getRedirectUrl(pathname: string, search: string): string | null {
     protocol: window.location.protocol,
     dashboardPath: buildDashboardRequestPath(pathname, search),
   });
+}
+
+/**
+ * Before giving up and bouncing to landing's sign-in, try completing the
+ * OIDC handshake silently via /auth/silent — the user may already have an
+ * active Authentik session (e.g. just landed here from Authentik's own
+ * post-login app-launch redirect) without a local dashboard session yet.
+ * Guarded by a one-shot sessionStorage flag so a failed silent attempt
+ * (Authentik has no session either) falls through to the normal sign-in
+ * redirect instead of looping.
+ */
+function trySilentAuthOnce(): boolean {
+  try {
+    if (sessionStorage.getItem(SILENT_AUTH_ATTEMPTED_KEY) === "1") {
+      return false;
+    }
+    sessionStorage.setItem(SILENT_AUTH_ATTEMPTED_KEY, "1");
+  } catch {
+    return false;
+  }
+  window.location.replace("/auth/silent");
+  return true;
 }
 
 export function ProductionAuthGuard({
@@ -38,6 +62,10 @@ export function ProductionAuthGuard({
 
   useEffect(() => {
     if (!redirectUrl || !shouldRedirect || typeof window === "undefined") {
+      return;
+    }
+
+    if (trySilentAuthOnce()) {
       return;
     }
 

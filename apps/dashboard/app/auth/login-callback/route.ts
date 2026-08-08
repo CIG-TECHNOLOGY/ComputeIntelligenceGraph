@@ -16,6 +16,7 @@ const AUTH_SYNC_MAX_ATTEMPTS = 2;
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code") ?? "";
   const state = req.nextUrl.searchParams.get("state") ?? "";
+  const oidcError = req.nextUrl.searchParams.get("error") ?? "";
   const verifier = req.cookies.get(PKCE_VERIFIER_COOKIE)?.value ?? "";
   const savedState = req.cookies.get(PKCE_STATE_COOKIE)?.value ?? "";
   const socialProvider = req.cookies.get(SOCIAL_PROVIDER_COOKIE)?.value ?? "sso";
@@ -23,6 +24,18 @@ export async function GET(req: NextRequest) {
     hostname: req.nextUrl.hostname,
     protocol: req.nextUrl.protocol,
   });
+
+  // A silent re-auth attempt (prompt=none, see /auth/silent) with no active
+  // Authentik session comes back as error=login_required rather than a
+  // code. That's an expected, silent "no" — send the user to landing's
+  // sign-in without showing the generic failure page, which is meant for
+  // an actual explicit login attempt going wrong, not a background check.
+  if (oidcError && !code) {
+    const response = NextResponse.redirect(resolveLandingUrl(), 302);
+    clearPkceCookies(response, dashboardUrl);
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  }
 
   try {
     if (!code) {
