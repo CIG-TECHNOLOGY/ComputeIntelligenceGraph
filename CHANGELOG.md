@@ -1,3 +1,25 @@
+## [1.0.14](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.13...v1.0.14) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** pass relative next path to Authentik's invalidation flow ([f0ca66f](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f0ca66f8da6ce2bb56dbfddf00a885876ed403f6))
+
+
+
+
+
+## [1.0.14](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.13...v1.0.14) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** pass relative next path to Authentik's invalidation flow ([f0ca66f](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f0ca66f8da6ce2bb56dbfddf00a885876ed403f6))
+
+
+
+
+
 ## [1.0.13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.12...v1.0.13) (2026-08-08)
 
 

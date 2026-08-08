@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.13-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.14-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.13)
+## 📋 Latest Changes (v1.0.14)
 
 ### Bug Fixes
 
-* **auth:** force logout before social login to satisfy Authentik's session precondition ([638e787](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/638e787cdd259ba5cef2851d3d82cb3090893103))
+* **auth:** pass relative next path to Authentik's invalidation flow ([f0ca66f](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f0ca66f8da6ce2bb56dbfddf00a885876ed403f6))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
