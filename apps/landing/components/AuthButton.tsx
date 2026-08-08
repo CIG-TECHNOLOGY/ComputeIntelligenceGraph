@@ -445,7 +445,12 @@ function getAuthentikConfig() {
   return {
     issuerUrl,
     clientId,
-    redirectUri: `${dashboardUrl}/auth/callback`,
+    // The current social-login flow exchanges the code server-side at
+    // /auth/login-callback (confidential client, holds the secret). The
+    // client-side /auth/callback page is legacy/PKCE-only and can't
+    // authenticate a confidential client — using it here caused a silent
+    // browser-side invalid_client failure with nothing in server logs.
+    redirectUri: `${dashboardUrl}/auth/login-callback`,
   };
 }
 

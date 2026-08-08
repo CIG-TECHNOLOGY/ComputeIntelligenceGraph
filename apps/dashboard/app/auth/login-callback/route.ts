@@ -36,10 +36,11 @@ export async function GET(req: NextRequest) {
     }
 
     const issuer = getAuthentikIssuer();
-    const redirectUri = new URL("/auth/callback", dashboardUrl).toString();
+    const redirectUri = new URL("/auth/login-callback", dashboardUrl).toString();
     const tokens = await exchangeAuthentikCode({
       issuer,
       clientId: getAuthentikClientId(),
+      clientSecret: getAuthentikClientSecret(),
       redirectUri,
       code,
       verifier,
@@ -117,6 +118,7 @@ function clearPkceCookies(response: NextResponse, dashboardUrl: string) {
 async function exchangeAuthentikCode(params: {
   issuer: string;
   clientId: string;
+  clientSecret: string;
   redirectUri: string;
   code: string;
   verifier: string;
@@ -131,6 +133,7 @@ async function exchangeAuthentikCode(params: {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: params.clientId,
+    client_secret: params.clientSecret,
     redirect_uri: params.redirectUri,
     code: params.code,
     code_verifier: params.verifier,
@@ -258,6 +261,17 @@ function getAuthentikClientId(): string {
     throw new Error("NEXT_PUBLIC_AUTHENTIK_CLIENT_ID is required for Authentik social login");
   }
   return clientId;
+}
+
+// Server-side only — never exposed to the browser. The cig-dashboard provider
+// is a confidential OAuth2 client; this code exchange runs in the Route
+// Handler (Node.js runtime), so holding the secret here is safe.
+function getAuthentikClientSecret(): string {
+  const clientSecret = process.env.AUTHENTIK_CLIENT_SECRET?.trim();
+  if (!clientSecret) {
+    throw new Error("AUTHENTIK_CLIENT_SECRET is required for Authentik social login");
+  }
+  return clientSecret;
 }
 
 function delay(ms: number): Promise<void> {
