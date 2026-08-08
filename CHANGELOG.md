@@ -1,3 +1,25 @@
+## [1.0.16](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.15...v1.0.16) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** route post-logout continuation through our own domain ([f8885c3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f8885c3df8f72b6e1d4b537321ddba99a8b04421))
+
+
+
+
+
+## [1.0.16](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.15...v1.0.16) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** route post-logout continuation through our own domain ([f8885c3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f8885c3df8f72b6e1d4b537321ddba99a8b04421))
+
+
+
+
+
 ## [1.0.15](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.14...v1.0.15) (2026-08-08)
 
 
