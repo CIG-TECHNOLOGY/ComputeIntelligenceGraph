@@ -1,3 +1,25 @@
+## [1.0.18](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.17...v1.0.18) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** route through Authentik flow with wrapped next, not source-login directly ([f744ffc](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f744ffc443c784f35f010d0f47b77529c2819c15))
+
+
+
+
+
+## [1.0.18](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.17...v1.0.18) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** route through Authentik flow with wrapped next, not source-login directly ([f744ffc](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f744ffc443c784f35f010d0f47b77529c2819c15))
+
+
+
+
+
 ## [1.0.17](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.16...v1.0.17) (2026-08-08)
 
 
