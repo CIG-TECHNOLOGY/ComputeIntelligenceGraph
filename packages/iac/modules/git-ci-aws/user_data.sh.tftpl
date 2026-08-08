@@ -1,0 +1,206 @@
+#!/bin/bash
+exec > >(tee -a /var/log/git-ci-user-data.log) 2>&1
+set -euo pipefail
+set -x
+
+REGION="${region}"
+DOMAIN="${domain}"
+
+dnf update -y
+dnf install -y awscli docker jq amazon-ssm-agent
+systemctl enable --now amazon-ssm-agent
+systemctl enable --now docker
+for i in $(seq 1 10); do
+  systemctl is-active --quiet docker && break
+  echo "Waiting for docker to become active ($i/10)"
+  sleep 3
+done
+systemctl is-active --quiet docker || { echo "docker failed to start"; systemctl status docker --no-pager || true; exit 1; }
+
+# Install Infisical CLI — the ONE bootstrap credential this host needs
+# (per CLAUDE.md's 2026-07-03 Infisical-first mandate). Everything else
+# (Forgejo admin token, Authentik OIDC client secret) is exported from
+# Infisical at boot, never stored in AWS Secrets Manager.
+curl --retry 5 --retry-delay 5 --max-time 60 -sLf 'https://artifacts-cli.infisical.com/setup.rpm.sh' | bash
+dnf install -y infisical
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl --retry 5 --retry-delay 5 --max-time 120 -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+mkdir -p /opt/git-ci
+
+cat > /opt/git-ci/Caddyfile <<CADDY
+$DOMAIN {
+  encode zstd gzip
+  reverse_proxy forgejo:3000
+}
+CADDY
+
+cat > /usr/local/bin/cig-git-ci-refresh <<'REFRESH'
+#!/bin/bash
+set -euo pipefail
+
+INFISICAL_TOKEN="${infisical_token}"
+INFISICAL_URL="${infisical_url}"
+INFISICAL_PROJECT_ID="${infisical_project_id}"
+DOMAIN="${domain}"
+FORGEJO_IMAGE_TAG="${forgejo_image_tag}"
+AUTHENTIK_URL="${authentik_url}"
+AUTHENTIK_CLIENT_ID="${authentik_client_id}"
+AUTHENTIK_CLIENT_SECRET="${authentik_client_secret}"
+ENV_FILE="/opt/git-ci/.env"
+COMPOSE_FILE="/opt/git-ci/docker-compose.yml"
+
+# Fetch all secrets in dotenv format directly from Infisical using the Service Token
+export INFISICAL_TOKEN="$INFISICAL_TOKEN"
+infisical export --projectId="$INFISICAL_PROJECT_ID" --env=prod --domain "$INFISICAL_URL" --format=dotenv --silent > "$ENV_FILE" || touch "$ENV_FILE"
+
+# POSTGRES_PASSWORD is expected in Infisical under this key; generate a
+# fallback once so a first boot never starts Postgres with an empty password.
+if ! grep -q '^POSTGRES_PASSWORD=' "$ENV_FILE"; then
+  echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)" >> "$ENV_FILE"
+fi
+
+cat >> "$ENV_FILE" <<ENV
+DOMAIN=$DOMAIN
+FORGEJO__server__ROOT_URL=https://$DOMAIN/
+FORGEJO__server__DOMAIN=$DOMAIN
+FORGEJO__actions__ENABLED=true
+FORGEJO__service__DISABLE_REGISTRATION=true
+FORGEJO__security__INSTALL_LOCK=true
+ENV
+chmod 600 "$ENV_FILE"
+
+cat > "$COMPOSE_FILE" <<COMPOSE
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: forgejo
+      POSTGRES_DB: forgejo
+      POSTGRES_PASSWORD: \$${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forgejo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:$FORGEJO_IMAGE_TAG
+    restart: unless-stopped
+    env_file:
+      - $ENV_FILE
+    environment:
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: db:5432
+      FORGEJO__database__NAME: forgejo
+      FORGEJO__database__USER: forgejo
+      FORGEJO__database__PASSWD: \$${POSTGRES_PASSWORD}
+    volumes:
+      - forgejo_data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/healthz >/dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/git-ci/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      forgejo:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  forgejo_data:
+  caddy_data:
+  caddy_config:
+COMPOSE
+
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans --pull always
+
+wait_for_url() {
+  local label="$1"
+  local url="$2"
+  local attempts="$${3:-60}"
+  local delay_seconds="$${4:-10}"
+
+  for attempt in $(seq 1 "$attempts"); do
+    if curl -fsS "$url" >/dev/null; then
+      echo "$label ready"
+      return 0
+    fi
+    echo "Waiting for $label ($attempt/$attempts)"
+    sleep "$delay_seconds"
+  done
+
+  echo "$label did not become ready in time" >&2
+  docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps >&2 || true
+  docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" logs --no-color --tail 200 >&2 || true
+  exit 1
+}
+
+wait_for_url "Forgejo" "http://127.0.0.1:3000/api/healthz"
+
+# Idempotent: register the Authentik OIDC source for CIG staff/admin login,
+# only if not already present and Authentik details were supplied. Tenant
+# repos are reached via push-mirror + relay token — tenants never need a
+# Forgejo login at all, so this is staff-only wiring.
+if [ -n "$AUTHENTIK_URL" ] && [ -n "$AUTHENTIK_CLIENT_ID" ]; then
+  EXISTING=$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T forgejo \
+    forgejo admin auth list --vertical-bars 2>/dev/null | grep -c "authentik" || true)
+  if [ "$EXISTING" -eq 0 ]; then
+    docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T forgejo \
+      forgejo admin auth add-oauth \
+      --name authentik \
+      --provider openidConnect \
+      --key "$AUTHENTIK_CLIENT_ID" \
+      --secret "$AUTHENTIK_CLIENT_SECRET" \
+      --auto-discover-url "$${AUTHENTIK_URL%/}/.well-known/openid-configuration" \
+      || echo "Authentik OIDC source registration failed — add manually via the admin UI" >&2
+  fi
+fi
+
+docker image prune -f >/dev/null
+REFRESH
+
+chmod +x /usr/local/bin/cig-git-ci-refresh
+
+cat > /etc/systemd/system/cig-git-ci.service <<'SERVICE'
+[Unit]
+Description=CIG git-ci (Forgejo) host stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/cig-git-ci-refresh
+ExecStop=/usr/bin/docker compose -f /opt/git-ci/docker-compose.yml --env-file /opt/git-ci/.env down
+TimeoutStartSec=1200
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable --now cig-git-ci
+
+echo "CIG git-ci host bootstrap complete"

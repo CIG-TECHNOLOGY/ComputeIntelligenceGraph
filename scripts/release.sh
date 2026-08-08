@@ -603,6 +603,16 @@ elif ! $DRY_RUN; then
   git push origin "${RELEASE_TAG}"
   git push upstream "${RELEASE_TAG}"
   success "Pushed ${BRANCH} + tag ${RELEASE_TAG} to origin and upstream"
+
+  # Notify the monitor SaaS about this deployment
+  if [ -n "${MONITOR_API_KEY:-}" ] && [ -n "${MONITOR_URL:-}" ]; then
+    curl -sf -X POST "${MONITOR_URL}/api/v1/deployments" \
+      -H "Authorization: Bearer ${MONITOR_API_KEY}" \
+      -H "Content-Type: application/json" \
+      -d "{\"version\":\"${NEXT_VERSION:-$CURRENT_VERSION}\",\"environment\":\"production\"}" \
+      && success "Deployment marker sent to CIG Monitor" \
+      || warn "Monitor deployment marker failed (non-fatal)"
+  fi
 else
   info "[dry-run] Would push branch + tag to origin and upstream"
 fi

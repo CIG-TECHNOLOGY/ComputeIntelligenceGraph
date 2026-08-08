@@ -1,0 +1,42 @@
+# CIG git-ci fallback — default onboarding check (3 of 3): Semgrep OSS.
+#
+# Semgrep OSS is the CodeQL-equivalent for this fallback path — CodeQL
+# itself is GitHub-proprietary and unavailable off-platform, so this is a
+# documented, accepted gap (see docs/git-ci-outage-runbook.md).
+#
+# See docs/git-ci-outage-runbook.md in CIG-TECHNOLOGY/ComputeIntelligenceGraph
+# for the operating model.
+
+name: git-ci / semgrep
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  semgrep:
+    runs-on: docker
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        id: scan
+        continue-on-error: true
+        run: semgrep scan --config auto --error
+
+      - name: Relay result to GitHub
+        if: always()
+        env:
+          FORGEJO_RELAY_TOKEN: ${{ secrets.FORGEJO_RELAY_TOKEN }}
+        run: |
+          CONCLUSION="success"
+          if [ "${{ steps.scan.outcome }}" != "success" ]; then CONCLUSION="failure"; fi
+          node .forgejo/scripts/relay-check-to-github.mjs \
+            --owner "__GITHUB_OWNER__" \
+            --repo "__GITHUB_REPO__" \
+            --check-name "git-ci / semgrep" \
+            --conclusion "$CONCLUSION" \
+            --sha "${{ github.sha }}" \
+            --details-url "${{ github.server_url }}/${{ github.repository }}/actions"

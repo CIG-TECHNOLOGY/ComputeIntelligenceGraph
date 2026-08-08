@@ -54,6 +54,8 @@ export const organizations = pgTable("organizations", {
   statusPageEnabled: boolean("status_page_enabled").notNull().default(true),
   statusPageTitle: varchar("status_page_title", { length: 255 }),
   logoUrl: varchar("logo_url", { length: 512 }),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  contactGithubUrl: varchar("contact_github_url", { length: 512 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

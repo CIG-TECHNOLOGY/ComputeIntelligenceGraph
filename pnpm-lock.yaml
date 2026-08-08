@@ -618,6 +618,8 @@ importers:
 
   packages/emails: {}
 
+  packages/git-ci: {}
+
   packages/gpu-orchestrator:
     dependencies:
       '@aws-sdk/client-dynamodb':

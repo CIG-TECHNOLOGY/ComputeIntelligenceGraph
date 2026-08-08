@@ -7,6 +7,8 @@ ENV        ?= prod
 ENVDIR     := environments/$(ENV)
 VARFILE    := $(ENVDIR)/$(ENV).tfvars
 TF         := terraform -chdir=$(ENVDIR)
+# secrets.auto.tfvars is gitignored and auto-loaded by Terraform when present
+SECRETS_VARFILE := $(ENVDIR)/secrets.auto.tfvars
 
 .PHONY: help init validate plan apply destroy output logs restart
 

@@ -181,8 +181,8 @@ entries:
     attrs:
       name: CIG Dashboard
       client_id: ${oidc_client_id}
-      client_secret: ${oidc_client_secret}
-      client_type: confidential
+      client_type: public
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, "authentik Self-signed Certificate"]]
       authorization_flow: !KeyOf cig_dashboard_authorization_flow
       invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       redirect_uris: ${redirect_uris}

@@ -2,6 +2,8 @@
 
 Last synchronized with the current release workflow on `2026-03-29`.
 
+> **Current production posture:** CIG is operating with only the status service and self-hosted Infisical always on. The API runtime and its edge are hibernated, and Authentik is cold standby. Read [minimal-infrastructure.md](minimal-infrastructure.md) before planning or applying AWS changes.
+
 ## Canonical Domains
 
 | Surface | Origin | Purpose |

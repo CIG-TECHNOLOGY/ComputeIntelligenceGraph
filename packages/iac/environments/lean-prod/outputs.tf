@@ -114,3 +114,18 @@ output "infisical_db_password_secret_arn" {
   value       = module.infisical_host.db_password_secret_arn
   sensitive   = true
 }
+
+output "git_ci_url" {
+  description = "Canonical HTTPS URL for the Forgejo CI fallback instance"
+  value       = module.git_ci_host.url
+}
+
+output "git_ci_host_instance_id" {
+  description = "EC2 instance ID for the Forgejo host"
+  value       = module.git_ci_host.host_instance_id
+}
+
+output "git_ci_runner_instance_id" {
+  description = "EC2 instance ID for the on-demand runner"
+  value       = module.git_ci_host.runner_instance_id
+}

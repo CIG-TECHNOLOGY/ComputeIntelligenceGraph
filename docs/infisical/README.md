@@ -48,12 +48,42 @@ During infrastructure provisioning (`terraform apply`), the following steps occu
 ### Email Notifications
 The instance has been configured with the main `SMTP_FROM_EMAIL` notifications identity. Infisical will automatically send organization invites and password recovery emails via the specified SMTP server (`mail.xn--tlo-fla.com`).
 
-## Operating Workspaces
+## Organizations
 
-Workspaces function as isolated environments. We maintain specific boundaries:
+Infisical supports multiple top-level organizations, each fully isolated from the others. Members of one org cannot see secrets or projects of another.
+
+| Organization | Allowed Domains | Role |
+|---|---|---|
+| `CIG` | `cig.technology`, `cig.lat` | CIG platform team |
+| `Hashpass` | `hashpass.tech`, `hashpass.co` | External partner — manages their own secrets |
+
+The **Hashpass** org was provisioned via `scripts/provision-hashpass-infisical.mjs`. Their admin received an invite at their `@hashpass.tech` address. Only users with `@hashpass.tech` or `@hashpass.co` email addresses can join that org.
+
+## Operating Workspaces (CIG org)
+
+Workspaces function as isolated environments. We maintain specific boundaries inside the **CIG** organization:
 - `cig-production` — Main CIG platform configuration.
 - `alternun-production` — Alternun project secrets.
-- `hashpass-production` — Hashpass project secrets.
+
+## Operating Workspaces (Hashpass org)
+
+Projects inside the **Hashpass** organization (managed autonomously by the Hashpass team):
+- `hashpass-production` — Production secrets (dev / staging / prod environments).
+- `hashpass-staging` — Pre-production workspace.
+- `hashpass-dev` — Development workspace.
+
+## Provisioning New External Orgs
+
+To onboard another external organization follow this pattern:
+
+```bash
+INFISICAL_ADMIN_EMAIL=admin@cig.lat \
+INFISICAL_ADMIN_PASSWORD=<password> \
+HASHPASS_INVITE_EMAIL=admin@hashpass.tech \
+pnpm infisical:provision:hashpass
+```
+
+The script is idempotent — safe to re-run. It will skip any resource that already exists.
 
 ## Disaster Recovery (DR)
 

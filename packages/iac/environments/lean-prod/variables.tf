@@ -241,3 +241,47 @@ variable "infisical_url" {
   type        = string
   default     = "https://secrets.cig.technology"
 }
+
+variable "git_ci_infisical_project_id" {
+  description = "Infisical project ID for git-ci-production (not a secret — just an internal identifier)"
+  type        = string
+  default     = "d851946f-aaac-465d-9ca3-230e4ffb5f52"
+}
+
+variable "git_ci_domain" {
+  description = "Domain for the multi-tenant Forgejo CI fallback instance"
+  type        = string
+  default     = "ci.cig.technology"
+}
+
+variable "git_ci_forgejo_image_tag" {
+  description = "Forgejo Docker image tag"
+  type        = string
+  default     = "10"
+}
+
+variable "git_ci_forgejo_runner_version" {
+  description = "forgejo-runner release version"
+  type        = string
+  default     = "6.3.1"
+}
+
+variable "git_ci_authentik_url" {
+  description = "Authentik OIDC issuer URL for CIG staff/admin SSO into the Forgejo instance"
+  type        = string
+  default     = ""
+}
+
+variable "git_ci_authentik_client_id" {
+  description = "OIDC client ID registered in Authentik for the Forgejo app"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "git_ci_authentik_client_secret" {
+  description = "OIDC client secret from Authentik for the Forgejo app"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

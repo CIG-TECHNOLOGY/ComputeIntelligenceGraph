@@ -1,0 +1,165 @@
+#!/bin/bash
+exec > >(tee -a /var/log/git-ci-user-data.log) 2>&1
+set -euo pipefail
+set -x
+
+REGION="${region}"
+DOMAIN="${domain}"
+FORGEJO_RUNNER_VERSION="${forgejo_runner_version}"
+
+dnf update -y
+dnf install -y awscli docker jq amazon-ssm-agent
+systemctl enable --now amazon-ssm-agent
+systemctl enable --now docker
+for i in $(seq 1 10); do
+  systemctl is-active --quiet docker && break
+  echo "Waiting for docker to become active ($i/10)"
+  sleep 3
+done
+systemctl is-active --quiet docker || { echo "docker failed to start"; systemctl status docker --no-pager || true; exit 1; }
+
+# Install Infisical CLI — the ONE bootstrap credential this host needs.
+curl --retry 5 --retry-delay 5 --max-time 60 -sLf 'https://artifacts-cli.infisical.com/setup.rpm.sh' | bash
+dnf install -y infisical
+
+curl --retry 5 --retry-delay 5 --max-time 120 -fsSL \
+  "https://code.forgejo.org/forgejo/runner/releases/download/v$FORGEJO_RUNNER_VERSION/forgejo-runner-$FORGEJO_RUNNER_VERSION-linux-amd64" \
+  -o /usr/local/bin/forgejo-runner
+chmod +x /usr/local/bin/forgejo-runner
+
+mkdir -p /etc/forgejo-runner
+
+# One-time registration script. forgejo-runner writes /etc/forgejo-runner/.runner
+# on success, so this is naturally idempotent across reboots of the same
+# (stopped/started, not terminated) instance — user_data only runs on first
+# boot, and re-registering an already-registered runner is a no-op guarded
+# below.
+cat > /usr/local/bin/cig-git-ci-runner-register <<'REGISTER'
+#!/bin/bash
+set -euo pipefail
+
+INFISICAL_TOKEN="${infisical_token}"
+INFISICAL_URL="${infisical_url}"
+INFISICAL_PROJECT_ID="${infisical_project_id}"
+DOMAIN="${domain}"
+
+if [ -f /etc/forgejo-runner/.runner ]; then
+  echo "Runner already registered, skipping"
+  exit 0
+fi
+
+export INFISICAL_TOKEN="$INFISICAL_TOKEN"
+# FORGEJO_RUNNER_TOKEN is an instance-level registration token generated
+# once by a CIG operator via the Forgejo admin UI (Site Administration ->
+# Actions -> Runners -> Create new Runner) and stored in Infisical. It is
+# NOT tenant-specific — the shared runner pool trust model is documented in
+# task.md's "Multi-Tenant Isolation Model" section.
+FORGEJO_RUNNER_TOKEN="$(infisical secrets get FORGEJO_RUNNER_TOKEN --projectId="$INFISICAL_PROJECT_ID" --env=prod --domain "$INFISICAL_URL" --plain --silent)"
+
+if [ -z "$FORGEJO_RUNNER_TOKEN" ]; then
+  echo "FORGEJO_RUNNER_TOKEN not found in Infisical — generate one via the Forgejo admin UI first" >&2
+  exit 1
+fi
+
+cd /etc/forgejo-runner
+/usr/local/bin/forgejo-runner register \
+  --no-interactive \
+  --instance "https://$DOMAIN" \
+  --token "$FORGEJO_RUNNER_TOKEN" \
+  --name "git-ci-runner-$(hostname)" \
+  --labels "docker:docker://node:20-bookworm,ubuntu-latest:docker://node:20-bookworm"
+REGISTER
+chmod +x /usr/local/bin/cig-git-ci-runner-register
+
+cat > /etc/systemd/system/forgejo-runner-register.service <<'SERVICE'
+[Unit]
+Description=Register this host with the CIG Forgejo Actions instance
+Before=forgejo-runner.service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/etc/forgejo-runner
+ExecStart=/usr/local/bin/cig-git-ci-runner-register
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+cat > /etc/systemd/system/forgejo-runner.service <<'SERVICE'
+[Unit]
+Description=Forgejo Actions runner daemon
+Requires=docker.service forgejo-runner-register.service
+After=docker.service forgejo-runner-register.service
+
+[Service]
+Type=simple
+WorkingDirectory=/etc/forgejo-runner
+ExecStart=/usr/local/bin/forgejo-runner daemon
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+# Idle-stop watchdog: after 15 idle minutes (no job containers running),
+# shut the instance down. EC2's default InstanceInitiatedShutdownBehavior is
+# "stop", so this returns the host to the aws_ec2_instance_state-managed
+# stopped state with zero AWS API calls and zero IAM permissions needed.
+cat > /usr/local/bin/cig-git-ci-runner-idle-check <<'IDLECHECK'
+#!/bin/bash
+set -euo pipefail
+
+STATE_FILE="/var/run/git-ci-runner-idle-count"
+IDLE_THRESHOLD=7   # 7 * 2min checks = 14min idle before shutdown
+
+active_jobs="$(docker ps -q | wc -l)"
+
+if [ "$active_jobs" -gt 0 ]; then
+  rm -f "$STATE_FILE"
+  exit 0
+fi
+
+count=0
+[ -f "$STATE_FILE" ] && count="$(cat "$STATE_FILE")"
+count=$((count + 1))
+
+if [ "$count" -ge "$IDLE_THRESHOLD" ]; then
+  echo "Runner idle for $((count * 2)) minutes, shutting down"
+  shutdown -h now
+else
+  echo "$count" > "$STATE_FILE"
+fi
+IDLECHECK
+chmod +x /usr/local/bin/cig-git-ci-runner-idle-check
+
+cat > /etc/systemd/system/git-ci-runner-idle-stop.service <<'SERVICE'
+[Unit]
+Description=Stop this runner when idle
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/cig-git-ci-runner-idle-check
+SERVICE
+
+cat > /etc/systemd/system/git-ci-runner-idle-stop.timer <<'TIMER'
+[Unit]
+Description=Check runner idle state every 2 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2min
+
+[Install]
+WantedBy=timers.target
+TIMER
+
+systemctl daemon-reload
+systemctl enable --now forgejo-runner-register.service
+systemctl enable --now forgejo-runner.service
+systemctl enable --now git-ci-runner-idle-stop.timer
+
+echo "CIG git-ci runner bootstrap complete"

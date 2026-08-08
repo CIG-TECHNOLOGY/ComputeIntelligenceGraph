@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.8-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.11-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,26 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.8)
+## 📋 Latest Changes (v1.0.11)
+
+### Bug Fixes
+
+* **iac:** monitor_ui_image_tag takes full image reference not just tag ([0dd26ad](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0dd26ad7cc58c498a953c906c1068b66f961a2b0))
+* **iac:** reduce monitor EBS from 20GB to 10GB (~$0.80/mo saving) ([804be4a](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/804be4a2d0cf812858c9c59f4035abeaf2c63006))
+* **iac:** reduce monitor EBS to 8GB minimum viable ([b92aab4](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b92aab4668af8ec3c50add76a6b11bf7557b9550))
+* **iac:** replace xcaddy host-build with Docker multi-stage Caddy build ([e2a04d2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/e2a04d2cc1d5377633414b1867eabf98e7f6e982))
+* **iac:** use cig-technology GHCR, 80 GB disk, GHCR docker login on EC2 ([799f7e2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/799f7e22035bd1c07a7212465ca263aa5b60a580))
+* **monitor:** add package-lock.json and fix Docker build ([0231a22](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/0231a22e03922fc237e028ff92a1de7a68cab98c))
+* **monitor:** exclude workers from Next.js tsconfig type-check ([7862111](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7862111026a6492b082e2b137ce23a99cd2923d1))
+* **monitor:** fix worker TypeScript compilation ([d35632e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d35632ec113577005e7c32d4689071fff7ce8235))
+* **monitor:** remove COPY public dir — monitor-ui has no public assets ([e30492f](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/e30492f98d06933b1aa6bdcb2aa6a14d28f959fe))
+* **monitor:** use esbuild to bundle worker instead of standalone tsc ([157f77f](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/157f77fc1bf7de962ca66a09446e44c196a37ae9))
+
 
 ### Features
 
-* **iac:** provision standalone infisical secrets manager ([0650633](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/06506337608f2f5bbd104a0384bb7cae4bb13583))
+* **iac,versioning:** Secrets Manager refactor, versioning 1.5.11, Infisical mandate ([f822f1b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f822f1beefa654b2e9f5c03334ebb16389e51a22))
+* **monitor:** multi-tenant uptime monitoring SaaS — monitor-ui + IaC ([27bf94c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/27bf94c2bbbd88ef96e52c185f46893a5f07abd6))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

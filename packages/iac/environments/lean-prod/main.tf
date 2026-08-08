@@ -123,6 +123,25 @@ module "monitor_host" {
   tags = merge(local.tags, { Service = "monitor" })
 }
 
+module "git_ci_host" {
+  source = "../../modules/git-ci-aws"
+
+  region                  = var.region
+  domain                  = var.git_ci_domain
+  route53_zone_id         = var.route53_zone_id
+  forgejo_image_tag       = var.git_ci_forgejo_image_tag
+  forgejo_runner_version  = var.git_ci_forgejo_runner_version
+  infisical_token         = var.infisical_token
+  infisical_url           = var.infisical_url
+  infisical_project_id    = var.git_ci_infisical_project_id
+  authentik_url           = var.git_ci_authentik_url
+  authentik_client_id     = var.git_ci_authentik_client_id
+  authentik_client_secret = var.git_ci_authentik_client_secret
+  ssh_public_key          = var.ssh_public_key
+
+  tags = merge(local.tags, { Service = "git-ci" })
+}
+
 # Dummy module declaration to satisfy orphaned legacy provider inside authentik-aws
 module "authentik" {
   source          = "../../modules/authentik-aws"

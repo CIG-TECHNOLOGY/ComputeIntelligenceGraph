@@ -11,6 +11,7 @@ Last synchronized with the root documentation links on `2026-03-29`.
 - [architecture/README.md](architecture/README.md) — current system shape, runtime roles, and implementation boundaries
 - [development/README.md](development/README.md) — local workflow, validation, and release commands
 - [deployment/README.md](deployment/README.md) — domains, deployment surfaces, and build verification entry points
+- [deployment/minimal-infrastructure.md](deployment/minimal-infrastructure.md) — current minimal AWS footprint, protected services, and recovery paths
 - [authentication/README.md](authentication/README.md) — Authentik/Supabase auth flows, provisioning, and logout behavior
 
 ## Supporting Docs

@@ -7,19 +7,17 @@ import { resolveDashboardUrl } from "../../../../lib/siteUrl";
  * Server-side relay that:
  *   1. Persists the PKCE verifier/state/provider in short-lived cookies on the
  *      dashboard origin, so the Authentik callback can complete the exchange.
- *   2. Redirects the browser directly into the provider-specific Authentik
- *      flow that jumps straight to Google/GitHub.
+ *   2. Redirects the browser directly to Authentik's source-login endpoint
+ *      (/source/oauth/login/<provider>/), bypassing the flow executor SPA.
+ *      cig-google-login/cig-github-login are single-stage RedirectStage flows
+ *      that just forward to this same URL — hitting it directly skips the
+ *      flow-executor's render/fetch/redirect round trip and its visible flash.
  *
  * This removes the previous interstitial relay page. The browser now sees a
  * real HTTP redirect instead of a rendered "redirecting" screen.
  */
 
 const ALLOWED_PROVIDERS = new Set(["google", "github"]);
-
-const PROVIDER_FLOW: Record<string, string> = {
-  google: "cig-google-login",
-  github: "cig-github-login",
-};
 
 const PKCE_VERIFIER_COOKIE = "cig_pkce_verifier";
 const PKCE_STATE_COOKIE = "cig_pkce_state";
@@ -49,19 +47,19 @@ export async function GET(
   const authentikUrl = process.env.NEXT_PUBLIC_AUTHENTIK_URL ?? "https://auth.cig.technology";
   const authBase = authentikUrl.replace(/\/$/, "");
   const authorizePath = `${authBase}/application/o/authorize/`;
-  const flowUrl = new URL(`/if/flow/${PROVIDER_FLOW[provider]}/`, authBase);
+  const sourceLoginUrl = new URL(`/source/oauth/login/${provider}/`, authBase);
   const dashboardUrl = resolveDashboardUrl({
     hostname: req.nextUrl.hostname,
     protocol: req.nextUrl.protocol,
   });
-  flowUrl.searchParams.set("next", buildAuthorizeUrl(authorizePath, {
+  sourceLoginUrl.searchParams.set("next", buildAuthorizeUrl(authorizePath, {
     clientId,
     redirectUri,
     state,
     codeChallenge,
   }));
 
-  const response = NextResponse.redirect(flowUrl, 302);
+  const response = NextResponse.redirect(sourceLoginUrl, 302);
   setPkceCookies(response, dashboardUrl.startsWith("https://"), {
     verifier: codeVerifier,
     state,

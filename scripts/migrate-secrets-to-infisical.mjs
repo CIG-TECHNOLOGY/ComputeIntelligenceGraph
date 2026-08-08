@@ -1,184 +1,215 @@
 #!/usr/bin/env node
+/**
+ * Migrates monitor secrets from AWS Secrets Manager → Infisical cig-production project.
+ *
+ * Reads all credentials from environment variables — never from command-line args.
+ *
+ * Required env (set in .env or export before running):
+ *   INFISICAL_URL             https://secrets.cig.technology
+ *   INFISICAL_ADMIN_EMAIL     admin@cig.lat
+ *   INFISICAL_ADMIN_PASSWORD  ...
+ *   AWS_PROFILE               aws-cig  (or set AWS_* env vars directly)
+ *   AWS_REGION                us-east-2
+ *
+ * Usage:
+ *   node scripts/migrate-secrets-to-infisical.mjs [--delete-from-sm]
+ *
+ * Pass --delete-from-sm to schedule deletion of the 4 operator secrets from AWS SM
+ * after confirming they are in Infisical. The 2 auto-generated secrets (db-password,
+ * nextauth-secret) stay in AWS SM because the EC2 needs them on first boot before
+ * Infisical is reachable.
+ */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { execSync } from "child_process";
 
-const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DEFAULT_ENV_FILE = path.join(ROOT_DIR, '.env');
-const DEFAULT_REGION = 'us-east-2';
-const MAIN_CIG_AWS_ACCOUNT_ID = '520900722378';
+const INFISICAL_URL = process.env.INFISICAL_URL;
+const EMAIL = process.env.INFISICAL_ADMIN_EMAIL;
+const PASSWORD = process.env.INFISICAL_ADMIN_PASSWORD;
+const AWS_REGION = process.env.AWS_REGION || "us-east-2";
+const AWS_PROFILE = process.env.AWS_PROFILE || "aws-cig";
+const DELETE_FROM_SM = process.argv.includes("--delete-from-sm");
 
-const targetSecrets = [
-  '/cig/prod/api/database-url',
-  '/cig/prod/api/supabase-url',
-  '/cig/prod/api/supabase-service-role-key',
-  '/cig/prod/api/jwt-secret',
-  '/cig/prod/api/authentik-issuer-url',
-  '/cig/prod/api/authentik-jwks-uri',
-  '/cig/prod/api/authentik-token-endpoint',
-  '/cig/prod/api/oidc-client-id',
-  '/cig/prod/api/oidc-client-secret',
-  '/cig/prod/api/openai-api-key',
-  '/cig/prod/api/smtp-from-email',
-  '/cig/prod/api/smtp-password',
-  'cig-api/neo4j/password'
+if (!INFISICAL_URL || !EMAIL || !PASSWORD) {
+  console.error("Missing required env: INFISICAL_URL, INFISICAL_ADMIN_EMAIL, INFISICAL_ADMIN_PASSWORD");
+  process.exit(1);
+}
+
+// The 4 operator-supplied monitor secrets to migrate.
+// The 2 auto-generated ones (db-password, nextauth-secret) stay in AWS SM
+// as bootstrap credentials needed before Infisical is reachable on first boot.
+const SECRETS_TO_MIGRATE = [
+  {
+    smName: "monitor/status.cig.technology/smtp-password",
+    infisicalKey: "MONITOR_SMTP_PASSWORD",
+    comment: "SMTP password for monitor alert notifications",
+  },
+  {
+    smName: "monitor/status.cig.technology/authentik-client-id",
+    infisicalKey: "MONITOR_AUTHENTIK_CLIENT_ID",
+    comment: "Authentik OIDC client ID for monitor-ui",
+  },
+  {
+    smName: "monitor/status.cig.technology/authentik-client-secret",
+    infisicalKey: "MONITOR_AUTHENTIK_CLIENT_SECRET",
+    comment: "Authentik OIDC client secret for monitor-ui",
+  },
+  {
+    smName: "monitor/status.cig.technology/ghcr-pull-token",
+    infisicalKey: "MONITOR_GHCR_PULL_TOKEN",
+    comment: "GHCR PAT for pulling ghcr.io/cig-technology private images",
+  },
 ];
 
-function parseEnvValue(rawValue) {
-  const value = rawValue.trim();
-  if (value.length === 0) return '';
-  const first = value[0];
-  const last = value[value.length - 1];
-  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
-    let inner = value.slice(1, -1);
-    if (first === '"') {
-      inner = inner
-        .replaceAll('\\n', '\n')
-        .replaceAll('\\r', '\r')
-        .replaceAll('\\t', '\t')
-        .replaceAll('\\"', '"')
-        .replaceAll('\\\\', '\\');
-    } else {
-      inner = inner.replaceAll("\\'", "'");
-    }
-    return inner;
-  }
-  const inlineCommentIndex = value.search(/\s#/);
-  return inlineCommentIndex >= 0 ? value.slice(0, inlineCommentIndex).trimEnd() : value;
+function awsGetSecret(secretId) {
+  return execSync(
+    `aws secretsmanager get-secret-value --secret-id "${secretId}" --region ${AWS_REGION} --query SecretString --output text`,
+    { env: { ...process.env, AWS_PROFILE }, stdio: ["pipe", "pipe", "pipe"] }
+  ).toString().trim();
 }
 
-function loadEnvFile(filePath) {
-  const env = {};
-  if (!fs.existsSync(filePath)) return env;
-  const content = fs.readFileSync(filePath, 'utf8');
-  for (const rawLine of content.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
-    const match = line.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
-    if (!match) continue;
-    const [, key, rawValue] = match;
-    env[key] = parseEnvValue(rawValue);
-  }
-  return env;
-}
-
-function run(command, args, { env = process.env } = {}) {
-  const result = spawnSync(command, args, {
-    cwd: ROOT_DIR,
-    env,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
+async function infisicalLogin() {
+  // Step 1: email/password login → initial accessToken
+  const res = await fetch(`${INFISICAL_URL}/api/v3/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
   });
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(' ')} failed: ${result.stderr || ''}`);
-  }
-  return result.stdout.trim();
+  if (!res.ok) throw new Error(`Infisical login failed ${res.status}: ${await res.text()}`);
+  const data = await res.json();
+  const initToken = data.accessToken ?? data.token;
+
+  // Step 2: select-organization → org-scoped token required for workspace/secret APIs
+  const orgRes = await fetch(`${INFISICAL_URL}/api/v1/organization`, {
+    headers: { Authorization: `Bearer ${initToken}` },
+  });
+  if (!orgRes.ok) throw new Error(`GET /organization failed: ${orgRes.status}`);
+  const orgData = await orgRes.json();
+  const orgs = orgData.organizations ?? [];
+  if (!orgs.length) throw new Error("No organizations found for this user");
+  const orgId = orgs[0].id;
+
+  const selRes = await fetch(`${INFISICAL_URL}/api/v3/auth/select-organization`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${initToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ organizationId: orgId }),
+  });
+  if (!selRes.ok) throw new Error(`select-organization failed: ${selRes.status}: ${await selRes.text()}`);
+  const selData = await selRes.json();
+  return selData.token ?? selData.accessToken;
 }
 
-function buildAwsEnv(parsedEnv, region) {
-  const env = { ...process.env };
-  const accessKeyId = parsedEnv.AWS_ACCESS_KEY_ID || parsedEnv.AWS_KEY_ID || env.AWS_ACCESS_KEY_ID || env.AWS_KEY_ID;
-  const secretAccessKey = parsedEnv.AWS_SECRET_ACCESS_KEY || parsedEnv.AWS_SECRET_KEY || env.AWS_SECRET_ACCESS_KEY || env.AWS_SECRET_KEY;
-  const sessionToken = parsedEnv.AWS_SESSION_TOKEN || parsedEnv.AWS_SECURITY_TOKEN || env.AWS_SESSION_TOKEN || env.AWS_SECURITY_TOKEN;
-
-  if (!accessKeyId || !secretAccessKey) {
-    throw new Error('CIG migration requires explicit AWS access keys in .env');
-  }
-
-  env.AWS_ACCESS_KEY_ID = accessKeyId;
-  env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
-  if (sessionToken) env.AWS_SESSION_TOKEN = sessionToken;
-  else delete env.AWS_SESSION_TOKEN;
-  delete env.AWS_PROFILE;
-  delete env.AWS_DEFAULT_PROFILE;
-  env.AWS_REGION = region;
-  env.AWS_DEFAULT_REGION = region;
-
-  const accountId = run('aws', ['sts', 'get-caller-identity', '--query', 'Account', '--output', 'text'], { env });
-  if (accountId !== MAIN_CIG_AWS_ACCOUNT_ID) {
-    throw new Error(`CIG migration must run against AWS account ${MAIN_CIG_AWS_ACCOUNT_ID}; resolved ${accountId}`);
-  }
-  return env;
+async function getWorkspaces(token) {
+  const res = await fetch(`${INFISICAL_URL}/api/v1/workspace`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`GET /workspace failed: ${res.status}`);
+  const data = await res.json();
+  // Environments are embedded in the workspace listing response
+  return data.workspaces ?? data;
 }
 
-async function apiRequest(url, method, headers, body) {
-  const options = {
-    method,
-    headers: { 'Content-Type': 'application/json', ...headers }
-  };
-  if (body) options.body = JSON.stringify(body);
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`API Request to ${url} failed with ${response.status}: ${text}`);
+async function upsertSecret(token, workspaceId, envSlug, key, value, comment) {
+  const body = { workspaceId, environment: envSlug, type: "shared", secretName: key, secretValue: value, secretComment: comment ?? "" };
+
+  const createRes = await fetch(`${INFISICAL_URL}/api/v3/secrets/raw/${key}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (createRes.status === 409) {
+    const patchRes = await fetch(`${INFISICAL_URL}/api/v3/secrets/raw/${key}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!patchRes.ok) throw new Error(`PATCH ${key}: ${patchRes.status} ${await patchRes.text()}`);
+    return "updated";
   }
-  return response.json();
+  if (!createRes.ok) throw new Error(`POST ${key}: ${createRes.status} ${await createRes.text()}`);
+  return "created";
+}
+
+function scheduleSmDeletion(secretId) {
+  execSync(
+    `aws secretsmanager delete-secret --secret-id "${secretId}" --recovery-window-in-days 7 --region ${AWS_REGION}`,
+    { env: { ...process.env, AWS_PROFILE }, stdio: ["pipe", "pipe", "pipe"] }
+  );
 }
 
 async function main() {
-  const parsedEnv = loadEnvFile(DEFAULT_ENV_FILE);
-  const awsEnv = buildAwsEnv(parsedEnv, DEFAULT_REGION);
+  console.log(`\n🔐  Infisical Migration — AWS Secrets Manager → ${INFISICAL_URL}`);
+  console.log(`    Secrets to migrate: ${SECRETS_TO_MIGRATE.length}\n`);
 
-  const infisicalUrl = parsedEnv.INFISICAL_URL || 'https://secrets.cig.technology';
-  const email = parsedEnv.INFISICAL_ADMIN_EMAIL || 'admin@cig.lat';
-  const password = parsedEnv.INFISICAL_ADMIN_PASSWORD || 'bRVwx2zZsbFZsL';
+  process.stdout.write("  Authenticating... ");
+  const token = await infisicalLogin();
+  console.log("✓");
 
-  console.log(`Authenticating against Infisical API at ${infisicalUrl} as ${email}`);
-  const loginRes = await apiRequest(`${infisicalUrl}/api/v3/auth/login`, 'POST', {}, { email, password });
-  const rawToken = loginRes.accessToken;
+  process.stdout.write("  Finding cig-production workspace... ");
+  const workspaces = await getWorkspaces(token);
+  const ws =
+    workspaces.find((w) => w.name?.toLowerCase().includes("cig-production") || w.slug?.includes("cig-production")) ??
+    workspaces[0];
+  if (!ws) throw new Error("No workspaces found");
+  console.log(`✓  ${ws.name} (${ws.id})`);
 
-  console.log('Retrieving organization ID');
-  const orgsRes = await apiRequest(`${infisicalUrl}/api/v1/organization`, 'GET', { Authorization: `Bearer ${rawToken}` });
-  if (!orgsRes.organizations || orgsRes.organizations.length === 0) {
-    throw new Error('No organizations found');
-  }
-  const orgId = orgsRes.organizations[0].id;
+  process.stdout.write("  Finding production environment... ");
+  // Environments are embedded in the workspace listing
+  const envs = ws.environments ?? [];
+  const env =
+    envs.find((e) => e.slug === "production" || e.name?.toLowerCase() === "production") ??
+    envs.find((e) => e.slug === "prod") ??
+    envs[0];
+  if (!env) throw new Error("No environments found in workspace");
+  console.log(`✓  ${env.name ?? env.slug} (${env.slug})`);
 
-  console.log(`Selecting organization: ${orgId}`);
-  const selectRes = await apiRequest(`${infisicalUrl}/api/v3/auth/select-organization`, 'POST', { Authorization: `Bearer ${rawToken}` }, { organizationId: orgId });
-  const scopedToken = selectRes.token;
-
-  console.log('Querying projects to locate cig-production workspace ID');
-  const projectsRes = await apiRequest(`${infisicalUrl}/api/v1/projects?includeRoles=false`, 'GET', { Authorization: `Bearer ${scopedToken}` });
-  const project = projectsRes.projects.find(p => p.name === 'cig-production');
-  if (!project) throw new Error('Could not find cig-production project');
-  const projectId = project.id;
-  console.log(`Located cig-production project ID: ${projectId}`);
-
-  console.log('\nBeginning secret migration from AWS Secrets Manager -> Infisical (cig-production, Production environment)');
-  const authHeaders = { Authorization: `Bearer ${scopedToken}` };
-
-  for (const secretName of targetSecrets) {
-    console.log(`Fetching secret ${secretName} from AWS Secrets Manager...`);
+  console.log("\n  Migrating:\n");
+  const results = [];
+  for (const { smName, infisicalKey, comment } of SECRETS_TO_MIGRATE) {
+    process.stdout.write(`    ${infisicalKey.padEnd(40)} `);
     try {
-      const secretValue = run('aws', ['secretsmanager', 'get-secret-value', '--secret-id', secretName, '--query', 'SecretString', '--output', 'text'], { env: awsEnv });
-      
-      const payloadKey = secretName.split('/').pop().toUpperCase().replaceAll('-', '_');
-      console.log(`Uploading raw secret to Infisical [${payloadKey}]...`);
-
-      const payload = {
-        workspaceId: projectId,
-        environment: 'prod',
-        type: 'shared',
-        secretPath: '/',
-        secretKey: payloadKey,
-        secretValue: secretValue
-      };
-
-      await apiRequest(`${infisicalUrl}/api/v3/secrets/raw/${payloadKey}`, 'POST', authHeaders, payload);
-      console.log(`Successfully migrated ${payloadKey}!`);
+      const value = awsGetSecret(smName);
+      const status = await upsertSecret(token, ws.id, env.slug, infisicalKey, value, comment);
+      console.log(`✓  ${status}`);
+      results.push({ infisicalKey, smName, ok: true });
     } catch (err) {
-      console.error(`Failed to migrate ${secretName}: ${err.message}`);
+      console.log(`✗  ${err.message}`);
+      results.push({ infisicalKey, smName, ok: false, err: err.message });
     }
   }
 
-  console.log('\nMigration complete! All active production secrets are now managed by Infisical.');
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length) {
+    console.error(`\n⚠️  ${failed.length} failure(s) — AWS SM secrets NOT deleted`);
+    process.exit(1);
+  }
+
+  console.log(`\n✅  All ${SECRETS_TO_MIGRATE.length} secrets in Infisical`);
+
+  if (DELETE_FROM_SM) {
+    console.log("\n  Scheduling AWS SM deletion (7-day recovery window):\n");
+    for (const { smName } of SECRETS_TO_MIGRATE) {
+      process.stdout.write(`    ${smName.padEnd(60)} `);
+      try {
+        scheduleSmDeletion(smName);
+        console.log("✓  scheduled");
+      } catch (err) {
+        console.log(`✗  ${err.message}`);
+      }
+    }
+  } else {
+    console.log("\n  AWS SM secrets kept (re-run with --delete-from-sm to schedule removal)");
+  }
+
+  console.log("\n  Next steps:");
+  console.log("  1. Verify secrets in Infisical dashboard at secrets.cig.technology");
+  console.log("  2. Create a Machine Identity or Service Token for the monitor EC2 in Infisical");
+  console.log("  3. Store that token in AWS SM as: monitor/status.cig.technology/infisical-token");
+  console.log("  4. Update bootstrap to: infisical run --env=production -- docker-compose up");
+  console.log("  5. Re-run with --delete-from-sm once Infisical is confirmed source of truth\n");
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exitCode = 1;
+main().catch((err) => {
+  console.error(`\nFatal: ${err.message}`);
+  process.exit(1);
 });

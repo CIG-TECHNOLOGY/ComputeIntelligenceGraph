@@ -59,6 +59,10 @@ SMTP_PORT=${smtp_port}
 SMTP_USERNAME=${smtp_username}
 SMTP_PASSWORD=${smtp_password}
 SMTP_FROM=${smtp_from}
+# Infisical v0.100+ reads SMTP_FROM_ADDRESS; SMTP_SECURE=false for port 587 STARTTLS
+SMTP_FROM_ADDRESS=${smtp_from}
+SMTP_FROM_NAME=CIG Secrets
+SMTP_SECURE=false
 
 # Compose project settings
 COMPOSE_PROJECT_NAME=infisical
@@ -102,6 +106,7 @@ services:
   backend:
     image: infisical/infisical:${infisical_image_tag}
     container_name: infisical-backend
+    hostname: ${domain}
     restart: unless-stopped
     depends_on:
       db:

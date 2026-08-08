@@ -74,3 +74,5 @@ ENV/
 config/env/private.gcloud.json
 *.tsbuildinfo
 TODO
+google-cloud-sdk
+.claude/settings.local.json

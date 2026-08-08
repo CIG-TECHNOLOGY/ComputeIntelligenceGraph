@@ -1,0 +1,45 @@
+# CIG git-ci fallback — default onboarding check (2 of 3): coverage/test-run.
+#
+# Starting point assuming a Node/pnpm project (adapt the "Install and test"
+# step for your tenant's actual stack — this is the one check in the
+# default triad that's language-specific, everything else is generic).
+#
+# See docs/git-ci-outage-runbook.md in CIG-TECHNOLOGY/ComputeIntelligenceGraph
+# for the operating model.
+
+name: git-ci / coverage
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: docker
+    container:
+      image: node:20-bookworm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install and test
+        id: test
+        continue-on-error: true
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm test -- --coverage
+
+      - name: Relay result to GitHub
+        if: always()
+        env:
+          FORGEJO_RELAY_TOKEN: ${{ secrets.FORGEJO_RELAY_TOKEN }}
+        run: |
+          CONCLUSION="success"
+          if [ "${{ steps.test.outcome }}" != "success" ]; then CONCLUSION="failure"; fi
+          node .forgejo/scripts/relay-check-to-github.mjs \
+            --owner "__GITHUB_OWNER__" \
+            --repo "__GITHUB_REPO__" \
+            --check-name "git-ci / coverage" \
+            --conclusion "$CONCLUSION" \
+            --sha "${{ github.sha }}" \
+            --details-url "${{ github.server_url }}/${{ github.repository }}/actions"

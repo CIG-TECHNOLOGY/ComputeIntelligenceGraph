@@ -163,6 +163,34 @@ resource "aws_iam_role_policy" "secrets" {
   })
 }
 
+# Required for Caddy's DNS-01 challenge (github.com/caddy-dns/route53) to issue
+# and renew the TLS cert directly on the instance, without a load balancer.
+resource "aws_iam_role_policy" "route53_dns01" {
+  name = "${local.name_prefix}-route53-dns01"
+  role = aws_iam_role.ec2.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["route53:GetChange"]
+        Resource = "arn:aws:route53:::change/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["route53:ChangeResourceRecordSets", "route53:ListResourceRecordSets"]
+        Resource = "arn:aws:route53:::hostedzone/${var.route53_zone_id}"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["route53:ListHostedZonesByName", "route53:ListHostedZones"]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "ec2" {
   name = "${local.name_prefix}-ec2-profile"
   role = aws_iam_role.ec2.name

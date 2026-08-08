@@ -1,0 +1,15 @@
+{
+  "name": "@cig/git-ci",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-tenant self-hosted Forgejo CI fallback for GitHub Actions platform outages",
+  "type": "module",
+  "scripts": {
+    "provision:tenant": "node scripts/provision-tenant.mjs",
+    "migrate:workflows": "node scripts/migrate-workflows.mjs",
+    "relay:check": "node scripts/relay-check-to-github.mjs",
+    "patch:env": "node scripts/patch-env.mjs",
+    "runner:start": "node scripts/runner-start.mjs",
+    "runner:stop": "node scripts/runner-stop.mjs"
+  }
+}

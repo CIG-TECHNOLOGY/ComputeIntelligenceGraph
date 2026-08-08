@@ -1,3 +1,11 @@
 environments/prod/tfplan
 environments/prod/.terraform/
 environments/prod/.terraform.lock.hcl
+environments/lean-prod/tfplan
+environments/lean-prod/.terraform/
+environments/lean-prod/.terraform.lock.hcl
+environments/api-prod/tfplan
+environments/api-prod/.terraform/
+environments/api-prod/.terraform.lock.hcl
+# Sensitive tfvars — never commit secrets
+environments/**/secrets.auto.tfvars
