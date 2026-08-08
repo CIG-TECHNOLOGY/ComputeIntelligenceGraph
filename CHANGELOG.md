@@ -1,3 +1,25 @@
+## [1.0.15](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.14...v1.0.15) (2026-08-08)
+
+
+### Bug Fixes
+
+* **landing:** footer version self-corrects from runtime-version.json ([b9a4273](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b9a42731577294ce65c4fd5d0acebcba7bd91ff3))
+
+
+
+
+
+## [1.0.15](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.14...v1.0.15) (2026-08-08)
+
+
+### Bug Fixes
+
+* **landing:** footer version self-corrects from runtime-version.json ([b9a4273](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b9a42731577294ce65c4fd5d0acebcba7bd91ff3))
+
+
+
+
+
 ## [1.0.14](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.13...v1.0.14) (2026-08-08)
 
 
