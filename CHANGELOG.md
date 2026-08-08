@@ -1,3 +1,25 @@
+## [1.0.12](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.11...v1.0.12) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** send client_secret in token exchange, align redirect_uri everywhere ([ccc66a1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ccc66a1c606307c89a9d8136d719bb545a009406))
+
+
+
+
+
+## [1.0.12](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.11...v1.0.12) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** send client_secret in token exchange, align redirect_uri everywhere ([ccc66a1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ccc66a1c606307c89a9d8136d719bb545a009406))
+
+
+
+
+
 ## [1.0.11](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.8...v1.0.11) (2026-08-08)
 
 
