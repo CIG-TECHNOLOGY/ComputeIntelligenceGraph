@@ -1,3 +1,25 @@
+## [1.0.13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.12...v1.0.13) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** force logout before social login to satisfy Authentik's session precondition ([638e787](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/638e787cdd259ba5cef2851d3d82cb3090893103))
+
+
+
+
+
+## [1.0.13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.12...v1.0.13) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** force logout before social login to satisfy Authentik's session precondition ([638e787](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/638e787cdd259ba5cef2851d3d82cb3090893103))
+
+
+
+
+
 ## [1.0.12](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.11...v1.0.12) (2026-08-08)
 
 
