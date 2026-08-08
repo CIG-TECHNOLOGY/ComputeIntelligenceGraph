@@ -7,29 +7,38 @@ import { resolveDashboardUrl } from "../../../../lib/siteUrl";
  * Server-side relay that:
  *   1. Persists the PKCE verifier/state/provider in short-lived cookies on the
  *      dashboard origin, so the Authentik callback can complete the exchange.
- *   2. Redirects the browser directly to Authentik's source-login endpoint
- *      (/source/oauth/login/<provider>/), bypassing the flow executor SPA.
+ *   2. Redirects the browser into the provider-specific Authentik flow
+ *      (cig-google-login / cig-github-login), which forwards to Google/GitHub.
  *
- * This intentionally does NOT force a logout first. That was tried (routing
- * through Authentik's default-invalidation-flow to clear a pre-existing
- * session before default-source-authentication's require_unauthenticated
- * check) across several variants — chaining `next` straight through, via a
- * relative path, and via a same-origin /continue hop on our own domain.
- * Authentik's own source confirms `next` should work for a relative target,
- * but every variant landed on Authentik's generic login form in practice,
- * and reproducing the exact SPA/session mechanics outside a real browser
- * proved unreliable. The actual fix belongs on the Authentik side: the
- * default-source-authentication flow's `authentication` requirement should
- * be `none` instead of `require_unauthenticated`, so it tolerates an
- * existing session instead of rejecting it. See CLAUDE.md / ops notes for
- * that change; this route stays intentionally simple.
+ * Earlier versions of this route redirected straight to
+ * /source/oauth/login/<provider>/ to skip the flow-executor SPA's render
+ * round trip. That broke the OAuth continuation entirely: that view
+ * (OAuthRedirect, authentik/sources/oauth/views/redirect.py) never reads or
+ * stores a `next` parameter — it only builds the redirect to the external
+ * provider. The `next`-after-login mechanism only exists on the flow
+ * executor (authentik/flows/views/executor.py dispatch()), which persists
+ * it into request.session[SESSION_KEY_GET] — a value that survives the
+ * round trip to Google/GitHub and back because it's tied to the Django
+ * session cookie, not the URL. Bypassing the flow entirely meant that state
+ * was never seeded, so after the source login completed, Authentik had no
+ * record of where to send the user and fell back to its own default
+ * (authentik_core:if-user) instead of continuing to the OAuth2 authorize
+ * endpoint — silently stranding the login before it ever reached our
+ * /auth/login-callback.
  *
- * cig-google-login/cig-github-login are single-stage RedirectStage flows
- * that just forward to this same URL — hitting it directly skips the
- * flow-executor's render/fetch/redirect round trip and its visible flash.
+ * The flow executor also doesn't read `next` directly off the querystring —
+ * it reads request.GET.get(QS_QUERY, "") and parses THAT as a nested query
+ * string (QS_QUERY = "query"). So the URL has to carry
+ * ?query=next%3D<url-encoded-authorize-url>, not a bare ?next=. Confirmed
+ * directly against a live flow executor call: with the query= wrapper, the
+ * flow's own response (cancel_url) correctly echoed the full next value
+ * back; without it, next was silently dropped every time.
  */
 
-const ALLOWED_PROVIDERS = new Set(["google", "github"]);
+const PROVIDER_FLOW: Record<string, string> = {
+  google: "cig-google-login",
+  github: "cig-github-login",
+};
 
 const PKCE_VERIFIER_COOKIE = "cig_pkce_verifier";
 const PKCE_STATE_COOKIE = "cig_pkce_state";
@@ -42,7 +51,7 @@ export async function GET(
 ) {
   const { provider } = await params;
 
-  if (!ALLOWED_PROVIDERS.has(provider)) {
+  if (!(provider in PROVIDER_FLOW)) {
     return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
   }
 
@@ -59,19 +68,24 @@ export async function GET(
   const authentikUrl = process.env.NEXT_PUBLIC_AUTHENTIK_URL ?? "https://auth.cig.technology";
   const authBase = authentikUrl.replace(/\/$/, "");
   const authorizePath = `${authBase}/application/o/authorize/`;
-  const sourceLoginUrl = new URL(`/source/oauth/login/${provider}/`, authBase);
-  const dashboardUrl = resolveDashboardUrl({
-    hostname: req.nextUrl.hostname,
-    protocol: req.nextUrl.protocol,
-  });
-  sourceLoginUrl.searchParams.set("next", buildAuthorizeUrl(authorizePath, {
+  const authorizeUrl = buildAuthorizeUrl(authorizePath, {
     clientId,
     redirectUri,
     state,
     codeChallenge,
-  }));
+  });
 
-  const response = NextResponse.redirect(sourceLoginUrl, 302);
+  const dashboardUrl = resolveDashboardUrl({
+    hostname: req.nextUrl.hostname,
+    protocol: req.nextUrl.protocol,
+  });
+
+  const flowUrl = new URL(`/if/flow/${PROVIDER_FLOW[provider]}/`, authBase);
+  // Authentik's flow executor only honors `next` when wrapped: it reads
+  // request.GET["query"] and re-parses that as a nested query string.
+  flowUrl.searchParams.set("query", new URLSearchParams({ next: authorizeUrl }).toString());
+
+  const response = NextResponse.redirect(flowUrl, 302);
   setPkceCookies(response, dashboardUrl.startsWith("https://"), {
     verifier: codeVerifier,
     state,
