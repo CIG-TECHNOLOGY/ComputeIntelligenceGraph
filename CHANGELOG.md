@@ -1,3 +1,25 @@
+## [1.0.19](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.18...v1.0.19) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** silently complete OIDC handshake when Authentik already has a session ([26e5d70](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/26e5d7031de81ca6c3abfc5a1a85b7dba32f15fb))
+
+
+
+
+
+## [1.0.19](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.18...v1.0.19) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** silently complete OIDC handshake when Authentik already has a session ([26e5d70](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/26e5d7031de81ca6c3abfc5a1a85b7dba32f15fb))
+
+
+
+
+
 ## [1.0.18](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.17...v1.0.18) (2026-08-08)
 
 

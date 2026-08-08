@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.18-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.19-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.18)
+## 📋 Latest Changes (v1.0.19)
 
 ### Bug Fixes
 
-* **auth:** route through Authentik flow with wrapped next, not source-login directly ([f744ffc](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f744ffc443c784f35f010d0f47b77529c2819c15))
+* **auth:** silently complete OIDC handshake when Authentik already has a session ([26e5d70](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/26e5d7031de81ca6c3abfc5a1a85b7dba32f15fb))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
