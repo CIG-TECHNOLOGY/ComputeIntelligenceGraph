@@ -7,14 +7,22 @@ import { resolveDashboardUrl } from "../../../../lib/siteUrl";
  * Server-side relay that:
  *   1. Persists the PKCE verifier/state/provider in short-lived cookies on the
  *      dashboard origin, so the Authentik callback can complete the exchange.
- *   2. Redirects the browser directly to Authentik's source-login endpoint
- *      (/source/oauth/login/<provider>/), bypassing the flow executor SPA.
- *      cig-google-login/cig-github-login are single-stage RedirectStage flows
- *      that just forward to this same URL — hitting it directly skips the
- *      flow-executor's render/fetch/redirect round trip and its visible flash.
+ *   2. Redirects through Authentik's logout flow first, then to its
+ *      source-login endpoint (/source/oauth/login/<provider>/).
  *
- * This removes the previous interstitial relay page. The browser now sees a
- * real HTTP redirect instead of a rendered "redirecting" screen.
+ * The logout hop matters: Authentik's built-in default-source-authentication
+ * flow (which processes the Google/GitHub callback) has
+ * authentication=require_unauthenticated. Any existing Authentik session in
+ * the browser — an admin session, a leftover session from a previous
+ * attempt, anything — makes that flow reject with "Flow does not apply to
+ * current user" before the social login can even complete. Forcing a logout
+ * first guarantees the precondition is met on every attempt, for every user,
+ * not just in an incognito window.
+ *
+ * cig-google-login/cig-github-login are single-stage RedirectStage flows
+ * that just forward to /source/oauth/login/<provider>/ — hitting it directly
+ * (via the logout flow's `next`) skips the flow-executor's render/fetch/
+ * redirect round trip for that hop and its visible flash.
  */
 
 const ALLOWED_PROVIDERS = new Set(["google", "github"]);
@@ -59,7 +67,11 @@ export async function GET(
     codeChallenge,
   }));
 
-  const response = NextResponse.redirect(sourceLoginUrl, 302);
+  // Force a clean session before the source login — see comment above.
+  const logoutUrl = new URL("/if/flow/default-invalidation-flow/", authBase);
+  logoutUrl.searchParams.set("next", sourceLoginUrl.toString());
+
+  const response = NextResponse.redirect(logoutUrl, 302);
   setPkceCookies(response, dashboardUrl.startsWith("https://"), {
     verifier: codeVerifier,
     state,
