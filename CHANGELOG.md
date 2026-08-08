@@ -1,3 +1,25 @@
+## [1.0.17](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.16...v1.0.17) (2026-08-08)
+
+
+### Reverts
+
+* **auth:** drop forced logout, back to single-hop source-login redirect ([9c22b7a](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/9c22b7a03b8590bd1d62f9b05825b0ffe57772bf))
+
+
+
+
+
+## [1.0.17](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.16...v1.0.17) (2026-08-08)
+
+
+### Reverts
+
+* **auth:** drop forced logout, back to single-hop source-login redirect ([9c22b7a](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/9c22b7a03b8590bd1d62f9b05825b0ffe57772bf))
+
+
+
+
+
 ## [1.0.16](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.15...v1.0.16) (2026-08-08)
 
 

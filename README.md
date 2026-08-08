@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.16-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.17-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.16)
+## 📋 Latest Changes (v1.0.17)
 
-### Bug Fixes
+### Reverts
 
-* **auth:** route post-logout continuation through our own domain ([f8885c3](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/f8885c3df8f72b6e1d4b537321ddba99a8b04421))
+* **auth:** drop forced logout, back to single-hop source-login redirect ([9c22b7a](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/9c22b7a03b8590bd1d62f9b05825b0ffe57772bf))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
