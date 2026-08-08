@@ -68,8 +68,12 @@ export async function GET(
   }));
 
   // Force a clean session before the source login — see comment above.
+  // `next` must be a relative path: Authentik's invalidation flow rejects
+  // absolute URLs as an open-redirect guard and silently falls back to its
+  // own default-authentication-flow instead of erroring, which is why this
+  // was landing on Authentik's generic login form rather than Google.
   const logoutUrl = new URL("/if/flow/default-invalidation-flow/", authBase);
-  logoutUrl.searchParams.set("next", sourceLoginUrl.toString());
+  logoutUrl.searchParams.set("next", `${sourceLoginUrl.pathname}${sourceLoginUrl.search}`);
 
   const response = NextResponse.redirect(logoutUrl, 302);
   setPkceCookies(response, dashboardUrl.startsWith("https://"), {
