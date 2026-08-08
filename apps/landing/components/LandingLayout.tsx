@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { FooterBar } from "@cig/ui/components";
 import { useResolvedDocsUrl } from "@cig/ui/siteUrl.client";
 import { AuthButton } from "./AuthButton";
@@ -12,10 +12,47 @@ function cn(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * The build-time NEXT_PUBLIC_APP_VERSION is baked into index.html/JS at
+ * build time, and GitHub Pages' CDN can serve a stale cached copy of that
+ * shell for a while after a deploy (independent of browser caching — a
+ * hard refresh doesn't help). Once the page loads, though, this refetches
+ * runtime-version.json directly with cache-busting, which reliably reaches
+ * origin, so the footer self-corrects to the true current version shortly
+ * after mount rather than staying stuck on whatever was baked into the
+ * (possibly stale) HTML shell that was served.
+ */
+function useRuntimeVersion(buildTimeVersion: string): string {
+  const [version, setVersion] = useState(buildTimeVersion);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/runtime-version.json?ts=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "cache-control": "no-cache" },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { version?: string; releaseTag?: string } | null) => {
+        if (cancelled || !data) return;
+        const fresh = (data.version || data.releaseTag || "").replace(/^v/, "");
+        if (fresh) setVersion(fresh);
+      })
+      .catch(() => {
+        // Keep the build-time value if the fetch fails.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return version;
+}
+
 /* ─── Footer ──────────────────────────────────────────────────────────── */
 function Footer() {
   const t = useTranslation();
-  const version = process.env.NEXT_PUBLIC_APP_VERSION || "";
+  const buildTimeVersion = process.env.NEXT_PUBLIC_APP_VERSION || "";
+  const version = useRuntimeVersion(buildTimeVersion);
   const build = process.env.NEXT_PUBLIC_APP_BUILD || "";
   const docsUrl = useResolvedDocsUrl();
 
