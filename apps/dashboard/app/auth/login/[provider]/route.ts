@@ -43,6 +43,7 @@ const PROVIDER_FLOW: Record<string, string> = {
 const PKCE_VERIFIER_COOKIE = "cig_pkce_verifier";
 const PKCE_STATE_COOKIE = "cig_pkce_state";
 const SOCIAL_PROVIDER_COOKIE = "cig_social_provider";
+const SILENT_AUTH_ATTEMPTED_COOKIE = "cig_silent_auth_attempted";
 const PKCE_COOKIE_MAX_AGE_SECONDS = 10 * 60;
 
 export async function GET(
@@ -90,6 +91,17 @@ export async function GET(
     verifier: codeVerifier,
     state,
     provider,
+  });
+  // Clear the one-shot silent-auth-attempted marker: this is a deliberate,
+  // explicit login, so ProductionAuthGuard should get a fresh silent-auth
+  // attempt when the user lands back on the dashboard root — by then
+  // Authentik will have a real session from this login, so the retry
+  // should succeed. Without this, a flag burned by an earlier background
+  // check (before the user ever logged in) would permanently block the
+  // retry that this explicit login makes possible. See ProductionAuthGuard.tsx.
+  response.cookies.set(SILENT_AUTH_ATTEMPTED_COOKIE, "", {
+    path: "/",
+    maxAge: 0,
   });
   response.headers.set("Cache-Control", "no-store");
   response.headers.set("Pragma", "no-cache");

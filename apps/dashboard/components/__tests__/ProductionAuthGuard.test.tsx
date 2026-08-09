@@ -25,6 +25,7 @@ describe("ProductionAuthGuard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    document.cookie = "cig_silent_auth_attempted=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     mockUsePathname.mockReturnValue("/graph");
     mockUseSearchParams.mockReturnValue(new URLSearchParams("x=1"));
     Object.defineProperty(window, "location", {
@@ -66,7 +67,7 @@ describe("ProductionAuthGuard", () => {
 
   it("falls back to the sign-in redirect once silent re-auth has already been tried", async () => {
     mockGetBrowserAccessToken.mockReturnValue(null);
-    sessionStorage.setItem("cig_silent_auth_attempted", "1");
+    document.cookie = "cig_silent_auth_attempted=1; path=/";
 
     render(
       <ProductionAuthGuard>
