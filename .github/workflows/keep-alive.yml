@@ -2,8 +2,10 @@ name: keep-alive
 
 on:
   schedule:
-    # Every 3 days at 12:00 UTC — well within Supabase's 7-day inactivity pause threshold
-    - cron: '0 12 */3 * *'
+    # Daily at 12:00 UTC — the previous 3-day schedule failed silently for
+    # over a month (see below) with nobody noticing until Supabase deleted
+    # the project. Daily gives faster detection if this breaks again too.
+    - cron: '0 12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,21 +13,49 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Ping API health
+      # Primary, must-succeed step. Talks to Supabase's PostgREST API
+      # directly with a real table query — this is what actually resets
+      # Supabase's inactivity clock and prevents the free-tier project from
+      # being paused (and eventually deleted). It intentionally does NOT
+      # route through api.cig.technology: that API's ECS service normally
+      # runs at desiredCount=0 as a cost-saving measure, so the previous
+      # version of this workflow — which pinged api.cig.technology FIRST
+      # and let a curl failure there abort the job — silently skipped the
+      # actual Supabase ping on every single run for over a month, which is
+      # exactly how the Supabase project ended up deleted.
+      - name: Ping Supabase directly (prevents free-tier pause/deletion)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://api.cig.technology/api/v1/health)
-          echo "Health: $STATUS"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/newsletter_subscriptions?select=id&limit=1")
+          echo "Supabase REST ping: $STATUS"
           if [ "$STATUS" != "200" ]; then
-            echo "::warning::API health returned $STATUS"
+            echo "::error::Supabase REST ping returned $STATUS — project may be paused or deleted. Check https://supabase.com/dashboard"
+            exit 1
           fi
 
-      - name: Ping DB keep-alive (prevents Supabase free-tier pause)
+      # Informational only from here on — api.cig.technology is expected to
+      # be down/scaled-to-zero most of the time, so failures here must never
+      # block or skip the Supabase ping above.
+      - name: Ping API health (informational, non-blocking)
+        if: always()
+        continue-on-error: true
         run: |
-          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" https://api.cig.technology/api/v1/health/db)
-          echo "DB ping: $STATUS"
-          if [ "$STATUS" = "503" ]; then
-            echo "::error::Database unreachable — Supabase may be paused. Resume at https://supabase.com/dashboard"
-            exit 1
-          elif [ "$STATUS" != "200" ]; then
-            echo "::warning::DB ping returned $STATUS — API may be down"
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 15 https://api.cig.technology/api/v1/health || echo "000")
+          echo "API health: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::warning::API health returned $STATUS (expected when the API is scaled to zero)"
+          fi
+
+      - name: Ping DB via API (informational, non-blocking)
+        if: always()
+        continue-on-error: true
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 15 https://api.cig.technology/api/v1/health/db || echo "000")
+          echo "DB ping via API: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::warning::DB ping via API returned $STATUS (expected when the API is scaled to zero)"
           fi
