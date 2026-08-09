@@ -1,3 +1,25 @@
+## [1.0.20](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.19...v1.0.20) (2026-08-09)
+
+
+### Bug Fixes
+
+* **auth:** stop silent re-auth one-shot flag from blocking post-login retry ([fe726e1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fe726e124df3cf9ac80df56cd119a8985d2803e8))
+
+
+
+
+
+## [1.0.20](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.19...v1.0.20) (2026-08-09)
+
+
+### Bug Fixes
+
+* **auth:** stop silent re-auth one-shot flag from blocking post-login retry ([fe726e1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fe726e124df3cf9ac80df56cd119a8985d2803e8))
+
+
+
+
+
 ## [1.0.19](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.18...v1.0.19) (2026-08-08)
 
 
