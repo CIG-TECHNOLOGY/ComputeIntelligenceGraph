@@ -21,3 +21,14 @@ The first AWS production API rollout uses:
 This environment intentionally keeps stateful core data in Terraform while the API runtime and optional pipelines live under `@cig/infra` with SST.
 
 The primary production delivery path is the GitHub Actions workflow in `.github/workflows/deploy-api.yml`, which applies this Terraform environment, syncs runtime secrets, and then deploys the ECS/Fargate runtime from `packages/infra`.
+
+## Permanent analytics hostnames
+
+`environments/lean-prod` provisions a 60-second wildcard CNAME and a DNS-
+validated ACM wildcard certificate for `*.analytics.cig.technology`, plus the
+same pair for `*.analytics.cig.lat` when `analytics_lat_zone_id` is supplied.
+Both CNAMEs point at the canonical dashboard hostname
+(`analytics_dashboard_target`, default `app.cig.lat`). Attach the emitted
+certificate ARN to the dashboard edge HTTPS listener (or use it as the
+certificate source for the edge proxy). The application stores and validates
+aliases but never creates per-user DNS records.

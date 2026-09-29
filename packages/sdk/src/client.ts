@@ -256,9 +256,29 @@ export class CigClient {
     );
   }
 
+  setAnalyticsPublicAlias(siteId: string, alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology"): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+    return this.request<{ publicAccess: AnalyticsPublicAccess }>(
+      `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/public-alias`,
+      { method: "PUT", body: JSON.stringify({ alias, baseDomain }) },
+    );
+  }
+
+  clearAnalyticsPublicAlias(siteId: string): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+    return this.request<{ publicAccess: AnalyticsPublicAccess }>(
+      `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/public-alias`,
+      { method: "DELETE" },
+    );
+  }
+
   getPublicAnalyticsView(token: string, days = 30): Promise<AnalyticsInsightsResponse> {
     return this.request<AnalyticsInsightsResponse>(
       `/api/v1/analytics/public/${encodeURIComponent(token)}?days=${encodeURIComponent(days)}`,
+    );
+  }
+
+  getPublicAnalyticsAlias(alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology", days = 30): Promise<AnalyticsInsightsResponse> {
+    return this.request<AnalyticsInsightsResponse>(
+      `/api/v1/analytics/public-alias/${encodeURIComponent(alias)}?base=${encodeURIComponent(baseDomain)}&days=${encodeURIComponent(days)}`,
     );
   }
 

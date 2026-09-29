@@ -2,7 +2,15 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import { query, withTransaction } from '../db/client.js';
 import { createSiteId } from './site-id.js';
-import { isAllowedOrigin, normalizeDomain, type SiteInput, validateSiteInput } from './validation.js';
+import {
+  analyticsPublicAliasUrl,
+  isAllowedOrigin,
+  normalizeDomain,
+  type AnalyticsPublicBaseDomain,
+  type SiteInput,
+  validateAnalyticsPublicAlias,
+  validateSiteInput,
+} from './validation.js';
 import { getAnalyticsProvisioner, type UmamiInsights, type UmamiProvisioner } from './umami.js';
 
 export type AnalyticsSiteStatus = 'pending' | 'provisioning' | 'active' | 'failed' | 'deleting' | 'deleted';
@@ -20,6 +28,8 @@ interface SiteRow {
   public_share_enabled: boolean | number;
   public_share_paused: boolean | number;
   public_share_created_at: string | null;
+  public_share_alias: string | null;
+  public_share_base_domain: AnalyticsPublicBaseDomain | null;
   created_at: string;
   updated_at: string;
 }
@@ -47,6 +57,9 @@ export interface AnalyticsPublicAccess {
   paused: boolean;
   url?: string;
   token?: string;
+  alias?: string;
+  baseDomain?: AnalyticsPublicBaseDomain;
+  permanentUrl?: string;
 }
 
 export interface AnalyticsInsights {
@@ -81,6 +94,9 @@ export function localRealtimeFromLastEvent(
 }
 
 function toSite(row: SiteRow): PublicAnalyticsSite {
+  const permanentUrl = row.public_share_alias && row.public_share_base_domain
+    ? analyticsPublicAliasUrl(row.public_share_alias, row.public_share_base_domain)
+    : undefined;
   return {
     id: row.id,
     name: row.name,
@@ -89,7 +105,13 @@ function toSite(row: SiteRow): PublicAnalyticsSite {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     lastEventAt: row.last_event_at,
-    publicAccess: { enabled: Boolean(row.public_share_enabled), paused: Boolean(row.public_share_paused) },
+    publicAccess: {
+      enabled: Boolean(row.public_share_enabled),
+      paused: Boolean(row.public_share_paused),
+      ...(row.public_share_alias ? { alias: row.public_share_alias } : {}),
+      ...(row.public_share_base_domain ? { baseDomain: row.public_share_base_domain } : {}),
+      ...(permanentUrl ? { permanentUrl } : {}),
+    },
     ...(row.last_error_code ? { provisioningError: row.last_error_code } : {}),
   };
 }
@@ -109,7 +131,7 @@ function selectSiteColumns(alias = ''): string {
   return `${prefix}id, ${prefix}organization_id, ${prefix}name, ${prefix}domain, ${prefix}status,
             ${prefix}umami_website_id, ${prefix}last_error_code, ${prefix}last_event_at,
             ${prefix}public_share_token_hash, ${prefix}public_share_enabled, ${prefix}public_share_paused,
-            ${prefix}public_share_created_at,
+            ${prefix}public_share_created_at, ${prefix}public_share_alias, ${prefix}public_share_base_domain,
             ${prefix}created_at, ${prefix}updated_at`;
 }
 
@@ -434,7 +456,7 @@ export async function setPublicAccess(
       [paused ? 1 : 0, timestamp, siteId],
     );
     await writeAudit(site.organization_id, siteId, userId, paused ? 'public_access_paused' : 'public_access_resumed', 'success');
-    return { publicAccess: { enabled: true, paused } };
+    return { publicAccess: toSite({ ...site, public_share_enabled: true, public_share_paused: paused }).publicAccess };
   }
 
   const token = randomBytes(32).toString('base64url');
@@ -443,7 +465,58 @@ export async function setPublicAccess(
     [shareTokenHash(token), paused ? 1 : 0, timestamp, timestamp, siteId],
   );
   await writeAudit(site.organization_id, siteId, userId, paused ? 'public_access_created_paused' : 'public_access_enabled', 'success');
-  return { publicAccess: { enabled: true, paused, token, url: publicShareUrlForSite(token) } };
+  return {
+    publicAccess: {
+      ...toSite({ ...site, public_share_enabled: true, public_share_paused: paused }).publicAccess,
+      token,
+      url: publicShareUrlForSite(token),
+    },
+  };
+}
+
+export async function setPublicAlias(
+  userId: string,
+  siteId: string,
+  alias: string | null,
+  baseDomain?: string,
+): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+  const site = await findSiteForUser(userId, siteId);
+  if (!site || site.status === 'deleted') throw Object.assign(new Error('Site not found'), { statusCode: 404 });
+
+  if (alias === null || alias.trim() === '') {
+    await query(
+      `UPDATE analytics_sites SET public_share_alias = NULL, public_share_base_domain = NULL, updated_at = ? WHERE id = ?`,
+      [new Date().toISOString(), siteId],
+    );
+    await writeAudit(site.organization_id, siteId, userId, 'public_alias_removed', 'success');
+    return { publicAccess: { ...toSite(site).publicAccess, alias: undefined, baseDomain: undefined, permanentUrl: undefined } };
+  }
+
+  if (!site.public_share_token_hash) {
+    throw Object.assign(new Error('Create a public link before assigning a permanent hostname'), { statusCode: 409 });
+  }
+  const validation = validateAnalyticsPublicAlias(alias, baseDomain ?? '');
+  if (!validation.valid) throw Object.assign(new Error(validation.message), { statusCode: 400, field: validation.field });
+
+  const conflict = await query<{ id: string }>(
+    `SELECT id FROM analytics_sites
+      WHERE public_share_alias = ? AND public_share_base_domain = ? AND id <> ? AND status != 'deleted'
+      LIMIT 1`,
+    [validation.alias, validation.baseDomain, siteId],
+  );
+  if (conflict.rows[0]) throw Object.assign(new Error('That permanent hostname is already in use'), { statusCode: 409 });
+
+  await query(
+    `UPDATE analytics_sites SET public_share_alias = ?, public_share_base_domain = ?, updated_at = ? WHERE id = ?`,
+    [validation.alias, validation.baseDomain, new Date().toISOString(), siteId],
+  );
+  await writeAudit(site.organization_id, siteId, userId, 'public_alias_assigned', 'success', {
+    alias: validation.alias,
+    baseDomain: validation.baseDomain,
+  });
+  const refreshed = await findSiteForUser(userId, siteId);
+  if (!refreshed) throw new Error('Site disappeared while assigning permanent hostname');
+  return { publicAccess: refreshed ? toSite(refreshed).publicAccess : toSite(site).publicAccess };
 }
 
 async function findSiteByPublicToken(token: string): Promise<SiteRow | null> {
@@ -456,9 +529,33 @@ async function findSiteByPublicToken(token: string): Promise<SiteRow | null> {
   return result.rows[0] ?? null;
 }
 
+async function findSiteByPublicAlias(alias: string, baseDomain: string): Promise<SiteRow | null> {
+  const validation = validateAnalyticsPublicAlias(alias, baseDomain);
+  if (!validation.valid) return null;
+  const result = await query<SiteRow>(
+    `SELECT ${selectSiteColumns()} FROM analytics_sites
+      WHERE public_share_alias = ? AND public_share_base_domain = ?
+        AND public_share_enabled = TRUE AND status = 'active'
+      LIMIT 1`,
+    [validation.alias, validation.baseDomain],
+  );
+  return result.rows[0] ?? null;
+}
+
 export async function getPublicAnalyticsView(token: string, rangeDays = 30): Promise<{ site: PublicAnalyticsSite; insights: AnalyticsInsights } | null> {
   if (!token || token.length > 200) return null;
   const site = await findSiteByPublicToken(token);
+  if (!site) return null;
+  if (site.public_share_paused) {
+    throw Object.assign(new Error('Public analytics link is under maintenance'), { statusCode: 423 });
+  }
+  return { site: toSite(site), insights: await buildInsights(site, rangeDays) };
+}
+
+export async function getPublicAnalyticsAliasView(alias: string, baseDomain: string, rangeDays = 30): Promise<{ site: PublicAnalyticsSite; insights: AnalyticsInsights } | null> {
+  const validation = validateAnalyticsPublicAlias(alias, baseDomain);
+  if (!validation.valid) throw Object.assign(new Error(validation.message), { statusCode: 400, field: validation.field });
+  const site = await findSiteByPublicAlias(validation.alias, validation.baseDomain);
   if (!site) return null;
   if (site.public_share_paused) {
     throw Object.assign(new Error('Public analytics link is under maintenance'), { statusCode: 423 });

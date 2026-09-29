@@ -8,11 +8,13 @@ import {
   getSite,
   getSiteStats,
   getSiteInsights,
+  getPublicAnalyticsAliasView,
   getPublicAnalyticsView,
   getTrackerSite,
   listSites,
   provisionSite,
   reconcileSites,
+  setPublicAlias,
   setPublicAccess,
   updateSite,
 } from '../analytics/service.js';
@@ -161,12 +163,51 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     }
   });
 
+  app.put('/api/v1/analytics/sites/:siteId/public-alias', { preHandler: [authenticate] }, async (request, reply) => {
+    try {
+      const { siteId } = request.params as { siteId: string };
+      const body = (request.body ?? {}) as { alias?: string | null; baseDomain?: string };
+      return reply.send(await setPublicAlias(
+        userId(request as AuthenticatedRequest),
+        siteId,
+        body.alias === undefined ? null : body.alias,
+        body.baseDomain,
+      ));
+    } catch (error) {
+      return sendError(reply, error);
+    }
+  });
+
+  app.delete('/api/v1/analytics/sites/:siteId/public-alias', { preHandler: [authenticate] }, async (request, reply) => {
+    try {
+      const { siteId } = request.params as { siteId: string };
+      return reply.send(await setPublicAlias(userId(request as AuthenticatedRequest), siteId, null));
+    } catch (error) {
+      return sendError(reply, error);
+    }
+  });
+
   app.get('/api/v1/analytics/public/:token', async (request, reply) => {
     try {
       const { token } = request.params as { token: string };
       const days = Number((request.query as { days?: string }).days ?? 30);
       const result = await getPublicAnalyticsView(token, days);
       if (!result) return reply.status(404).send({ error: 'Public analytics link not found', statusCode: 404 });
+      return reply
+        .header('cache-control', 'private, max-age=15, stale-while-revalidate=30')
+        .send(result);
+    } catch (error) {
+      return sendError(reply, error);
+    }
+  });
+
+  app.get('/api/v1/analytics/public-alias/:alias', async (request, reply) => {
+    try {
+      const { alias } = request.params as { alias: string };
+      const query = request.query as { base?: string; days?: string };
+      const days = Number(query.days ?? 30);
+      const result = await getPublicAnalyticsAliasView(alias, query.base ?? '', days);
+      if (!result) return reply.status(404).send({ error: 'Permanent analytics link not found', statusCode: 404 });
       return reply
         .header('cache-control', 'private, max-age=15, stale-while-revalidate=30')
         .send(result);

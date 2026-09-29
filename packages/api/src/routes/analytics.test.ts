@@ -34,7 +34,8 @@ describe('analytics routes', () => {
         status TEXT NOT NULL, umami_website_id TEXT, last_error_code TEXT, idempotency_key TEXT,
         last_event_at TEXT, public_share_token_hash TEXT, public_share_enabled INTEGER NOT NULL DEFAULT 0,
         public_share_paused INTEGER NOT NULL DEFAULT 0,
-        public_share_created_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        public_share_created_at TEXT, public_share_alias TEXT, public_share_base_domain TEXT,
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL
       )
     `);
     await query('CREATE UNIQUE INDEX analytics_sites_org_domain_idx ON analytics_sites (organization_id, domain)');
@@ -229,5 +230,65 @@ describe('analytics routes', () => {
       url: `/api/v1/analytics/public/${shareToken}`,
     });
     expect(revoked.statusCode).toBe(404);
+  });
+
+  it('creates, updates, and removes a permanent signal-room hostname', async () => {
+    const token = userToken('user-a');
+    const siteId = (await app.inject({
+      method: 'GET',
+      url: '/api/v1/analytics/sites',
+      headers: { authorization: `Bearer ${token}` },
+    })).json().items[0].id as string;
+
+    await app.inject({
+      method: 'POST',
+      url: `/api/v1/analytics/sites/${siteId}/public-access`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { enabled: true },
+    });
+    const assigned = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/analytics/sites/${siteId}/public-alias`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { alias: 'hashpass-tech', baseDomain: 'analytics.cig.lat' },
+    });
+    expect(assigned.statusCode).toBe(200);
+    expect(assigned.json().publicAccess).toMatchObject({
+      alias: 'hashpass-tech',
+      baseDomain: 'analytics.cig.lat',
+      permanentUrl: 'https://hashpass-tech.analytics.cig.lat',
+    });
+
+    const publicView = await app.inject({
+      method: 'GET',
+      url: '/api/v1/analytics/public-alias/hashpass-tech?base=analytics.cig.lat',
+    });
+    expect(publicView.statusCode).toBe(200);
+    expect(publicView.json().site.publicAccess.permanentUrl).toBe('https://hashpass-tech.analytics.cig.lat');
+
+    const updated = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/analytics/sites/${siteId}/public-alias`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { alias: 'hashpass-prod', baseDomain: 'analytics.cig.technology' },
+    });
+    expect(updated.statusCode).toBe(200);
+    expect(updated.json().publicAccess.permanentUrl).toBe('https://hashpass-prod.analytics.cig.technology');
+
+    const invalid = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/analytics/sites/${siteId}/public-alias`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { alias: 'nested.room', baseDomain: 'analytics.cig.lat' },
+    });
+    expect(invalid.statusCode).toBe(400);
+
+    const removed = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/analytics/sites/${siteId}/public-alias`,
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(removed.statusCode).toBe(200);
+    expect(removed.json().publicAccess).not.toHaveProperty('permanentUrl');
   });
 });

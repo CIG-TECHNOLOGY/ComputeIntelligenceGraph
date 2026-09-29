@@ -9,6 +9,18 @@ variable "route53_zone_id" {
   type        = string
 }
 
+variable "analytics_lat_zone_id" {
+  description = "Optional Route 53 hosted zone ID for cig.lat; when set, provisions *.analytics.cig.lat"
+  type        = string
+  default     = ""
+}
+
+variable "analytics_dashboard_target" {
+  description = "Canonical dashboard hostname receiving permanent analytics aliases"
+  type        = string
+  default     = "app.cig.lat"
+}
+
 variable "api_domain" {
   description = "Public API domain"
   type        = string

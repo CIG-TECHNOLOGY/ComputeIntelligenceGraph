@@ -13,14 +13,29 @@ const PUBLIC_PATHS = [
   "/auth/login",
   "/api/auth/sync",
   "/analytics/share",
+  "/analytics/alias",
   "/runtime-version.json",
   "/sw.js",
   "/_next",
   "/favicon",
 ];
 
+function permanentAnalyticsHost(hostname: string): { alias: string; baseDomain: "analytics.cig.lat" | "analytics.cig.technology" } | null {
+  const match = hostname.toLowerCase().match(/^([a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.((?:analytics\.cig\.lat)|(?:analytics\.cig\.technology))$/);
+  if (!match) return null;
+  return { alias: match[1], baseDomain: match[2] as "analytics.cig.lat" | "analytics.cig.technology" };
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const permanentHost = permanentAnalyticsHost(request.nextUrl.hostname);
+  if (permanentHost && (pathname === "/" || pathname === "/analytics")) {
+    const rewritten = request.nextUrl.clone();
+    rewritten.pathname = `/analytics/alias/${permanentHost.alias}`;
+    rewritten.searchParams.set("base", permanentHost.baseDomain);
+    return NextResponse.rewrite(rewritten);
+  }
 
   if (pathname === "/auth/callback" && request.nextUrl.searchParams.has("code")) {
     const loginCallbackUrl = new URL("/auth/login-callback", request.url);

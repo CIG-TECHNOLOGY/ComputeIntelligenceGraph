@@ -74,6 +74,9 @@ export interface AnalyticsPublicAccess {
   enabled: boolean;
   paused: boolean;
   url?: string;
+  alias?: string;
+  baseDomain?: "analytics.cig.lat" | "analytics.cig.technology";
+  permanentUrl?: string;
   /** Returned only once when a new public link is created. */
   token?: string;
 }

@@ -6,12 +6,16 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Copy, ExternalLink, Globe2, Link2, Loader2, LockKeyhole, Radio, RotateCw, Share2, Users } from "lucide-react";
 import type { AnalyticsBreakdown, AnalyticsInsights, AnalyticsSite } from "@cig/sdk";
 import {
+  clearAnalyticsPublicAlias,
   getAnalyticsSiteInsights,
+  getPublicAnalyticsAlias,
   getPublicAnalyticsView,
+  setAnalyticsPublicAlias,
   setAnalyticsPublicAccess,
 } from "../../lib/api";
 
-type Props = { siteId?: string; publicToken?: string };
+type PublicAlias = { alias: string; baseDomain: "analytics.cig.lat" | "analytics.cig.technology" };
+type Props = { siteId?: string; publicToken?: string; publicAlias?: PublicAlias };
 
 const formatNumber = (value: number) => new Intl.NumberFormat().format(Math.max(0, Math.round(value)));
 const formatDuration = (seconds: number) => {
@@ -20,17 +24,23 @@ const formatDuration = (seconds: number) => {
   return minutes ? `${minutes}m ${Math.round(seconds % 60)}s` : `${Math.round(seconds)}s`;
 };
 
-export function AnalyticsDashboard({ siteId, publicToken }: Props) {
+export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) {
   const [days, setDays] = useState(30);
   const [copied, setCopied] = useState(false);
   const [publicLink, setPublicLink] = useState<string | null>(null);
+  const [alias, setAlias] = useState("");
+  const [baseDomain, setBaseDomain] = useState<PublicAlias["baseDomain"]>("analytics.cig.lat");
   const queryClient = useQueryClient();
   const router = useRouter();
-  const isPublic = Boolean(publicToken);
+  const isPublic = Boolean(publicToken || publicAlias);
   const insightsQuery = useQuery({
-    queryKey: ["analytics", "insights", siteId ?? publicToken, days],
-    queryFn: () => publicToken ? getPublicAnalyticsView(publicToken, days) : getAnalyticsSiteInsights(siteId!, days),
-    enabled: Boolean(publicToken || siteId),
+    queryKey: ["analytics", "insights", siteId ?? publicToken ?? `${publicAlias?.baseDomain}:${publicAlias?.alias}`, days],
+    queryFn: () => publicToken
+      ? getPublicAnalyticsView(publicToken, days)
+      : publicAlias
+        ? getPublicAnalyticsAlias(publicAlias.alias, publicAlias.baseDomain, days)
+        : getAnalyticsSiteInsights(siteId!, days),
+    enabled: Boolean(publicToken || publicAlias || siteId),
     refetchInterval: 30_000,
   });
   const publicLinkStorageKey = siteId ? `cig.analytics.public-link.${siteId}` : null;
@@ -46,8 +56,8 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
   const shareMutation = useMutation({
     mutationFn: ({ enabled, paused, rotate }: { enabled: boolean; paused?: boolean; rotate?: boolean }) => setAnalyticsPublicAccess(siteId!, enabled, paused, rotate),
     onSuccess: async (result) => {
-      if (result.publicAccess.url) {
-        const nextLink = new URL(result.publicAccess.url, window.location.origin).toString();
+      if (result.publicAccess.permanentUrl || result.publicAccess.url) {
+        const nextLink = new URL(result.publicAccess.permanentUrl ?? result.publicAccess.url!, window.location.origin).toString();
         setPublicLink(nextLink);
         if (publicLinkStorageKey) {
           try {
@@ -71,9 +81,42 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
     },
   });
 
+  const aliasMutation = useMutation({
+    mutationFn: () => setAnalyticsPublicAlias(siteId!, alias, baseDomain),
+    onSuccess: async (result) => {
+      if (result.publicAccess.permanentUrl) {
+        setPublicLink(result.publicAccess.permanentUrl);
+        if (publicLinkStorageKey) {
+          try { window.localStorage.setItem(publicLinkStorageKey, result.publicAccess.permanentUrl); } catch { /* optional browser storage */ }
+        }
+      }
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "insights", siteId] });
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "sites"] });
+    },
+  });
+  const removeAliasMutation = useMutation({
+    mutationFn: () => clearAnalyticsPublicAlias(siteId!),
+    onSuccess: async () => {
+      setAlias("");
+      setPublicLink(null);
+      if (publicLinkStorageKey) {
+        try { window.localStorage.removeItem(publicLinkStorageKey); } catch { /* optional browser storage */ }
+      }
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "insights", siteId] });
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "sites"] });
+    },
+  });
+
   const payload = insightsQuery.data;
   const site = payload?.site;
   const insights = payload?.insights;
+  useEffect(() => {
+    const configured = site?.publicAccess;
+    if (!configured) return;
+    if (configured.permanentUrl) setPublicLink(configured.permanentUrl);
+    if (configured.alias) setAlias(configured.alias);
+    if (configured.baseDomain) setBaseDomain(configured.baseDomain);
+  }, [site?.publicAccess]);
 
   function goBackToAnalytics() {
     if (isPublic && typeof window !== "undefined" && window.history.length > 1) {
@@ -89,6 +132,8 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
+
+  const aliasIsValid = /^[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?$/i.test(alias);
 
   if (insightsQuery.isLoading) {
     return <div className="mx-auto flex min-h-[55vh] max-w-7xl items-center justify-center text-sm text-cig-muted"><Loader2 className="mr-2 size-4 animate-spin" />Loading your signal layer…</div>;
@@ -169,6 +214,23 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
           </div>
         </div>
         {publicLink && <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3"><code className="min-w-0 flex-1 truncate text-xs text-cyan-700 dark:text-cyan-200">{publicLink}</code><button type="button" onClick={copyPublicLink} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">{copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}{copied ? "Copied" : "Copy link"}</button><a href={publicLink} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">Open <ExternalLink className="size-3.5" /></a><button type="button" onClick={() => shareMutation.mutate({ enabled: false })} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10">Revoke</button></div>}
+        <div className="mt-5 rounded-xl border border-cig bg-cig/30 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><p className="text-sm font-semibold text-cig-primary">Permanent signal-room hostname</p><p className="mt-1 text-xs text-cig-secondary">Keep one readable URL even when the private share token is rotated.</p></div>
+            {site.publicAccess?.permanentUrl && <button type="button" disabled={removeAliasMutation.isPending} onClick={() => removeAliasMutation.mutate()} className="text-xs font-semibold text-red-600 hover:underline">Remove hostname</button>}
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="flex min-w-0 items-center rounded-lg border border-cig bg-cig-card px-3 text-sm focus-within:border-cyan-400">
+              <input value={alias} onChange={(event) => setAlias(event.target.value.toLowerCase().replace(/\s+/g, "-"))} placeholder="hashpass-tech" aria-label="Permanent hostname label" className="min-w-0 flex-1 bg-transparent py-2 text-cig-primary outline-none placeholder:text-cig-muted" maxLength={63} />
+              <span className="shrink-0 text-xs text-cig-muted">.{baseDomain}</span>
+            </div>
+            <button type="button" disabled={!site.publicAccess?.enabled || !aliasIsValid || aliasMutation.isPending} onClick={() => aliasMutation.mutate()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{aliasMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}{site.publicAccess?.permanentUrl ? "Update hostname" : "Create permanent link"}</button>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-cig-muted"><label className="inline-flex items-center gap-2"><span>Managed zone</span><select value={baseDomain} onChange={(event) => setBaseDomain(event.target.value as PublicAlias["baseDomain"])} className="rounded-md border border-cig bg-cig-card px-2 py-1 text-cig-secondary"><option value="analytics.cig.lat">analytics.cig.lat (default)</option><option value="analytics.cig.technology">analytics.cig.technology</option></select></label><span>One label only; letters, numbers, - and _.</span></div>
+          {!site.publicAccess?.enabled && <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">Create a public link first, then assign its permanent hostname.</p>}
+          {aliasMutation.isError && <p className="mt-2 text-xs text-red-600">{aliasMutation.error instanceof Error ? aliasMutation.error.message : "Could not assign that hostname."}</p>}
+          {removeAliasMutation.isError && <p className="mt-2 text-xs text-red-600">{removeAliasMutation.error instanceof Error ? removeAliasMutation.error.message : "Could not remove that hostname."}</p>}
+        </div>
       </section>}
     </div>
   );
