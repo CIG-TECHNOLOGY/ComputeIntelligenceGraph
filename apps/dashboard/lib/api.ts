@@ -9,6 +9,8 @@ import type {
   AnalyticsSiteListResponse,
   AnalyticsSiteResponse,
   AnalyticsStats,
+  AnalyticsInsightsResponse,
+  AnalyticsPublicAccess,
 } from "@cig/sdk";
 import { getDashboardClient } from "./cigClient";
 
@@ -63,6 +65,8 @@ export type {
   AnalyticsSiteListResponse,
   AnalyticsSiteResponse,
   AnalyticsStats,
+  AnalyticsInsightsResponse,
+  AnalyticsPublicAccess,
 } from "@cig/sdk";
 
 function getClient() {
@@ -148,6 +152,15 @@ export const deleteAnalyticsSite = (siteId: string): Promise<AnalyticsSiteRespon
 
 export const getAnalyticsSiteStats = (siteId: string): Promise<AnalyticsStats> =>
   getClient().getAnalyticsSiteStats(siteId);
+
+export const getAnalyticsSiteInsights = (siteId: string, days = 30): Promise<AnalyticsInsightsResponse> =>
+  getClient().getAnalyticsSiteInsights(siteId, days);
+
+export const setAnalyticsPublicAccess = (siteId: string, enabled: boolean): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
+  getClient().setAnalyticsPublicAccess(siteId, enabled);
+
+export const getPublicAnalyticsView = (token: string, days = 30): Promise<AnalyticsInsightsResponse> =>
+  getClient().getPublicAnalyticsView(token, days);
 
 export const triggerDiscovery = () => getClient().triggerDiscovery();
 

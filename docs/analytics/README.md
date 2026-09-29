@@ -18,7 +18,7 @@ UMAMI_API_TOKEN=<server-side API key>
 ANALYTICS_COLLECTOR_URL=https://api.example.com/api/v1/analytics/collect
 ```
 
-Apply the CIG control-plane migrations before opening the dashboard (`CIG_AUTO_MIGRATE=true` for a controlled service start, or the repository's `pnpm --filter @cig/api migrate:up` release step). Migration `009_analytics_saas.sql` is portable across the supported PostgreSQL and local SQLite modes.
+Apply the CIG control-plane migrations before opening the dashboard (`CIG_AUTO_MIGRATE=true` for a controlled service start, or the repository's `pnpm --filter @cig/api migrate:up` release step). Migrations `009_analytics_saas.sql` and `010_analytics_public_access.sql` are portable across the supported PostgreSQL and local SQLite modes.
 
 The token needs only the private Umami website create/update/delete and collection permissions described in the foundation decision record. The CIG API maps each public site ID to its internal Umami website ID and keeps that mapping out of API responses, tracker markup, browser storage, and logs.
 
@@ -28,6 +28,12 @@ The token needs only the private Umami website create/update/delete and collecti
 2. Wait for the site to reach **active**. A failed upstream provision remains visible and can be retried; retries reconcile the existing mapping before creating another website.
 3. Copy the generated HTML snippet into the customer page `<head>`, or create a Google Tag Manager **Custom HTML** tag with the same snippet and an **All Pages** trigger.
 4. Load an approved page, then refresh the dashboard. The aggregate pageview counter is the verification signal.
+
+## Detailed signal room
+
+Each active site has a standalone **signal room** at `/analytics/<site-id>` behind the normal dashboard login. It reads the server-side Umami API and presents pageviews, visitors, visit duration, a traffic series, top paths, country geography, and the realtime visitor window. The CIG API keeps the Umami website UUID and bearer token server-side; if the upstream is temporarily unavailable, the room falls back to the control-plane aggregate counters.
+
+Owners can create a read-only public room from the page. The API stores only a SHA-256 hash of the share token and supports rotation/revocation. Public URLs are `/analytics/share/<token>` and never grant tracker administration, site editing, or access to the Umami admin surface. Treat a public link as a bearer credential and revoke it when it is no longer needed. Umami also supports native share URLs and boards, but those remain an operator-only option in this deployment; the CIG room is the customer-facing boundary.
 
 The collector accepts pageviews and named custom events (`window.cigAnalytics.track("signup", { plan: "pro" })`). Payloads are size-limited and accepted only when the browser `Origin` matches the normalized site domain. `data-domains`-style client checks are not used as authorization; the API is authoritative.
 

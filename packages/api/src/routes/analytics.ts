@@ -7,10 +7,13 @@ import {
   deleteSite,
   getSite,
   getSiteStats,
+  getSiteInsights,
+  getPublicAnalyticsView,
   getTrackerSite,
   listSites,
   provisionSite,
   reconcileSites,
+  setPublicAccess,
   updateSite,
 } from '../analytics/service.js';
 import { buildTrackerScript } from '../analytics/validation.js';
@@ -133,6 +136,33 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
     const { siteId } = request.params as { siteId: string };
     const stats = await getSiteStats(userId(request as AuthenticatedRequest), siteId);
     return stats ? reply.send(stats) : reply.status(404).send({ error: 'Site not found', statusCode: 404 });
+  });
+
+  app.get('/api/v1/analytics/sites/:siteId/insights', { preHandler: [authenticate] }, async (request, reply) => {
+    const { siteId } = request.params as { siteId: string };
+    const days = Number((request.query as { days?: string }).days ?? 30);
+    const result = await getSiteInsights(userId(request as AuthenticatedRequest), siteId, days);
+    return result ? reply.send(result) : reply.status(404).send({ error: 'Site not found', statusCode: 404 });
+  });
+
+  app.post('/api/v1/analytics/sites/:siteId/public-access', { preHandler: [authenticate] }, async (request, reply) => {
+    try {
+      const { siteId } = request.params as { siteId: string };
+      const enabled = (request.body as { enabled?: boolean } | undefined)?.enabled === true;
+      return reply.send(await setPublicAccess(userId(request as AuthenticatedRequest), siteId, enabled));
+    } catch (error) {
+      return sendError(reply, error);
+    }
+  });
+
+  app.get('/api/v1/analytics/public/:token', async (request, reply) => {
+    const { token } = request.params as { token: string };
+    const days = Number((request.query as { days?: string }).days ?? 30);
+    const result = await getPublicAnalyticsView(token, days);
+    if (!result) return reply.status(404).send({ error: 'Public analytics link not found', statusCode: 404 });
+    return reply
+      .header('cache-control', 'private, max-age=15, stale-while-revalidate=30')
+      .send(result);
   });
 
   app.get('/api/v1/analytics/tracker.js', async (request, reply) => {

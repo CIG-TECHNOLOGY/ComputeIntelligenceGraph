@@ -35,4 +35,10 @@ describe("dashboard middleware", () => {
 
     expect(response.headers.get("location")).toBeNull();
   });
+
+  it("keeps public analytics share links accessible without a session", () => {
+    const response = middleware(makeRequest("https://app.cig.lat/analytics/share/share_token"));
+
+    expect(response.headers.get("location")).toBeNull();
+  });
 });

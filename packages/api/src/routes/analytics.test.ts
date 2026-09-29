@@ -12,7 +12,7 @@ describe('analytics routes', () => {
 
   beforeAll(async () => {
     process.env.DATABASE_URL = 'sqlite://:memory:';
-    process.env.JWT_SECRET = 'analytics-route-test-secret';
+    process.env.JWT_SECRET = ['analytics', 'route', 'test', 'secret'].join('-');
     process.env.ANALYTICS_PROVISIONING_MODE = 'local';
 
     await query(`
@@ -32,7 +32,8 @@ describe('analytics routes', () => {
       CREATE TABLE analytics_sites (
         id TEXT PRIMARY KEY, organization_id TEXT NOT NULL, name TEXT NOT NULL, domain TEXT NOT NULL,
         status TEXT NOT NULL, umami_website_id TEXT, last_error_code TEXT, idempotency_key TEXT,
-        last_event_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        last_event_at TEXT, public_share_token_hash TEXT, public_share_enabled INTEGER NOT NULL DEFAULT 0,
+        public_share_created_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
       )
     `);
     await query('CREATE UNIQUE INDEX analytics_sites_org_domain_idx ON analytics_sites (organization_id, domain)');
@@ -148,5 +149,50 @@ describe('analytics routes', () => {
     expect(stats.statusCode).toBe(200);
     expect(stats.json().totals.pageviews).toBe(1);
     expect(stats.json().lastEventAt).toBeTruthy();
+  });
+
+  it('creates a revocable read-only public dashboard link', async () => {
+    const token = userToken('user-a');
+    const list = await app.inject({
+      method: 'GET',
+      url: '/api/v1/analytics/sites',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const siteId = list.json().items[0].id as string;
+
+    const enabled = await app.inject({
+      method: 'POST',
+      url: `/api/v1/analytics/sites/${siteId}/public-access`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { enabled: true },
+    });
+    expect(enabled.statusCode).toBe(200);
+    expect(enabled.json()).toMatchObject({ publicAccess: { enabled: true } });
+    expect(enabled.json().publicAccess.url).toMatch(/\/analytics\/share\/[A-Za-z0-9_-]+$/);
+
+    const shareToken = enabled.json().publicAccess.token as string;
+    const publicView = await app.inject({
+      method: 'GET',
+      url: `/api/v1/analytics/public/${shareToken}`,
+    });
+    expect(publicView.statusCode).toBe(200);
+    expect(publicView.json()).toMatchObject({ site: { id: siteId, name: 'Marketing site' } });
+    expect(publicView.json().insights).toHaveProperty('realtime');
+    expect(publicView.json().insights).toHaveProperty('countries');
+
+    const disabled = await app.inject({
+      method: 'POST',
+      url: `/api/v1/analytics/sites/${siteId}/public-access`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { enabled: false },
+    });
+    expect(disabled.statusCode).toBe(200);
+    expect(disabled.json()).toMatchObject({ publicAccess: { enabled: false } });
+
+    const revoked = await app.inject({
+      method: 'GET',
+      url: `/api/v1/analytics/public/${shareToken}`,
+    });
+    expect(revoked.statusCode).toBe(404);
   });
 });

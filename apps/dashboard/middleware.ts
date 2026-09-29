@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/auth/login-callback",
   "/auth/login",
   "/api/auth/sync",
+  "/analytics/share",
   "/runtime-version.json",
   "/sw.js",
   "/_next",
@@ -30,7 +31,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Allow public paths through
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return NextResponse.next();
   }
 

@@ -67,6 +67,14 @@ export interface AnalyticsSite {
   updatedAt: string;
   lastEventAt: string | null;
   provisioningError?: string;
+  publicAccess?: AnalyticsPublicAccess;
+}
+
+export interface AnalyticsPublicAccess {
+  enabled: boolean;
+  url?: string;
+  /** Returned only once when a new public link is created. */
+  token?: string;
 }
 
 export interface AnalyticsSiteInput {
@@ -87,6 +95,38 @@ export interface AnalyticsStats {
   totals: { pageviews: number; events: number; accepted: number };
   daily: Array<{ date: string; pageviews: number; events: number }>;
   lastEventAt: string | null;
+}
+
+export interface AnalyticsBreakdown {
+  label: string;
+  value: number;
+}
+
+export interface AnalyticsInsights {
+  source: "umami" | "local";
+  generatedAt: string;
+  rangeDays: number;
+  totals: {
+    pageviews: number;
+    visitors: number;
+    visits: number;
+    bounces: number;
+    totaltime: number;
+  };
+  series: Array<{ date: string; pageviews: number; visitors: number }>;
+  countries: AnalyticsBreakdown[];
+  pages: AnalyticsBreakdown[];
+  realtime: {
+    visitors: number;
+    countries: AnalyticsBreakdown[];
+    pages: AnalyticsBreakdown[];
+    updatedAt: string;
+  };
+}
+
+export interface AnalyticsInsightsResponse {
+  site: AnalyticsSite;
+  insights: AnalyticsInsights;
 }
 
 export interface GraphStats {

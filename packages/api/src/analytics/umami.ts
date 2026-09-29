@@ -11,7 +11,40 @@ export interface UmamiProvisioner {
   updateWebsite(websiteId: string, input: UmamiWebsiteInput): Promise<void>;
   deleteWebsite(websiteId: string): Promise<void>;
   collect(websiteId: string, payload: Record<string, unknown>): Promise<void>;
+  getInsights?(websiteId: string, startAt: number, endAt: number): Promise<UmamiInsights>;
 }
+
+export interface UmamiBreakdown {
+  label: string;
+  value: number;
+}
+
+export interface UmamiInsights {
+  totals: {
+    pageviews: number;
+    visitors: number;
+    visits: number;
+    bounces: number;
+    totaltime: number;
+  };
+  series: Array<{ date: string; pageviews: number; visitors: number }>;
+  countries: UmamiBreakdown[];
+  pages: UmamiBreakdown[];
+  realtime: {
+    visitors: number;
+    countries: UmamiBreakdown[];
+    pages: UmamiBreakdown[];
+    updatedAt: string;
+  };
+}
+
+const emptyInsights = (): UmamiInsights => ({
+  totals: { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 },
+  series: [],
+  countries: [],
+  pages: [],
+  realtime: { visitors: 0, countries: [], pages: [], updatedAt: new Date().toISOString() },
+});
 
 class LocalUmamiProvisioner implements UmamiProvisioner {
   async findWebsite(input: UmamiWebsiteInput): Promise<{ websiteId: string } | null> {
@@ -36,6 +69,13 @@ class LocalUmamiProvisioner implements UmamiProvisioner {
   async collect(websiteId: string, payload: Record<string, unknown>): Promise<void> {
     void websiteId;
     void payload;
+  }
+
+  async getInsights(websiteId: string, startAt: number, endAt: number): Promise<UmamiInsights> {
+    void websiteId;
+    void startAt;
+    void endAt;
+    return emptyInsights();
   }
 }
 
@@ -66,6 +106,14 @@ class HttpUmamiProvisioner implements UmamiProvisioner {
 
     if (response.status === 204) return undefined;
     return response.json() as Promise<T>;
+  }
+
+  private async safeRequest<T>(path: string, init: RequestInit = {}): Promise<T | undefined> {
+    try {
+      return await this.request<T>(path, init);
+    } catch {
+      return undefined;
+    }
   }
 
   async createWebsite(input: UmamiWebsiteInput): Promise<{ websiteId: string }> {
@@ -104,6 +152,74 @@ class HttpUmamiProvisioner implements UmamiProvisioner {
       method: 'POST',
       body: JSON.stringify({ type: 'event', payload: { website: websiteId, ...payload } }),
     });
+  }
+
+  async getInsights(websiteId: string, startAt: number, endAt: number): Promise<UmamiInsights> {
+    const encodedId = encodeURIComponent(websiteId);
+    const range = `startAt=${startAt}&endAt=${endAt}`;
+    const [stats, pageviews, countries, pages, realtime, active] = await Promise.all([
+      this.safeRequest<Record<string, unknown>>(`/api/websites/${encodedId}/stats?${range}`),
+      this.safeRequest<unknown>(`/api/websites/${encodedId}/pageviews?${range}&unit=day`),
+      this.safeRequest<unknown>(`/api/websites/${encodedId}/metrics?${range}&type=country`),
+      this.safeRequest<unknown>(`/api/websites/${encodedId}/metrics?${range}&type=path`),
+      this.safeRequest<unknown>(`/api/realtime/${encodedId}?startAt=${endAt - 30 * 60 * 1000}&endAt=${endAt}`),
+      this.safeRequest<unknown>(`/api/websites/${encodedId}/active`),
+    ]);
+
+    const rows = (value: unknown, key?: string): Array<Record<string, unknown>> => {
+      const candidate = key && value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : value;
+      const data = candidate && typeof candidate === 'object' && !Array.isArray(candidate)
+        ? (candidate as Record<string, unknown>).data
+        : candidate;
+      if (Array.isArray(data)) {
+        return data.filter((row): row is Record<string, unknown> => Boolean(row && typeof row === 'object'));
+      }
+      if (data && typeof data === 'object') {
+        return Object.entries(data as Record<string, unknown>).map(([label, value]) => ({ label, value }));
+      }
+      return [];
+    };
+
+    const breakdown = (value: unknown): UmamiBreakdown[] => rows(value).map((row) => ({
+      label: String(row.x ?? row.name ?? row.label ?? row.country ?? 'Unknown'),
+      value: Number(row.y ?? row.value ?? row.count ?? 0),
+    })).filter((row) => Number.isFinite(row.value) && row.value > 0);
+
+    const pageviewRows = rows(pageviews, 'pageviews');
+    const realtimeRecord = realtime && typeof realtime === 'object' ? realtime as Record<string, unknown> : {};
+    const realtimeCountries = breakdown(realtimeRecord.countries);
+    const realtimePages = breakdown(realtimeRecord.pages ?? realtimeRecord.paths ?? realtimeRecord.urls);
+    const realtimeTotals = realtimeRecord.totals && typeof realtimeRecord.totals === 'object'
+      ? realtimeRecord.totals as Record<string, unknown>
+      : {};
+    const activeValue = typeof active === 'number'
+      ? active
+      : active && typeof active === 'object' && 'visitors' in active
+        ? Number((active as Record<string, unknown>).visitors)
+        : 0;
+
+    return {
+      totals: {
+        pageviews: Number(stats?.pageviews ?? 0),
+        visitors: Number(stats?.visitors ?? 0),
+        visits: Number(stats?.visits ?? 0),
+        bounces: Number(stats?.bounces ?? 0),
+        totaltime: Number(stats?.totaltime ?? 0),
+      },
+      series: pageviewRows.map((row) => ({
+        date: String(row.x ?? row.date ?? ''),
+        pageviews: Number(row.y ?? row.pageviews ?? 0),
+        visitors: Number(row.visitors ?? 0),
+      })).filter((row) => row.date),
+      countries: breakdown(countries),
+      pages: breakdown(pages),
+      realtime: {
+        visitors: Number(realtimeRecord.visitors ?? realtimeTotals.visitors ?? realtimeRecord.count ?? activeValue ?? 0),
+        countries: realtimeCountries,
+        pages: realtimePages,
+        updatedAt: new Date().toISOString(),
+      },
+    };
   }
 }
 

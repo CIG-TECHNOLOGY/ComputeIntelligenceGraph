@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { Check, Clipboard, ExternalLink, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import type { AnalyticsSite } from "@cig/sdk";
 import {
@@ -138,7 +139,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cig bg-cig-card px-4 py-3 text-xs text-cig-secondary">
                 <span>{statsQuery.data?.lastEventAt ? `Last event ${new Date(statsQuery.data.lastEventAt).toLocaleString()}` : "Waiting for the first approved-origin event"}</span>
-                <button type="button" onClick={() => statsQuery.refetch()} className="font-semibold text-cyan-600 hover:text-cyan-500 dark:text-cyan-300">Verify latest event</button>
+                <div className="flex items-center gap-3"><button type="button" onClick={() => statsQuery.refetch()} className="font-semibold text-cyan-600 hover:text-cyan-500 dark:text-cyan-300">Verify latest event</button><Link href={`/analytics/${selectedSite.id}`} className="rounded-lg bg-cyan-500 px-3 py-2 font-semibold text-slate-950 hover:bg-cyan-400">Open signal room</Link></div>
               </div>
             </div>
           )}

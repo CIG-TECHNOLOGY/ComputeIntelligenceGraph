@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import { query, withTransaction } from '../db/client.js';
 import { createSiteId } from './site-id.js';
 import { isAllowedOrigin, normalizeDomain, type SiteInput, validateSiteInput } from './validation.js';
-import { getAnalyticsProvisioner, type UmamiProvisioner } from './umami.js';
+import { getAnalyticsProvisioner, type UmamiInsights, type UmamiProvisioner } from './umami.js';
 
 export type AnalyticsSiteStatus = 'pending' | 'provisioning' | 'active' | 'failed' | 'deleting' | 'deleted';
 
@@ -16,6 +16,9 @@ interface SiteRow {
   umami_website_id: string | null;
   last_error_code: string | null;
   last_event_at: string | null;
+  public_share_token_hash: string | null;
+  public_share_enabled: boolean | number;
+  public_share_created_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +31,7 @@ export interface PublicAnalyticsSite {
   createdAt: string;
   updatedAt: string;
   lastEventAt: string | null;
+  publicAccess: AnalyticsPublicAccess;
   provisioningError?: string;
 }
 
@@ -35,6 +39,23 @@ export interface AnalyticsStats {
   totals: { pageviews: number; events: number; accepted: number };
   daily: Array<{ date: string; pageviews: number; events: number }>;
   lastEventAt: string | null;
+}
+
+export interface AnalyticsPublicAccess {
+  enabled: boolean;
+  url?: string;
+  token?: string;
+}
+
+export interface AnalyticsInsights {
+  source: 'umami' | 'local';
+  generatedAt: string;
+  rangeDays: number;
+  totals: UmamiInsights['totals'];
+  series: UmamiInsights['series'];
+  countries: UmamiInsights['countries'];
+  pages: UmamiInsights['pages'];
+  realtime: UmamiInsights['realtime'];
 }
 
 function toSite(row: SiteRow): PublicAnalyticsSite {
@@ -46,8 +67,27 @@ function toSite(row: SiteRow): PublicAnalyticsSite {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     lastEventAt: row.last_event_at,
+    publicAccess: { enabled: Boolean(row.public_share_enabled) },
     ...(row.last_error_code ? { provisioningError: row.last_error_code } : {}),
   };
+}
+
+function publicShareUrlForSite(token: string): string {
+  // Keep the API portable across local and production dashboard origins. The
+  // browser resolves this path against the origin that created the link.
+  return `/analytics/share/${encodeURIComponent(token)}`;
+}
+
+function shareTokenHash(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+function selectSiteColumns(alias = ''): string {
+  const prefix = alias ? `${alias}.` : '';
+  return `${prefix}id, ${prefix}organization_id, ${prefix}name, ${prefix}domain, ${prefix}status,
+            ${prefix}umami_website_id, ${prefix}last_error_code, ${prefix}last_event_at,
+            ${prefix}public_share_token_hash, ${prefix}public_share_enabled, ${prefix}public_share_created_at,
+            ${prefix}created_at, ${prefix}updated_at`;
 }
 
 function safeErrorCode(error: unknown): string {
@@ -94,8 +134,7 @@ export async function ensureOrganizationForUser(userId: string): Promise<{ id: s
 
 async function findSiteForUser(userId: string, siteId: string): Promise<SiteRow | null> {
   const result = await query<SiteRow>(
-    `SELECT s.id, s.organization_id, s.name, s.domain, s.status, s.umami_website_id,
-            s.last_error_code, s.last_event_at, s.created_at, s.updated_at
+    `SELECT ${selectSiteColumns('s')}
        FROM analytics_sites s
        JOIN analytics_memberships m ON m.organization_id = s.organization_id
       WHERE m.user_id = ? AND s.id = ?`,
@@ -115,8 +154,7 @@ async function writeAudit(organizationId: string, siteId: string | null, actorUs
 export async function listSites(userId: string): Promise<PublicAnalyticsSite[]> {
   const organization = await ensureOrganizationForUser(userId);
   const result = await query<SiteRow>(
-    `SELECT id, organization_id, name, domain, status, umami_website_id, last_error_code,
-            last_event_at, created_at, updated_at
+    `SELECT ${selectSiteColumns()}
        FROM analytics_sites WHERE organization_id = ? AND status != 'deleted'
       ORDER BY created_at DESC`,
     [organization.id],
@@ -141,8 +179,7 @@ export async function createSite(
   const organization = await ensureOrganizationForUser(userId);
   if (idempotencyKey) {
     const existing = await query<SiteRow>(
-      `SELECT id, organization_id, name, domain, status, umami_website_id, last_error_code,
-              last_event_at, created_at, updated_at
+      `SELECT ${selectSiteColumns()}
          FROM analytics_sites WHERE organization_id = ? AND idempotency_key = ?`,
       [organization.id, idempotencyKey.slice(0, 200)],
     );
@@ -279,6 +316,101 @@ export async function getSiteStats(userId: string, siteId: string): Promise<Anal
   };
 }
 
+async function buildInsights(site: SiteRow, rangeDays: number): Promise<AnalyticsInsights> {
+  const safeDays = Math.min(90, Math.max(1, Math.floor(rangeDays) || 30));
+  const endAt = Date.now();
+  const startAt = endAt - safeDays * 24 * 60 * 60 * 1000;
+  const localSince = new Date(startAt).toISOString().slice(0, 10);
+  const localRows = await query<{ usage_date: string; pageviews: number; events: number }>(
+    `SELECT usage_date, pageviews, events FROM analytics_usage_daily
+      WHERE site_id = ? AND usage_date >= ? ORDER BY usage_date ASC`,
+    [site.id, localSince],
+  );
+  const localInsights: UmamiInsights = {
+    totals: {
+      pageviews: localRows.rows.reduce((sum, row) => sum + Number(row.pageviews), 0),
+      visitors: 0,
+      visits: 0,
+      bounces: 0,
+      totaltime: 0,
+    },
+    series: localRows.rows.map((row) => ({ date: row.usage_date, pageviews: Number(row.pageviews), visitors: 0 })),
+    countries: [],
+    pages: [],
+    realtime: { visitors: 0, countries: [], pages: [], updatedAt: new Date().toISOString() },
+  };
+
+  let insights = localInsights;
+  let source: AnalyticsInsights['source'] = 'local';
+  if (site.umami_website_id && !site.umami_website_id.startsWith('local_')) {
+    try {
+      const provisioner = getAnalyticsProvisioner();
+      if (provisioner.getInsights) {
+        insights = await provisioner.getInsights(site.umami_website_id, startAt, endAt);
+        source = 'umami';
+      }
+    } catch {
+      // Keep local control-plane counters available while upstream analytics recovers.
+    }
+  }
+
+  return {
+    source,
+    generatedAt: new Date().toISOString(),
+    rangeDays: safeDays,
+    ...insights,
+  };
+}
+
+export async function getSiteInsights(userId: string, siteId: string, rangeDays = 30): Promise<{ site: PublicAnalyticsSite; insights: AnalyticsInsights } | null> {
+  const site = await findSiteForUser(userId, siteId);
+  if (!site || site.status === 'deleted') return null;
+  return { site: toSite(site), insights: await buildInsights(site, rangeDays) };
+}
+
+export async function setPublicAccess(
+  userId: string,
+  siteId: string,
+  enabled: boolean,
+): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+  const site = await findSiteForUser(userId, siteId);
+  if (!site || site.status === 'deleted') throw Object.assign(new Error('Site not found'), { statusCode: 404 });
+
+  if (!enabled) {
+    await query(
+      `UPDATE analytics_sites SET public_share_token_hash = NULL, public_share_enabled = FALSE, public_share_created_at = NULL, updated_at = ? WHERE id = ?`,
+      [new Date().toISOString(), siteId],
+    );
+    await writeAudit(site.organization_id, siteId, userId, 'public_access_disabled', 'success');
+    return { publicAccess: { enabled: false } };
+  }
+
+  const token = randomBytes(32).toString('base64url');
+  await query(
+    `UPDATE analytics_sites SET public_share_token_hash = ?, public_share_enabled = TRUE, public_share_created_at = ?, updated_at = ? WHERE id = ?`,
+    [shareTokenHash(token), new Date().toISOString(), new Date().toISOString(), siteId],
+  );
+  await writeAudit(site.organization_id, siteId, userId, 'public_access_enabled', 'success');
+  return { publicAccess: { enabled: true, token, url: publicShareUrlForSite(token) } };
+}
+
+async function findSiteByPublicToken(token: string): Promise<SiteRow | null> {
+  const result = await query<SiteRow>(
+    `SELECT ${selectSiteColumns()} FROM analytics_sites
+      WHERE public_share_token_hash = ? AND public_share_enabled = TRUE AND status = 'active'
+      LIMIT 1`,
+    [shareTokenHash(token)],
+  );
+  return result.rows[0] ?? null;
+}
+
+export async function getPublicAnalyticsView(token: string, rangeDays = 30): Promise<{ site: PublicAnalyticsSite; insights: AnalyticsInsights } | null> {
+  if (!token || token.length > 200) return null;
+  const site = await findSiteByPublicToken(token);
+  if (!site) return null;
+  return { site: toSite(site), insights: await buildInsights(site, rangeDays) };
+}
+
 export async function collectEvent(
   siteId: string,
   origin: string | undefined,
@@ -286,8 +418,7 @@ export async function collectEvent(
   provisioner?: UmamiProvisioner,
 ): Promise<{ organizationId: string }> {
   const result = await query<SiteRow>(
-    `SELECT id, organization_id, name, domain, status, umami_website_id, last_error_code,
-            last_event_at, created_at, updated_at FROM analytics_sites WHERE id = ?`,
+      `SELECT ${selectSiteColumns()} FROM analytics_sites WHERE id = ?`,
     [siteId],
   );
   const site = result.rows[0];
@@ -347,8 +478,7 @@ export async function collectEvent(
 
 export async function getTrackerSite(siteId: string): Promise<SiteRow | null> {
   const result = await query<SiteRow>(
-    `SELECT id, organization_id, name, domain, status, umami_website_id, last_error_code,
-            last_event_at, created_at, updated_at FROM analytics_sites WHERE id = ?`,
+    `SELECT ${selectSiteColumns()} FROM analytics_sites WHERE id = ?`,
     [siteId],
   );
   const site = result.rows[0] ?? null;

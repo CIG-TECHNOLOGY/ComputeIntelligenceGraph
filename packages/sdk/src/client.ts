@@ -33,6 +33,8 @@ import type {
   AnalyticsSiteListResponse,
   AnalyticsSiteResponse,
   AnalyticsStats,
+  AnalyticsInsightsResponse,
+  AnalyticsPublicAccess,
 } from "./types";
 
 // Fetch API types for environments where lib "DOM" is not present (e.g. Node-only consumers).
@@ -225,6 +227,25 @@ export class CigClient {
 
   getAnalyticsSiteStats(siteId: string): Promise<AnalyticsStats> {
     return this.request<AnalyticsStats>(`/api/v1/analytics/sites/${encodeURIComponent(siteId)}/stats`);
+  }
+
+  getAnalyticsSiteInsights(siteId: string, days = 30): Promise<AnalyticsInsightsResponse> {
+    return this.request<AnalyticsInsightsResponse>(
+      `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/insights?days=${encodeURIComponent(days)}`,
+    );
+  }
+
+  setAnalyticsPublicAccess(siteId: string, enabled: boolean): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+    return this.request<{ publicAccess: AnalyticsPublicAccess }>(
+      `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/public-access`,
+      { method: "POST", body: JSON.stringify({ enabled }) },
+    );
+  }
+
+  getPublicAnalyticsView(token: string, days = 30): Promise<AnalyticsInsightsResponse> {
+    return this.request<AnalyticsInsightsResponse>(
+      `/api/v1/analytics/public/${encodeURIComponent(token)}?days=${encodeURIComponent(days)}`,
+    );
   }
 
   triggerDiscovery(): Promise<{ message: string }> {
