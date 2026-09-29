@@ -381,7 +381,12 @@ jobs:
     name: Apply API core-data infrastructure
     runs-on: ubuntu-latest
     needs: [detect-api-impact, build-image]
-    if: ${{ inputs.dry_run != true }}
+    # A workflow dispatch can promote an already-built runtime image without
+    # requiring Terraform access to unrelated long-lived core-data resources.
+    # Push/tag releases keep the historical apply behavior; operators can opt
+    # out for a runtime-only recovery when the infrastructure role is scoped
+    # away from those resources.
+    if: ${{ inputs.dry_run != true && (github.event_name != 'workflow_dispatch' || inputs.apply_core_data == true) }}
     permissions:
       contents: read
       id-token: write
