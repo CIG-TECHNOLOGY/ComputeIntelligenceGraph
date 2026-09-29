@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Check, Clipboard, ExternalLink, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
-import type { AnalyticsSite } from "@cig/sdk";
+import type { AnalyticsBreakdown, AnalyticsSite } from "@cig/sdk";
 import {
   createAnalyticsSite,
   deleteAnalyticsSite,
@@ -27,6 +27,12 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat().format(value);
 }
 
+function mergeBreakdowns(items: AnalyticsBreakdown[]): AnalyticsBreakdown[] {
+  const merged = new Map<string, number>();
+  for (const item of items) merged.set(item.label, (merged.get(item.label) ?? 0) + item.value);
+  return [...merged.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+}
+
 export default function AnalyticsPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -43,6 +49,47 @@ export default function AnalyticsPage() {
 
   const sitesQuery = useQuery({ queryKey: ["analytics", "sites"], queryFn: listAnalyticsSites });
   const sites = useMemo(() => sitesQuery.data?.items ?? [], [sitesQuery.data?.items]);
+  const activeSites = useMemo(() => sites.filter((site) => site.status === "active"), [sites]);
+  const siteInsightsQueries = useQueries({
+    queries: activeSites.map((site) => ({
+      queryKey: ["analytics", "workspace-insights", site.id, 30],
+      queryFn: () => getAnalyticsSiteInsights(site.id, 30),
+      enabled: sitesQuery.isSuccess,
+      refetchInterval: 30_000,
+      staleTime: 15_000,
+    })),
+  });
+  const siteStatsQueries = useQueries({
+    queries: activeSites.map((site) => ({
+      queryKey: ["analytics", "workspace-stats", site.id],
+      queryFn: () => getAnalyticsSiteStats(site.id),
+      enabled: sitesQuery.isSuccess,
+      refetchInterval: 30_000,
+      staleTime: 15_000,
+    })),
+  });
+  const workspaceSummary = useMemo(() => {
+    const rows = activeSites.flatMap((site, index) => {
+      const insights = siteInsightsQueries[index]?.data?.insights;
+      const stats = siteStatsQueries[index]?.data;
+      return insights ? [{ site, insights, stats }] : [];
+    });
+    const pages = rows.flatMap(({ site, insights }) => insights.pages.map((page) => ({ ...page, site: site.domain })));
+    return {
+      loaded: rows.length > 0,
+      loading: activeSites.length > 0 && siteInsightsQueries.some((query) => query.isLoading),
+      failed: siteInsightsQueries.filter((query) => query.isError).length + siteStatsQueries.filter((query) => query.isError).length,
+      pageviews: rows.reduce((sum, row) => sum + row.insights.totals.pageviews, 0),
+      visitors: rows.reduce((sum, row) => sum + row.insights.totals.visitors, 0),
+      visits: rows.reduce((sum, row) => sum + row.insights.totals.visits, 0),
+      events: rows.reduce((sum, row) => sum + (row.stats?.totals.events ?? 0), 0),
+      accepted: rows.reduce((sum, row) => sum + (row.stats?.totals.accepted ?? 0), 0),
+      pagesTracked: new Set(pages.map((page) => `${page.site}:${page.label}`)).size,
+      liveVisitors: rows.reduce((sum, row) => sum + row.insights.realtime.visitors, 0),
+      topPages: pages.sort((a, b) => b.value - a.value).slice(0, 6),
+      topCountries: mergeBreakdowns(rows.flatMap((row) => row.insights.countries)).slice(0, 6),
+    };
+  }, [activeSites, siteInsightsQueries, siteStatsQueries]);
   const selectedSite = sites.find((site) => site.id === selectedId) ?? sites[0] ?? null;
   const statsQuery = useQuery({
     queryKey: ["analytics", "stats", selectedSite?.id],
@@ -149,6 +196,37 @@ export default function AnalyticsPage() {
         <p>{formatDashboardApiError(sitesQuery.error instanceof Error ? sitesQuery.error : {}, "analytics")}</p>
         <button type="button" onClick={() => void sitesQuery.refetch()} className="mt-2 font-semibold underline underline-offset-2">Retry loading analytics</button>
       </div>}
+
+      {activeSites.length > 0 && <section className="rounded-2xl border border-cyan-400/20 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,.10),transparent_42%),var(--cig-bg-card)] p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-cyan-600 dark:text-cyan-300">Workspace summary</p>
+            <h2 className="mt-1 text-xl font-semibold text-cig-primary">All sites, one signal</h2>
+            <p className="mt-1 text-sm text-cig-secondary">Combined 30-day performance across your {activeSites.length} active {activeSites.length === 1 ? "site" : "sites"}.</p>
+          </div>
+          {workspaceSummary.loading && <span className="inline-flex items-center gap-2 text-xs text-cig-muted"><Loader2 className="size-3.5 animate-spin" />Refreshing summary</span>}
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-7">
+          <Metric label="Pageviews" value={formatNumber(workspaceSummary.pageviews)} />
+          <Metric label="Visitors" value={formatNumber(workspaceSummary.visitors)} />
+          <Metric label="Visits" value={formatNumber(workspaceSummary.visits)} />
+          <Metric label="Events" value={formatNumber(workspaceSummary.events)} />
+          <Metric label="Accepted" value={formatNumber(workspaceSummary.accepted)} />
+          <Metric label="Pages tracked" value={formatNumber(workspaceSummary.pagesTracked)} />
+          <Metric label="Live now" value={formatNumber(workspaceSummary.liveVisitors)} />
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,.8fr)]">
+          <div className="rounded-xl border border-cig bg-cig-card p-4">
+            <div className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold text-cig-primary">Most visited pages</h3><span className="text-[10px] uppercase tracking-[.16em] text-cig-muted">all sites</span></div>
+            <div className="mt-3 space-y-2">{workspaceSummary.topPages.length ? workspaceSummary.topPages.map((page, index) => <div key={`${page.site}-${page.label}`} className="flex items-center gap-3 text-xs"><span className="w-4 text-cig-muted">{index + 1}</span><span className="min-w-0 flex-1 truncate text-cig-secondary" title={`${page.label} · ${page.site}`}>{page.label}<span className="ml-2 text-[10px] text-cig-muted">{page.site}</span></span><span className="font-semibold text-cig-primary">{formatNumber(page.value)}</span></div>) : <p className="text-xs text-cig-muted">Page rankings appear after the first verified pageview.</p>}</div>
+          </div>
+          <div className="rounded-xl border border-cig bg-cig-card p-4">
+            <div className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold text-cig-primary">Audience countries</h3><span className="text-[10px] uppercase tracking-[.16em] text-cig-muted">30 days</span></div>
+            <div className="mt-3 space-y-2">{workspaceSummary.topCountries.length ? workspaceSummary.topCountries.map((country) => <div key={country.label} className="flex items-center justify-between gap-3 text-xs"><span className="truncate text-cig-secondary">{country.label}</span><span className="font-semibold text-cig-primary">{formatNumber(country.value)}</span></div>) : <p className="text-xs text-cig-muted">Country data appears when geo-enriched events arrive.</p>}</div>
+          </div>
+        </div>
+        {workspaceSummary.failed > 0 && <p className="mt-3 text-xs text-amber-700 dark:text-amber-300">Some site metrics could not be refreshed; totals include the sites that responded.</p>}
+      </section>}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-4">

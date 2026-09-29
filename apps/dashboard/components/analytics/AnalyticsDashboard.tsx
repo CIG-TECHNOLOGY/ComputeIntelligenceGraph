@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, ExternalLink, Globe2, Link2, Loader2, LockKeyhole, Radio, RotateCw, Share2, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Check, Copy, ExternalLink, Globe2, Link2, Loader2, LockKeyhole, Radio, RotateCw, Share2, Users } from "lucide-react";
 import type { AnalyticsBreakdown, AnalyticsInsights, AnalyticsSite } from "@cig/sdk";
 import {
   getAnalyticsSiteInsights,
@@ -24,6 +25,7 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
   const [copied, setCopied] = useState(false);
   const [publicLink, setPublicLink] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
   const isPublic = Boolean(publicToken);
   const insightsQuery = useQuery({
     queryKey: ["analytics", "insights", siteId ?? publicToken, days],
@@ -31,10 +33,39 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
     enabled: Boolean(publicToken || siteId),
     refetchInterval: 30_000,
   });
+  const publicLinkStorageKey = siteId ? `cig.analytics.public-link.${siteId}` : null;
+  useEffect(() => {
+    if (!publicLinkStorageKey) return;
+    try {
+      const stored = window.localStorage.getItem(publicLinkStorageKey);
+      if (stored) setPublicLink(stored);
+    } catch {
+      // Storage can be unavailable in privacy-restricted browsers.
+    }
+  }, [publicLinkStorageKey]);
   const shareMutation = useMutation({
     mutationFn: ({ enabled, paused, rotate }: { enabled: boolean; paused?: boolean; rotate?: boolean }) => setAnalyticsPublicAccess(siteId!, enabled, paused, rotate),
     onSuccess: async (result) => {
-      setPublicLink(result.publicAccess.url ? new URL(result.publicAccess.url, window.location.origin).toString() : null);
+      if (result.publicAccess.url) {
+        const nextLink = new URL(result.publicAccess.url, window.location.origin).toString();
+        setPublicLink(nextLink);
+        if (publicLinkStorageKey) {
+          try {
+            window.localStorage.setItem(publicLinkStorageKey, nextLink);
+          } catch {
+            // Storage can be unavailable in privacy-restricted browsers.
+          }
+        }
+      } else if (!result.publicAccess.enabled) {
+        setPublicLink(null);
+        if (publicLinkStorageKey) {
+          try {
+            window.localStorage.removeItem(publicLinkStorageKey);
+          } catch {
+            // Storage can be unavailable in privacy-restricted browsers.
+          }
+        }
+      }
       await queryClient.invalidateQueries({ queryKey: ["analytics", "sites"] });
       await queryClient.invalidateQueries({ queryKey: ["analytics", "insights", siteId] });
     },
@@ -43,6 +74,14 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
   const payload = insightsQuery.data;
   const site = payload?.site;
   const insights = payload?.insights;
+
+  function goBackToAnalytics() {
+    if (isPublic && typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push("/analytics");
+  }
 
   async function copyPublicLink() {
     if (!publicLink) return;
@@ -68,6 +107,7 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
         <div className="pointer-events-none absolute -bottom-32 left-1/3 size-80 rounded-full bg-orange-400/10 blur-3xl" />
         <div className="relative flex flex-wrap items-start justify-between gap-5">
           <div>
+            <button type="button" onClick={goBackToAnalytics} className="mb-5 inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/[.05] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10" aria-label="Back to analytics sites"><ArrowLeft className="size-3.5" />Back to Analytics</button>
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.28em] text-cyan-300"><span className="size-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.9)]" />CIG signal room</div>
             <h1 className="mt-3 text-3xl font-semibold tracking-[-.03em] sm:text-4xl">{site.name}</h1>
             <p className="mt-2 text-sm text-slate-300">{site.domain} · {isPublic ? "read-only public view" : "private workspace"}</p>
@@ -116,7 +156,7 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
-        <WorldMap countries={insights.countries} />
+        <WorldMap countries={insights.countries} realtimeCountries={insights.realtime.countries} />
         <BreakdownCard title="Most visited paths" icon={<Link2 className="size-4" />} items={insights.pages} empty="Pages appear after the first verified pageview." />
       </section>
 
@@ -161,11 +201,65 @@ function MiniList({ title, items, empty }: { title: string; items: AnalyticsBrea
   return <div><div className="mb-2 flex items-center justify-between"><p className="text-xs font-semibold text-cig-primary">{title}</p><span className="text-[10px] text-cig-muted">live</span></div>{items.length ? <div className="space-y-2">{items.slice(0, 4).map((item) => <div key={`${title}-${item.label}`} className="flex items-center justify-between gap-3 text-xs"><span className="truncate text-cig-secondary">{item.label}</span><span className="font-semibold text-cig-primary">{formatNumber(item.value)}</span></div>)}</div> : <p className="text-xs text-cig-muted">{empty}</p>}</div>;
 }
 
-const COUNTRY_POINTS: Record<string, [number, number]> = { US: [23, 35], CA: [22, 21], MX: [25, 47], BR: [36, 68], CO: [29, 57], AR: [34, 82], GB: [49, 27], FR: [51, 35], DE: [54, 30], ES: [49, 41], NG: [51, 60], ZA: [55, 79], IN: [69, 54], CN: [77, 42], JP: [87, 46], AU: [84, 82] };
+const COUNTRY_POINTS: Record<string, [number, number]> = {
+  US: [23, 35], CA: [22, 21], MX: [25, 47], GT: [28, 52], CO: [29, 57], BR: [36, 68], PE: [31, 64], CL: [32, 78], AR: [34, 82],
+  GB: [49, 27], IE: [47, 27], FR: [51, 35], ES: [49, 41], PT: [47, 41], DE: [54, 30], IT: [55, 40], NL: [53, 27],
+  NG: [51, 60], EG: [57, 48], KE: [58, 67], ZA: [55, 79], IN: [69, 54], PK: [66, 50], CN: [77, 42], JP: [87, 46], KR: [84, 43],
+  SG: [76, 67], AU: [84, 82], NZ: [91, 88],
+};
 
-function WorldMap({ countries }: { countries: AnalyticsBreakdown[] }) {
+const COUNTRY_ALIASES: Record<string, string> = {
+  "UNITED STATES": "US", "UNITED STATES OF AMERICA": "US", "USA": "US", "UNITED KINGDOM": "GB", "GREAT BRITAIN": "GB",
+  CANADA: "CA", MEXICO: "MX", COLOMBIA: "CO", BRAZIL: "BR", ARGENTINA: "AR", CHILE: "CL", PERU: "PE", FRANCE: "FR", GERMANY: "DE",
+  SPAIN: "ES", ITALY: "IT", NETHERLANDS: "NL", NIGERIA: "NG", EGYPT: "EG", KENYA: "KE", "SOUTH AFRICA": "ZA", INDIA: "IN",
+  PAKISTAN: "PK", CHINA: "CN", JAPAN: "JP", "SOUTH KOREA": "KR", SINGAPORE: "SG", AUSTRALIA: "AU", "NEW ZEALAND": "NZ",
+};
+
+function countryPoint(label: string): [number, number] {
+  const normalized = label.trim().toUpperCase();
+  const code = normalized.length === 2 ? normalized : COUNTRY_ALIASES[normalized];
+  if (code && COUNTRY_POINTS[code]) return COUNTRY_POINTS[code];
+  let hash = 0;
+  for (const character of normalized) hash = (hash * 31 + character.charCodeAt(0)) % 10_000;
+  return [12 + (hash % 76), 20 + ((hash * 17) % 62)];
+}
+
+function WorldMap({ countries, realtimeCountries }: { countries: AnalyticsBreakdown[]; realtimeCountries: AnalyticsBreakdown[] }) {
   const total = countries.reduce((sum, item) => sum + item.value, 0);
-  return <div className="rounded-2xl border border-cig bg-cig-card p-5 sm:p-6"><SectionHeading icon={<Globe2 className="size-4" />} eyebrow="Audience geography" title="Where the signal is coming from" detail={total ? `${formatNumber(total)} mapped views` : "Country data appears when Umami receives a geo-enriched event"} /><div className="mt-5 overflow-hidden rounded-xl border border-cig bg-[#07111d] p-2"><svg viewBox="0 0 100 100" className="h-64 w-full" role="img" aria-label="Audience map"><defs><pattern id="map-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#7dd3fc" strokeOpacity=".08" strokeWidth=".2" /></pattern><filter id="map-glow"><feGaussianBlur stdDeviation="1.8" /></filter></defs><rect width="100" height="100" fill="url(#map-grid)" /><path d="M8 25 17 16 29 18 36 30 30 41 22 44 20 55 14 51 11 39 4 36Z" fill="#164e63" fillOpacity=".42" /><path d="m32 51 8 5 5 10-6 14-5 13-5-14 2-12-5-9Z" fill="#164e63" fillOpacity=".42" /><path d="m45 23 12-5 8 4 2 11-8 4-3 11-6-4-4-10-6-5Z" fill="#164e63" fillOpacity=".42" /><path d="m59 39 9-4 11 5 8 10-7 9-8-2-7 5-4-10-8-4Z" fill="#164e63" fillOpacity=".42" /><path d="m77 72 12 3 5 8-10 7-12-4Z" fill="#164e63" fillOpacity=".42" />{countries.map((country) => { const code = country.label.toUpperCase().slice(0, 2); const [x, y] = COUNTRY_POINTS[code] ?? [12 + ((country.label.length * 13) % 76), 20 + ((country.label.length * 17) % 62)]; const size = 1.4 + (country.value / Math.max(...countries.map((item) => item.value), 1)) * 3.8; return <g key={country.label}><circle cx={x} cy={y} r={size * 2} fill="#22d3ee" fillOpacity=".12" filter="url(#map-glow)" /><circle cx={x} cy={y} r={size} fill="#67e8f9" /><title>{country.label}: {formatNumber(country.value)}</title></g>; })}</svg></div><div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-3">{countries.slice(0, 6).map((country) => <div key={country.label} className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-cig-secondary">{country.label}</span><span className="font-semibold text-cig-primary">{formatNumber(country.value)}</span></div>)}</div></div>;
+  const liveTotal = realtimeCountries.reduce((sum, item) => sum + item.value, 0);
+  const maxValue = Math.max(...countries.map((item) => item.value), 1);
+  const maxLiveValue = Math.max(...realtimeCountries.map((item) => item.value), 1);
+  const hasSignals = countries.length > 0 || realtimeCountries.length > 0;
+  return <div className="rounded-2xl border border-cig bg-cig-card p-5 sm:p-6">
+    <SectionHeading icon={<Globe2 className="size-4" />} eyebrow="Audience geography" title="Where the signal is coming from" detail={liveTotal ? `${formatNumber(liveTotal)} live country signals · ${formatNumber(total)} mapped views` : total ? `${formatNumber(total)} mapped views · live pulses appear as visitors connect` : "Waiting for geo-enriched events from the tracker"} />
+    <div className="mt-5 overflow-hidden rounded-xl border border-cig bg-[#07111d] p-2">
+      <svg viewBox="0 0 100 100" className="h-64 w-full" role="img" aria-label="Realtime audience map">
+        <defs>
+          <pattern id="map-grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#7dd3fc" strokeOpacity=".08" strokeWidth=".2" /></pattern>
+          <filter id="map-glow"><feGaussianBlur stdDeviation="1.8" /></filter>
+        </defs>
+        <rect width="100" height="100" fill="url(#map-grid)" />
+        <path d="M8 25 17 16 29 18 36 30 30 41 22 44 20 55 14 51 11 39 4 36Z" fill="#164e63" fillOpacity=".42" />
+        <path d="m32 51 8 5 5 10-6 14-5 13-5-14 2-12-5-9Z" fill="#164e63" fillOpacity=".42" />
+        <path d="m45 23 12-5 8 4 2 11-8 4-3 11-6-4-4-10-6-5Z" fill="#164e63" fillOpacity=".42" />
+        <path d="m59 39 9-4 11 5 8 10-7 9-8-2-7 5-4-10-8-4Z" fill="#164e63" fillOpacity=".42" />
+        <path d="m77 72 12 3 5 8-10 7-12-4Z" fill="#164e63" fillOpacity=".42" />
+        {countries.map((country) => {
+          const [x, y] = countryPoint(country.label);
+          const size = 1.1 + (country.value / maxValue) * 2.7;
+          return <g key={`history-${country.label}`} opacity=".62"><circle cx={x} cy={y} r={size * 2} fill="#22d3ee" fillOpacity=".08" filter="url(#map-glow)" /><circle cx={x} cy={y} r={size} fill="#38bdf8" fillOpacity=".7" /><title>{country.label}: {formatNumber(country.value)} mapped views</title></g>;
+        })}
+        {realtimeCountries.map((country) => {
+          const [x, y] = countryPoint(country.label);
+          const size = 1.8 + (country.value / maxLiveValue) * 3.2;
+          return <g key={`live-${country.label}`}><circle cx={x} cy={y} r={size * 2.4} fill="#22d3ee" fillOpacity=".11" filter="url(#map-glow)" /><circle cx={x} cy={y} r={size * 1.6} fill="none" stroke="#67e8f9" strokeOpacity=".45" strokeWidth=".45"><animate attributeName="r" values={`${size * 1.2};${size * 2.4};${size * 1.2}`} dur="2.2s" repeatCount="indefinite" /></circle><circle cx={x} cy={y} r={size} fill="#a5f3fc" stroke="#22d3ee" strokeWidth=".45" /><title>{country.label}: {formatNumber(country.value)} live visitors</title></g>;
+        })}
+        {!hasSignals && <text x="50" y="53" textAnchor="middle" fill="#94a3b8" fontSize="3.5">Waiting for the first geo-enriched event</text>}
+      </svg>
+    </div>
+    <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-semibold uppercase tracking-[.14em] text-cig-muted"><span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full bg-cyan-200 ring-2 ring-cyan-400/30" />Live now</span><span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full bg-sky-400/70" />Selected range</span><span className="ml-auto normal-case tracking-normal">Country-level location only</span></div>
+    <div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-2 sm:grid-cols-3">{[...realtimeCountries, ...countries.filter((country) => !realtimeCountries.some((live) => live.label === country.label))].slice(0, 6).map((country) => <div key={country.label} className="flex items-center justify-between gap-2 text-xs"><span className="truncate text-cig-secondary">{country.label}</span><span className="font-semibold text-cig-primary">{formatNumber(country.value)}</span></div>)}</div>
+  </div>;
 }
 
 function BreakdownCard({ title, icon, items, empty }: { title: string; icon: React.ReactNode; items: AnalyticsBreakdown[]; empty: string }) {
