@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Copy, ExternalLink, Globe2, Link2, Loader2, LockKeyhole, Radio, RotateCw, Share2, Users } from "lucide-react";
@@ -16,6 +16,16 @@ import {
 
 type PublicAlias = { alias: string; baseDomain: "analytics.cig.lat" | "analytics.cig.technology" };
 type Props = { siteId?: string; publicToken?: string; publicAlias?: PublicAlias };
+type PermanentLinkStatus = "idle" | "checking" | "ready" | "timed_out";
+
+const isPermanentAnalyticsUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && /^(?:[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.(?:analytics\.cig\.lat|analytics\.cig\.technology)$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
+};
 
 const formatNumber = (value: number) => new Intl.NumberFormat().format(Math.max(0, Math.round(value)));
 const formatDuration = (seconds: number) => {
@@ -28,8 +38,12 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
   const [days, setDays] = useState(30);
   const [copied, setCopied] = useState(false);
   const [publicLink, setPublicLink] = useState<string | null>(null);
+  const [permanentLink, setPermanentLink] = useState<string | null>(null);
+  const [permanentLinkStatus, setPermanentLinkStatus] = useState<PermanentLinkStatus>("idle");
+  const [permanentLinkError, setPermanentLinkError] = useState<string | null>(null);
   const [alias, setAlias] = useState("");
   const [baseDomain, setBaseDomain] = useState<PublicAlias["baseDomain"]>("analytics.cig.lat");
+  const verificationRun = useRef(0);
   const queryClient = useQueryClient();
   const router = useRouter();
   const isPublic = Boolean(publicToken || publicAlias);
@@ -44,29 +58,69 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
     refetchInterval: 30_000,
   });
   const publicLinkStorageKey = siteId ? `cig.analytics.public-link.${siteId}` : null;
+
+  const verifyPermanentLink = useCallback((url: string) => {
+    const run = ++verificationRun.current;
+    setPermanentLink(url);
+    setPermanentLinkStatus("checking");
+    setPermanentLinkError(null);
+
+    void (async () => {
+      const deadline = Date.now() + 120_000;
+      while (run === verificationRun.current && Date.now() < deadline) {
+        try {
+          const response = await fetch(`/api/analytics/alias-readiness?url=${encodeURIComponent(url)}`, { cache: "no-store" });
+          const result = (await response.json()) as { ready?: boolean };
+          if (response.ok && result.ready) {
+            if (run !== verificationRun.current) return;
+            setPermanentLinkStatus("ready");
+            setPublicLink(url);
+            if (publicLinkStorageKey) {
+              try { window.localStorage.setItem(publicLinkStorageKey, url); } catch { /* optional browser storage */ }
+            }
+            return;
+          }
+        } catch {
+          // DNS, TLS, or the edge may still be provisioning.
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 3_000));
+      }
+
+      if (run === verificationRun.current) {
+        setPermanentLinkStatus("timed_out");
+        setPermanentLinkError("DNS or HTTPS is still provisioning. We will keep the hostname saved; try again when the edge is ready.");
+      }
+    })();
+  }, [publicLinkStorageKey]);
+
   useEffect(() => {
     if (!publicLinkStorageKey) return;
     try {
       const stored = window.localStorage.getItem(publicLinkStorageKey);
-      if (stored) setPublicLink(stored);
+      if (!stored) return;
+      if (isPermanentAnalyticsUrl(stored)) verifyPermanentLink(stored);
+      else setPublicLink(stored);
     } catch {
       // Storage can be unavailable in privacy-restricted browsers.
     }
-  }, [publicLinkStorageKey]);
+  }, [publicLinkStorageKey, verifyPermanentLink]);
   const shareMutation = useMutation({
     mutationFn: ({ enabled, paused, rotate }: { enabled: boolean; paused?: boolean; rotate?: boolean }) => setAnalyticsPublicAccess(siteId!, enabled, paused, rotate),
     onSuccess: async (result) => {
       if (result.publicAccess.permanentUrl || result.publicAccess.url) {
         const nextLink = new URL(result.publicAccess.permanentUrl ?? result.publicAccess.url!, window.location.origin).toString();
-        setPublicLink(nextLink);
-        if (publicLinkStorageKey) {
-          try {
-            window.localStorage.setItem(publicLinkStorageKey, nextLink);
-          } catch {
-            // Storage can be unavailable in privacy-restricted browsers.
+        if (result.publicAccess.permanentUrl) verifyPermanentLink(result.publicAccess.permanentUrl);
+        else {
+          setPublicLink(nextLink);
+          if (publicLinkStorageKey) {
+            try { window.localStorage.setItem(publicLinkStorageKey, nextLink); } catch { /* optional browser storage */ }
           }
         }
       } else if (!result.publicAccess.enabled) {
+        verificationRun.current += 1;
+        setPermanentLink(null);
+        setPermanentLinkStatus("idle");
+        setPermanentLinkError(null);
         setPublicLink(null);
         if (publicLinkStorageKey) {
           try {
@@ -85,10 +139,7 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
     mutationFn: () => setAnalyticsPublicAlias(siteId!, alias, baseDomain),
     onSuccess: async (result) => {
       if (result.publicAccess.permanentUrl) {
-        setPublicLink(result.publicAccess.permanentUrl);
-        if (publicLinkStorageKey) {
-          try { window.localStorage.setItem(publicLinkStorageKey, result.publicAccess.permanentUrl); } catch { /* optional browser storage */ }
-        }
+        verifyPermanentLink(result.publicAccess.permanentUrl);
       }
       await queryClient.invalidateQueries({ queryKey: ["analytics", "insights", siteId] });
       await queryClient.invalidateQueries({ queryKey: ["analytics", "sites"] });
@@ -97,7 +148,11 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
   const removeAliasMutation = useMutation({
     mutationFn: () => clearAnalyticsPublicAlias(siteId!),
     onSuccess: async () => {
+      verificationRun.current += 1;
       setAlias("");
+      setPermanentLink(null);
+      setPermanentLinkStatus("idle");
+      setPermanentLinkError(null);
       setPublicLink(null);
       if (publicLinkStorageKey) {
         try { window.localStorage.removeItem(publicLinkStorageKey); } catch { /* optional browser storage */ }
@@ -110,13 +165,14 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
   const payload = insightsQuery.data;
   const site = payload?.site;
   const insights = payload?.insights;
+  const configuredPermanentUrl = site?.publicAccess?.permanentUrl;
   useEffect(() => {
     const configured = site?.publicAccess;
     if (!configured) return;
-    if (configured.permanentUrl) setPublicLink(configured.permanentUrl);
+    if (configured.permanentUrl && configured.permanentUrl !== permanentLink) verifyPermanentLink(configured.permanentUrl);
     if (configured.alias) setAlias(configured.alias);
     if (configured.baseDomain) setBaseDomain(configured.baseDomain);
-  }, [site?.publicAccess]);
+  }, [configuredPermanentUrl, permanentLink, site?.publicAccess, verifyPermanentLink]);
 
   function goBackToAnalytics() {
     if (isPublic && typeof window !== "undefined" && window.history.length > 1) {
@@ -213,18 +269,19 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
             {site.publicAccess?.enabled && <button type="button" disabled={shareMutation.isPending} onClick={() => shareMutation.mutate({ enabled: true, paused: !site.publicAccess?.paused })} className="inline-flex items-center gap-2 rounded-lg border border-amber-400/40 px-3.5 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-400/10 dark:text-amber-200 disabled:opacity-60">{site.publicAccess.paused ? "Resume public link" : "Put under maintenance"}</button>}
           </div>
         </div>
-        {publicLink && <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3"><code className="min-w-0 flex-1 truncate text-xs text-cyan-700 dark:text-cyan-200">{publicLink}</code><button type="button" onClick={copyPublicLink} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">{copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}{copied ? "Copied" : "Copy link"}</button><a href={publicLink} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">Open <ExternalLink className="size-3.5" /></a><button type="button" onClick={() => shareMutation.mutate({ enabled: false })} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10">Revoke</button></div>}
+        {permanentLink && permanentLinkStatus !== "ready" && <div className="mt-5 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-800 dark:text-amber-100"><div className="flex items-center gap-2 font-semibold">{permanentLinkStatus === "checking" ? <Loader2 className="size-4 animate-spin" /> : <RotateCw className="size-4" />}{permanentLinkStatus === "checking" ? "Provisioning permanent hostname" : "Hostname is still provisioning"}</div><code className="mt-2 block truncate text-xs">{permanentLink}</code><p className="mt-1 text-xs opacity-85">We are waiting for DNS and HTTPS to become reachable before enabling Copy link and Open.</p>{permanentLinkError && <p className="mt-2 text-xs">{permanentLinkError}</p>}{permanentLinkStatus === "timed_out" && <button type="button" onClick={() => verifyPermanentLink(permanentLink)} className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-current/30 px-2.5 py-1.5 text-xs font-semibold hover:bg-current/10"><RotateCw className="size-3.5" />Check again</button>}</div>}
+        {publicLink && (!permanentLink || permanentLinkStatus === "ready") && <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3"><code className="min-w-0 flex-1 truncate text-xs text-cyan-700 dark:text-cyan-200">{publicLink}</code><button type="button" onClick={copyPublicLink} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">{copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}{copied ? "Copied" : "Copy link"}</button><a href={publicLink} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-cig px-2.5 py-1.5 text-xs font-semibold text-cig-secondary hover:text-cig-primary">Open <ExternalLink className="size-3.5" /></a><button type="button" onClick={() => shareMutation.mutate({ enabled: false })} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10">Revoke</button></div>}
         <div className="mt-5 rounded-xl border border-cig bg-cig/30 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div><p className="text-sm font-semibold text-cig-primary">Permanent signal-room hostname</p><p className="mt-1 text-xs text-cig-secondary">Keep one readable URL even when the private share token is rotated.</p></div>
-            {site.publicAccess?.permanentUrl && <button type="button" disabled={removeAliasMutation.isPending} onClick={() => removeAliasMutation.mutate()} className="text-xs font-semibold text-red-600 hover:underline">Remove hostname</button>}
+            {(site.publicAccess?.permanentUrl || permanentLink) && <button type="button" disabled={removeAliasMutation.isPending} onClick={() => removeAliasMutation.mutate()} className="text-xs font-semibold text-red-600 hover:underline">Remove hostname</button>}
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div className="flex min-w-0 items-center rounded-lg border border-cig bg-cig-card px-3 text-sm focus-within:border-cyan-400">
               <input value={alias} onChange={(event) => setAlias(event.target.value.toLowerCase().replace(/\s+/g, "-"))} placeholder="hashpass-tech" aria-label="Permanent hostname label" className="min-w-0 flex-1 bg-transparent py-2 text-cig-primary outline-none placeholder:text-cig-muted" maxLength={63} />
               <span className="shrink-0 text-xs text-cig-muted">.{baseDomain}</span>
             </div>
-            <button type="button" disabled={!site.publicAccess?.enabled || !aliasIsValid || aliasMutation.isPending} onClick={() => aliasMutation.mutate()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{aliasMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}{site.publicAccess?.permanentUrl ? "Update hostname" : "Create permanent link"}</button>
+            <button type="button" disabled={!site.publicAccess?.enabled || !aliasIsValid || aliasMutation.isPending || permanentLinkStatus === "checking"} onClick={() => aliasMutation.mutate()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{aliasMutation.isPending || permanentLinkStatus === "checking" ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}{aliasMutation.isPending ? "Saving hostname" : permanentLinkStatus === "checking" ? "Provisioning hostname" : site.publicAccess?.permanentUrl ? "Update hostname" : "Create permanent link"}</button>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-cig-muted"><label className="inline-flex items-center gap-2"><span>Managed zone</span><select value={baseDomain} onChange={(event) => setBaseDomain(event.target.value as PublicAlias["baseDomain"])} className="rounded-md border border-cig bg-cig-card px-2 py-1 text-cig-secondary"><option value="analytics.cig.lat">analytics.cig.lat (default)</option><option value="analytics.cig.technology">analytics.cig.technology</option></select></label><span>One label only; letters, numbers, - and _.</span></div>
           {!site.publicAccess?.enabled && <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">Create a public link first, then assign its permanent hostname.</p>}
