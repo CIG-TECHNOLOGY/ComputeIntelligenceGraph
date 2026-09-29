@@ -25,6 +25,25 @@ describe('CigClient', () => {
     expect(observedThis).toBe(globalThis);
   });
 
+  it('resolves organization headers for every request at request time', async () => {
+    const fetchImpl = vi.fn((_url: RequestInfo | URL, _init?: RequestInit) =>
+      Promise.resolve(new Response('{}', { status: 200 }))
+    );
+    const getDefaultHeaders = vi.fn(() => ({ 'x-cig-organization-id': 'org_active' }));
+    const client = new CigClient({
+      baseUrl: 'https://api.example.com',
+      getDefaultHeaders,
+      fetch: fetchImpl as unknown as typeof fetch,
+    });
+
+    await client.requestRaw('/api/v1/resources', { headers: { 'x-request-id': 'request-1' } });
+
+    expect(getDefaultHeaders).toHaveBeenCalledTimes(1);
+    const init = fetchImpl.mock.calls[0]?.[1] as RequestInit;
+    expect(new Headers(init.headers).get('x-cig-organization-id')).toBe('org_active');
+    expect(new Headers(init.headers).get('x-request-id')).toBe('request-1');
+  });
+
   it('fetches dashboard health metadata from the API', async () => {
     const fetchImpl = vi.fn(() =>
       Promise.resolve(

@@ -63,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Detect API impact
         id: detect
@@ -101,7 +101,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -183,7 +183,7 @@ jobs:
         env:
           INFRA_API_BOOTSTRAP_ONLY: 'true'
           INFRA_CREATE_PIPELINES: 'false'
-          API_IMAGE_URI: public.ecr.aws/docker/library/node:22-alpine
+          API_IMAGE_URI: public.ecr.aws/docker/library/node:24-alpine
         run: |
           # The first bootstrap has no SST stage yet, so treat that as a soft skip.
           set +e
@@ -444,7 +444,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -674,7 +674,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Wait for deployment stabilization
         run: sleep 20

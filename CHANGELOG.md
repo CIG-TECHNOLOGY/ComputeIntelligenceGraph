@@ -1,3 +1,27 @@
+## [1.0.25](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.24...v1.0.25) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** deploy API independently of Docker Hub ([a0972e7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a0972e75563cd75c9be6969ddbed206f5dc3fcdb))
+
+
+
+
+
+## [1.0.25](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.24...v1.0.25) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** deploy API independently of Docker Hub ([a0972e7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a0972e75563cd75c9be6969ddbed206f5dc3fcdb))
+
+
+
+
+
+
+
 ## [1.0.24](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.23...v1.0.24) (2026-09-29)
 
 ### Bug Fixes

@@ -134,7 +134,7 @@ export function loadLLMProxyStackConfig(): LLMProxyStackConfig {
     imageRepository: process.env.LLM_PROXY_IMAGE_REPOSITORY ?? 'llm-proxy-production',
     imageUri:
       optionalEnv('LLM_PROXY_IMAGE_URI') ??
-      `public.ecr.aws/docker/library/node:22-alpine`,
+      `public.ecr.aws/docker/library/node:24-alpine`,
     lambdaMemoryMb: numberEnv('LLM_PROXY_LAMBDA_MEMORY_MB', 256),
     lambdaTimeoutSeconds: numberEnv('LLM_PROXY_LAMBDA_TIMEOUT_SECONDS', 90),
     bootstrapOnly,

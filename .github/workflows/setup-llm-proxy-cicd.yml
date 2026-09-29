@@ -242,7 +242,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -275,7 +275,7 @@ jobs:
         working-directory: packages/llm-proxy
         env:
           INFRA_LLM_PROXY_BOOTSTRAP_ONLY: 'true'
-          API_IMAGE_URI: public.ecr.aws/docker/library/node:22-alpine
+          API_IMAGE_URI: public.ecr.aws/docker/library/node:24-alpine
         run: |
           echo "🚀 Deploying SST infrastructure..."
           pnpm exec sst deploy --stage production --yes

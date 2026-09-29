@@ -17,6 +17,7 @@ export enum Permission {
 
 export interface JwtPayload {
   sub: string;
+  email?: string;
   permissions: Permission[];
   iat?: number;
   exp?: number;
@@ -164,6 +165,7 @@ export async function verifyBearerToken(token: string): Promise<JwtPayload> {
         const managedClaims = await verifyIdToken(token);
         return {
           sub: managedClaims.sub,
+          email: managedClaims.email,
           permissions: permissionsFromManagedGroups(managedClaims.groups),
         };
       } catch {
@@ -176,6 +178,7 @@ export async function verifyBearerToken(token: string): Promise<JwtPayload> {
         const supabaseClaims = await verifySupabaseAccessToken(token);
         return {
           sub: supabaseClaims.sub,
+          email: supabaseClaims.email,
           permissions: permissionsFromSupabaseClaims(supabaseClaims),
         };
       } catch {

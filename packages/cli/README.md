@@ -11,7 +11,7 @@ The CLI is the bootstrapper and operator tool for CIG. It is not the
 continuous discovery engine. In the current foundation release, it can:
 
 - launch a first-run `cig setup` wizard for local or managed installs
-- validate Node 22, Docker/Compose, memory, disk, and required ports before install
+- validate Node 24, Docker/Compose, memory, disk, and required ports before install
 - authenticate against a managed API with device authorization
 - install a discovery-first local self-hosted stack with Docker Compose
 - stage a managed-mode `cig-node` bundle for later Linux host installation

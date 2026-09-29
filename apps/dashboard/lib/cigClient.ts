@@ -1,6 +1,7 @@
 import { getSupabaseClient } from "@cig/auth";
 import type { Session } from "@supabase/supabase-js";
 import { CigClient } from "@cig/sdk";
+import { getActiveOrganizationId } from "./organizations";
 import { resolveDashboardAuthSource } from "./sessionAuth";
 
 export const DASHBOARD_API_URL =
@@ -246,6 +247,11 @@ export async function resolveDashboardAccessToken(): Promise<string | null> {
   return storedToken;
 }
 
+export function resolveDashboardOrganizationHeaders(): HeadersInit | undefined {
+  const organizationId = getActiveOrganizationId();
+  return organizationId ? { "x-cig-organization-id": organizationId } : undefined;
+}
+
 let dashboardClient: CigClient | null = null;
 
 export function getDashboardClient(): CigClient {
@@ -253,6 +259,7 @@ export function getDashboardClient(): CigClient {
     dashboardClient = new CigClient({
       baseUrl: DASHBOARD_API_URL,
       getAccessToken: resolveDashboardAccessToken,
+      getDefaultHeaders: resolveDashboardOrganizationHeaders,
     });
   }
 

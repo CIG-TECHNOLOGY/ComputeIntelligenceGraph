@@ -67,7 +67,7 @@ cd /etc/forgejo-runner
   --instance "https://$DOMAIN" \
   --token "$FORGEJO_RUNNER_TOKEN" \
   --name "git-ci-runner-$(hostname)" \
-  --labels "docker:docker://node:20-bookworm,ubuntu-latest:docker://node:20-bookworm"
+  --labels "docker:docker://node:24-bookworm,ubuntu-latest:docker://node:24-bookworm"
 REGISTER
 chmod +x /usr/local/bin/cig-git-ci-runner-register
 

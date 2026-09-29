@@ -199,7 +199,7 @@ export function loadApiStackConfig(): ApiStackConfig {
     imageRepository: requiredEnv('API_IMAGE_REPOSITORY'),
     imageUri:
       optionalEnv('API_IMAGE_URI') ??
-      `public.ecr.aws/docker/library/node:22-alpine`,
+      `public.ecr.aws/docker/library/node:24-alpine`,
     containerPort: numberEnv('API_CONTAINER_PORT', 8080),
     cpu: numberEnv('API_CPU', 512),
     memoryMiB: numberEnv('API_MEMORY_MIB', 1024),

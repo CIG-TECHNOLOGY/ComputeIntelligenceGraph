@@ -1,6 +1,6 @@
 # Multi-stage build for LLM Proxy Lambda function
 # Stage 1: Build
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN pnpm install --no-frozen-lockfile
 RUN pnpm --filter @llm-proxy/app build
 
 # Stage 2: Runtime
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

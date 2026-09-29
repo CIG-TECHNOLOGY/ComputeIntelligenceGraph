@@ -42,6 +42,7 @@ type _HeadersInit = NonNullable<ConstructorParameters<typeof Headers>[0]>;
 type _BodyInit = Exclude<NonNullable<RequestInit["body"]>, null>;
 
 type AccessTokenResolver = () => string | null | undefined | Promise<string | null | undefined>;
+type DefaultHeadersResolver = () => _HeadersInit | undefined | Promise<_HeadersInit | undefined>;
 
 export interface CigClientOptions {
   baseUrl: string;
@@ -49,6 +50,7 @@ export interface CigClientOptions {
   accessToken?: string;
   getAccessToken?: AccessTokenResolver;
   defaultHeaders?: _HeadersInit;
+  getDefaultHeaders?: DefaultHeadersResolver;
   fetch?: typeof fetch;
 }
 
@@ -92,7 +94,8 @@ export class CigClient {
   }
 
   private async resolveHeaders(headers?: _HeadersInit, body?: _BodyInit | null): Promise<Headers> {
-    const resolvedHeaders = new Headers(this.options.defaultHeaders);
+    const defaultHeaders = await this.options.getDefaultHeaders?.() ?? this.options.defaultHeaders;
+    const resolvedHeaders = new Headers(defaultHeaders);
 
     if (headers) {
       new Headers(headers).forEach((value, key) => {

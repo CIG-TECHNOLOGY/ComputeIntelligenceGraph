@@ -168,7 +168,7 @@ The script outputs two values. Add them as **GitHub Actions secrets**:
 
 The build uses Next.js [standalone output](https://nextjs.org/docs/pages/api-reference/next-config-js/output#automatically-copying-traced-files):
 - Build produces `apps/dashboard/.next/standalone/` with a self-contained `server.js`
-- Final image is ~150 MB (node:22-alpine, non-root user 1000)
+- Final image is ~150 MB (node:24-alpine, non-root user 1000)
 - Port 3000, health check on `/`
 
 The dashboard `next.config.js` must have `output: 'standalone'` for this to work.

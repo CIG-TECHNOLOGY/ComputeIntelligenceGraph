@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { useTranslation } from "@cig-technology/i18n/react";
+import { OrganizationSwitcher } from "./OrganizationSwitcher";
 
 interface Identity {
   id: string;
@@ -34,7 +35,9 @@ export function UserMenu() {
     : "?";
 
   return (
-    <div ref={menuRef} className="relative px-2.5 py-2.5">
+    <div ref={menuRef} className="relative py-2.5">
+      <OrganizationSwitcher />
+      <div className="px-2.5 pt-2.5">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-cig-hover transition-colors"
@@ -85,6 +88,7 @@ export function UserMenu() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }

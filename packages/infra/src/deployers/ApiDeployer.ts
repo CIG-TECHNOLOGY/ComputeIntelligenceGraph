@@ -37,7 +37,7 @@ export function buildApiSstEnvironment(
   const imageUri =
     config.imageUri ??
     resolved?.imageUri ??
-    (config.imageTag ? `${config.imageRepository}:${config.imageTag}` : 'public.ecr.aws/docker/library/node:22-alpine');
+    (config.imageTag ? `${config.imageRepository}:${config.imageTag}` : 'public.ecr.aws/docker/library/node:24-alpine');
 
   return {
     ...process.env,

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ─── Builder Stage ────────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -58,7 +58,7 @@ RUN pnpm --filter @cig/api build
 RUN npm_config_force_legacy_deploy=true pnpm --filter @cig/api --prod deploy /app/deploy
 
 # ─── Production Stage ─────────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+FROM node:24-alpine AS production
 
 # Security: create non-root user
 RUN addgroup -g 1000 node_group || true \

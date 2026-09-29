@@ -301,7 +301,7 @@ services/cartography/
 ```bash
 NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
-NEO4J_PASSWORD=cigpassword
+NEO4J_PASSWORD=YOUR_NEO4J_PASSWORD
 AWS_ROLE_ARN=arn:aws:iam::123456789:role/CIGDiscovery
 AWS_REGIONS=us-east-1,us-west-2
 GCP_PROJECT_ID=my-project
@@ -1359,7 +1359,7 @@ services:
       NODE_ENV: production
       CIG_GRAPH_URI: bolt://neo4j:7687
       CIG_GRAPH_USERNAME: neo4j
-      CIG_GRAPH_PASSWORD: password
+      CIG_GRAPH_PASSWORD: YOUR_GRAPH_PASSWORD
       CIG_VECTOR_URI: http://vector-db:8000
       CIG_API_PORT: 8080
     depends_on:
@@ -1389,7 +1389,7 @@ services:
       NODE_ENV: production
       CIG_GRAPH_URI: bolt://neo4j:7687
       CIG_GRAPH_USERNAME: neo4j
-      CIG_GRAPH_PASSWORD: password
+      CIG_GRAPH_PASSWORD: YOUR_GRAPH_PASSWORD
       CIG_DISCOVERY_INTERVAL: 5
       DOCKER_HOST: unix:///var/run/docker.sock
     volumes:
@@ -1416,7 +1416,7 @@ services:
       CIG_API_URI: http://api:8080
       CIG_VECTOR_URI: http://vector-db:8000
       CIG_LLM_PROVIDER: openai
-      CIG_LLM_API_KEY: ${OPENAI_API_KEY}
+      CIG_LLM_API_KEY: YOUR_OPENAI_API_KEY
       CIG_LLM_MODEL: gpt-4
     depends_on:
       api:
@@ -1866,7 +1866,7 @@ class CredentialManager {
 
 ```dockerfile
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -1884,7 +1884,7 @@ COPY . .
 RUN pnpm build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:24-alpine AS production
 
 # Create non-root user
 RUN addgroup -g 1000 node && \
@@ -3418,4 +3418,3 @@ This design document provides a comprehensive technical blueprint for implementi
 The phased implementation approach allows for incremental delivery of value, starting with core AWS discovery and graph storage, then expanding to multi-cloud support, conversational interface, and advanced features like cost analysis and security scanning.
 
 With proper execution of this design, CIG will provide organizations with unprecedented visibility into their infrastructure, enabling better decision-making, faster troubleshooting, and improved operational efficiency.
-

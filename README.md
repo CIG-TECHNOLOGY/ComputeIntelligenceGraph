@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.23-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.25-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.23)
+## 📋 Latest Changes (v1.0.25)
 
 ### Bug Fixes
 
-* **ci:** accept release tag prefix in dashboard smoke test ([335cd13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/335cd135361ce3b03281537aae4ceaf47a3e5e3e))
+* **ci:** deploy API independently of Docker Hub ([a0972e7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a0972e75563cd75c9be6969ddbed206f5dc3fcdb))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

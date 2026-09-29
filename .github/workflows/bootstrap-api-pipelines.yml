@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -54,5 +54,5 @@ jobs:
         env:
           INFRA_API_BOOTSTRAP_ONLY: 'true'
           INFRA_CREATE_PIPELINES: 'true'
-          API_IMAGE_URI: public.ecr.aws/docker/library/node:22-alpine
+          API_IMAGE_URI: public.ecr.aws/docker/library/node:24-alpine
         run: bash ./scripts/bootstrap-api.sh

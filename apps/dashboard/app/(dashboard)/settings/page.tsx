@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "@cig-technology/i18n/react";
 import { useAppStore } from "../../../lib/store";
 import { notifyUser } from "../../../components/NotificationBell";
+import { OrganizationManagement } from "../../../components/OrganizationManagement";
 
 export default function SettingsPage() {
   const t = useTranslation();
@@ -73,6 +74,9 @@ export default function SettingsPage() {
           <Toggle checked={wsEnabled} onChange={setWsEnabled} />
         </Field>
       </Section>
+
+      {/* Organization workspace */}
+      <OrganizationManagement />
 
       {/* About */}
       <Section title={t("settings.about")}>
