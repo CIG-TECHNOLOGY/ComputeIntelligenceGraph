@@ -14,6 +14,12 @@ variable "dashboard_target" {
   default     = "app.cig.lat"
 }
 
+variable "dashboard_https_listener_arn" {
+  description = "Optional HTTPS listener that should serve the wildcard certificate"
+  type        = string
+  default     = ""
+}
+
 resource "aws_acm_certificate" "wildcard" {
   domain_name       = "*.${var.base_domain}"
   validation_method = "DNS"
@@ -43,6 +49,12 @@ resource "aws_route53_record" "certificate_validation" {
 resource "aws_acm_certificate_validation" "wildcard" {
   certificate_arn         = aws_acm_certificate.wildcard.arn
   validation_record_fqdns = [for record in aws_route53_record.certificate_validation : record.fqdn]
+}
+
+resource "aws_lb_listener_certificate" "dashboard_https" {
+  count           = var.dashboard_https_listener_arn == "" ? 0 : 1
+  listener_arn    = var.dashboard_https_listener_arn
+  certificate_arn = aws_acm_certificate_validation.wildcard.certificate_arn
 }
 
 resource "aws_route53_record" "wildcard" {

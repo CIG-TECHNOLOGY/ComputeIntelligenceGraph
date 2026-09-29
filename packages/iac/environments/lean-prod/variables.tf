@@ -21,6 +21,12 @@ variable "analytics_dashboard_target" {
   default     = "app.cig.lat"
 }
 
+variable "analytics_dashboard_https_listener_arn" {
+  description = "HTTPS listener serving app.cig.lat and permanent analytics aliases"
+  type        = string
+  default     = ""
+}
+
 variable "api_domain" {
   description = "Public API domain"
   type        = string

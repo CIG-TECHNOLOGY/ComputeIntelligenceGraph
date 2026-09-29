@@ -55,7 +55,7 @@ COMPOSE_FILE="/opt/git-ci/docker-compose.yml"
 
 # Fetch all secrets in dotenv format directly from Infisical using the Service Token
 export INFISICAL_TOKEN="$INFISICAL_TOKEN"
-TMP_ENV_FILE=$(mktemp "${ENV_FILE}.XXXXXX")
+TMP_ENV_FILE=$(mktemp "$${ENV_FILE}.XXXXXX")
 if infisical export --projectId="$INFISICAL_PROJECT_ID" --env=prod --domain "$INFISICAL_URL" --format=dotenv --silent > "$TMP_ENV_FILE"; then
   chmod 600 "$TMP_ENV_FILE"
   mv "$TMP_ENV_FILE" "$ENV_FILE"

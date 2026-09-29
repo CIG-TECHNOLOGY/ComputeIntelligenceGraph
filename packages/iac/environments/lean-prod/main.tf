@@ -43,9 +43,10 @@ locals {
 module "analytics_alias_technology_dns" {
   source = "../../modules/analytics-alias-dns"
 
-  route53_zone_id  = var.route53_zone_id
-  base_domain      = "analytics.cig.technology"
-  dashboard_target = var.analytics_dashboard_target
+  route53_zone_id              = var.route53_zone_id
+  base_domain                  = "analytics.cig.technology"
+  dashboard_target             = var.analytics_dashboard_target
+  dashboard_https_listener_arn = var.analytics_dashboard_https_listener_arn
 }
 
 module "analytics_alias_lat_dns" {
