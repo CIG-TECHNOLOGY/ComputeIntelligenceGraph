@@ -647,6 +647,25 @@ jobs:
 
           echo "API_SMTP_PASSWORD_SECRET_ARN=$SMTP_PASSWORD_SECRET_ARN" >> "$API_SECRET_ARNS_FILE"
 
+      - name: Login to Amazon ECR for migrations
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Run database migrations before runtime rollout
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DIRECT_URL_POOLER || secrets.SUPABASE_DATABASE_URL }}
+          IMAGE_URI: ${{ needs.build-image.outputs.image_uri }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DATABASE_URL" ]; then
+            echo 'Set SUPABASE_DIRECT_URL_POOLER or SUPABASE_DATABASE_URL before deploying the API.' >&2
+            exit 1
+          fi
+          docker pull "$IMAGE_URI"
+          docker run --rm \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$IMAGE_URI" \
+            node dist/migrate.js
+
       - name: Deploy API runtime
         working-directory: packages/infra
         env:
