@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.21-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.22-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,17 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.21)
+## 📋 Latest Changes (v1.0.22)
 
 ### Bug Fixes
 
-* **ci:** decouple Supabase keep-alive from api.cig.technology, run daily ([296918b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/296918b24f8be39b867451d7eb0361107c53df98))
+* **ci:** pass production Umami runtime config ([327faf9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/327faf9012430b6f8a2cf8e604fa60d8c739cd0a))
+* **ci:** scope API deployment jobs to production ([a97e7a2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a97e7a22189651451e6db72e9f5c0ddc439c6f6b))
+
+
+### Features
+
+* **analytics:** add detailed signal room sharing ([91dd140](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/91dd14055da237dad838cc950a6db4b5eec87f68))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

@@ -1,3 +1,37 @@
+## [1.0.22](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.21...v1.0.22) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** pass production Umami runtime config ([327faf9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/327faf9012430b6f8a2cf8e604fa60d8c739cd0a))
+* **ci:** scope API deployment jobs to production ([a97e7a2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a97e7a22189651451e6db72e9f5c0ddc439c6f6b))
+
+
+### Features
+
+* **analytics:** add detailed signal room sharing ([91dd140](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/91dd14055da237dad838cc950a6db4b5eec87f68))
+
+
+
+
+
+## [1.0.22](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.21...v1.0.22) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** pass production Umami runtime config ([327faf9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/327faf9012430b6f8a2cf8e604fa60d8c739cd0a))
+* **ci:** scope API deployment jobs to production ([a97e7a2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a97e7a22189651451e6db72e9f5c0ddc439c6f6b))
+
+
+### Features
+
+* **analytics:** add detailed signal room sharing ([91dd140](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/91dd14055da237dad838cc950a6db4b5eec87f68))
+
+
+
+
+
 ## [1.0.21](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.20...v1.0.21) (2026-09-29)
 
 
