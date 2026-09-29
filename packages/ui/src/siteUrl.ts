@@ -1,4 +1,4 @@
-const DEFAULT_LANDING_URL = "https://cig.technology";
+const DEFAULT_LANDING_URL = "https://cig.lat";
 const DEFAULT_DASHBOARD_URL = "https://app.cig.lat";
 const DEFAULT_DOCS_URL = "https://cig.technology/documentation";
 const PRODUCTION_DASHBOARD_HOSTNAMES = new Set([

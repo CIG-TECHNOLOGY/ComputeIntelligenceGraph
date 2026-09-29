@@ -84,7 +84,7 @@ jobs:
           tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ needs.resolve-tag.outputs.tag }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.cig.technology
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.technology' }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.lat' }}
             NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.lat' }}
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL || secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY }}

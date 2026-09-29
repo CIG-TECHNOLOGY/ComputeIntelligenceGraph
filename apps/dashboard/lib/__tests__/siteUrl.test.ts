@@ -59,7 +59,7 @@ describe("siteUrl", () => {
     delete process.env.NEXT_PUBLIC_DOCS_URL;
 
     expect(resolveLandingUrl({ hostname: "app.cig.lat", protocol: "https:" })).toBe(
-      "https://cig.technology",
+      "https://cig.lat",
     );
     expect(resolveDashboardUrl({ hostname: "cig.technology", protocol: "https:" })).toBe(
       "https://app.cig.lat",

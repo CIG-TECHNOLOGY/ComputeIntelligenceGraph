@@ -242,7 +242,7 @@ module.exports = {
     // ── Frontend / Public URLs ─────────────────────────────────────────────
     NEXT_PUBLIC_SITE_URL: {
       description: 'Primary public site URL',
-      example: 'https://cig.technology',
+      example: 'https://cig.lat',
       targets: { landing: 'NEXT_PUBLIC_SITE_URL', dashboard: 'NEXT_PUBLIC_SITE_URL' },
     },
     NEXT_PUBLIC_LEGACY_SITE_URL: {

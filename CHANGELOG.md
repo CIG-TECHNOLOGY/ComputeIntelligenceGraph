@@ -1,3 +1,57 @@
+## [1.0.28](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.27...v1.0.28) (2026-09-29)
+
+
+### Bug Fixes
+
+* attach analytics wildcard certificate to dashboard edge ([4495575](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/4495575faa9db22ea6a79f0c07927ab3d3a6b9fc))
+* gate API rollout on database migrations ([67c6fc6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/67c6fc62b8f2065c60c4e211e7964718d6c498ad))
+* gate permanent links on hostname readiness ([b5036f8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b5036f8c350b8440b063834645a267a0109296f2))
+* keep accepted analytics visitors live ([d8ba6c7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d8ba6c7a098f68e0fc90e2da7d3cb1da3784eee4))
+* keep main dashboard on cig.lat ([53f8f3c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/53f8f3cfbad2a570251aae8ed2f378e438cb093f))
+* maintain public analytics links and canonicalize domains ([133879b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/133879b0f55897c9195ecb856b2c061ed71e93fe))
+* publish dashboard release marker from build tag ([48a6435](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/48a64356f5a8799dcfde50bee310cb96e43f7ef2))
+* register dashboard auth callback routes ([82e080c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/82e080c89f3676245b6bd0ba157038cd7ad0bbf5))
+* run API migration and smoke jobs after manual dispatch ([d74b931](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d74b9313461ac2432c25253a54558998e0d4e30e))
+* run migrations on manual API promotions ([ae46f2e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ae46f2e98a7813d772d1888f72566c232a0cab94))
+* use canonical product domain in translations ([a253fd9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a253fd992c4d5fef74b363663700703d4fcc0661))
+
+
+### Features
+
+* add analytics workspace summary and live map ([befc236](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/befc236c15d034a7951bbb1a89fcf30879de5a32))
+* add permanent analytics signal room aliases ([02bde64](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/02bde646c1da9898383e1c30b0fd636eb083078f))
+
+
+
+
+
+## [1.0.28](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.27...v1.0.28) (2026-09-29)
+
+
+### Bug Fixes
+
+* attach analytics wildcard certificate to dashboard edge ([4495575](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/4495575faa9db22ea6a79f0c07927ab3d3a6b9fc))
+* gate API rollout on database migrations ([67c6fc6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/67c6fc62b8f2065c60c4e211e7964718d6c498ad))
+* gate permanent links on hostname readiness ([b5036f8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b5036f8c350b8440b063834645a267a0109296f2))
+* keep accepted analytics visitors live ([d8ba6c7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d8ba6c7a098f68e0fc90e2da7d3cb1da3784eee4))
+* keep main dashboard on cig.lat ([53f8f3c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/53f8f3cfbad2a570251aae8ed2f378e438cb093f))
+* maintain public analytics links and canonicalize domains ([133879b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/133879b0f55897c9195ecb856b2c061ed71e93fe))
+* publish dashboard release marker from build tag ([48a6435](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/48a64356f5a8799dcfde50bee310cb96e43f7ef2))
+* register dashboard auth callback routes ([82e080c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/82e080c89f3676245b6bd0ba157038cd7ad0bbf5))
+* run API migration and smoke jobs after manual dispatch ([d74b931](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d74b9313461ac2432c25253a54558998e0d4e30e))
+* run migrations on manual API promotions ([ae46f2e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ae46f2e98a7813d772d1888f72566c232a0cab94))
+* use canonical product domain in translations ([a253fd9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a253fd992c4d5fef74b363663700703d4fcc0661))
+
+
+### Features
+
+* add analytics workspace summary and live map ([befc236](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/befc236c15d034a7951bbb1a89fcf30879de5a32))
+* add permanent analytics signal room aliases ([02bde64](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/02bde646c1da9898383e1c30b0fd636eb083078f))
+
+
+
+
+
 ## [1.0.27](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.26...v1.0.27) (2026-09-29)
 
 - Dashboard/API clients now surface actionable workspace and analytics deployment errors.
