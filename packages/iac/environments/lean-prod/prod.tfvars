@@ -15,7 +15,7 @@ smtp_port = 587
 smtp_from = "notifications@cig.technology"
 
 # Monitor SaaS
-monitor_domain       = "status.cig.technology"
-monitor_ui_image_tag = "ghcr.io/cig-technology/monitor-ui:latest"
-gatus_image_tag      = "latest"
+monitor_domain        = "status.cig.technology"
+monitor_ui_image_tag  = "ghcr.io/cig-technology/monitor-ui:latest"
+gatus_image_tag       = "latest"
 monitor_authentik_url = "https://auth.cig.technology/application/o/monitor/"

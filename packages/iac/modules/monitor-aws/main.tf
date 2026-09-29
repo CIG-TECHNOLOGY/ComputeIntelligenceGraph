@@ -31,13 +31,13 @@ locals {
     authentik_url        = var.authentik_url
     route53_zone_id      = var.route53_zone_id
     # Auto-generated secrets (always present)
-    db_password_secret_id  = aws_secretsmanager_secret.db_password.id
-    nextauth_secret_id     = aws_secretsmanager_secret.nextauth_secret.id
+    db_password_secret_id = aws_secretsmanager_secret.db_password.id
+    nextauth_secret_id    = aws_secretsmanager_secret.nextauth_secret.id
     # Operator-supplied secrets — pass the Secrets Manager ID, never the raw value
-    smtp_password_secret_id          = var.smtp_password != "" ? aws_secretsmanager_secret.smtp_password[0].id : ""
-    authentik_client_id_secret_id    = var.authentik_client_id != "" ? aws_secretsmanager_secret.authentik_client_id[0].id : ""
+    smtp_password_secret_id           = var.smtp_password != "" ? aws_secretsmanager_secret.smtp_password[0].id : ""
+    authentik_client_id_secret_id     = var.authentik_client_id != "" ? aws_secretsmanager_secret.authentik_client_id[0].id : ""
     authentik_client_secret_secret_id = var.authentik_client_secret != "" ? aws_secretsmanager_secret.authentik_client_secret[0].id : ""
-    ghcr_pull_token_secret_id        = var.ghcr_pull_token != "" ? aws_secretsmanager_secret.ghcr_pull_token[0].id : ""
+    ghcr_pull_token_secret_id         = var.ghcr_pull_token != "" ? aws_secretsmanager_secret.ghcr_pull_token[0].id : ""
   })
 }
 
