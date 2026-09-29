@@ -65,7 +65,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -123,6 +123,7 @@ jobs:
   # Deploy after the artifact is available to the Pages service.
   deploy-pages:
     name: Deploy Pages
+    if: ${{ always() && needs.build-pages.result == 'success' }}
     runs-on: ubuntu-latest
     needs: [build-pages]
     permissions:
