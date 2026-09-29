@@ -1,0 +1,100 @@
+name: cig-analytics
+
+services:
+  umami:
+    # Release tag plus the multi-architecture OCI index digest verified from
+    # docker.umami.is. Upgrade both together after compatibility checks.
+    image: docker.umami.is/umami-software/umami:3.4.0@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    # Upstream v3.4.0 runs as `nextjs` (UID/GID 1001). Pin it explicitly so a
+    # future base-image change cannot silently grant root at runtime.
+    user: "1001:1001"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    ports:
+      # A reverse proxy owns public TLS and routing in deployed environments.
+      - "127.0.0.1:3005:3000"
+    environment:
+      # DML-only runtime role. It must not have CREATE, ALTER, or DROP rights.
+      DATABASE_URL: ${UMAMI_RUNTIME_DATABASE_URL:?Set UMAMI_RUNTIME_DATABASE_URL in the secret file}
+      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET in .env}
+      TWO_FACTOR_ENCRYPTION_KEY: ${UMAMI_TWO_FACTOR_ENCRYPTION_KEY:-}
+      DISABLE_TELEMETRY: "1"
+      DISABLE_UPDATES: "1"
+      MCP_ENABLED: "0"
+      # This upstream setting resolves favicons for tracked customer websites.
+      # It is intentionally distinct from the application favicon in the
+      # build-time branding patchset. An empty value preserves Umami's default.
+      FAVICON_URL: ${UMAMI_WEBSITE_FAVICON_SERVICE_URL:-}
+      # A one-shot `umami-migrate` job owns schema changes. The normal service
+      # still performs the upstream connection and database-version checks.
+      SKIP_DB_MIGRATION: "1"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      # This is Umami's upstream liveness endpoint. It verifies the app is
+      # serving HTTP; database migration/readiness is handled before startup.
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:3000/api/heartbeat >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  umami-migrate:
+    # Run manually with the `migration` profile before starting or upgrading
+    # Umami. It is deliberately never started as a long-running service.
+    image: docker.umami.is/umami-software/umami:3.4.0@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
+    profiles: ["migration"]
+    restart: "no"
+    init: true
+    user: "1001:1001"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    command:
+      - sh
+      - -ec
+      - |
+        # Double-dollar escapes Compose interpolation so the container shell,
+        # rather than the operator's host shell, resolves these variables.
+        export PATH="$$PWD/node_modules/.bin:$$PATH"
+        node scripts/check-db.js
+    environment:
+      # DDL-capable owner used only by this one-shot migration job.
+      DATABASE_URL: ${UMAMI_MIGRATION_DATABASE_URL:?Set UMAMI_MIGRATION_DATABASE_URL in the secret file}
+      DIRECT_DATABASE_URL: ${UMAMI_MIGRATION_DATABASE_URL:?Set UMAMI_MIGRATION_DATABASE_URL in the secret file}
+      # check-db.js applies Prisma migrations unless this is set.
+      SKIP_DB_MIGRATION: "0"
+      DISABLE_TELEMETRY: "1"
+      DISABLE_UPDATES: "1"
+      MCP_ENABLED: "0"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M

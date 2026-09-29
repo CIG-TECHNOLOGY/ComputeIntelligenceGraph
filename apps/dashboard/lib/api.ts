@@ -4,6 +4,11 @@ import type {
   GraphSource,
   GraphSnapshot,
   SendChatMessagePayload,
+  AnalyticsSite,
+  AnalyticsSiteInput,
+  AnalyticsSiteListResponse,
+  AnalyticsSiteResponse,
+  AnalyticsStats,
 } from "@cig/sdk";
 import { getDashboardClient } from "./cigClient";
 
@@ -53,6 +58,11 @@ export type {
   SendChatMessagePayload,
   SessionListResponse,
   TargetsResponse,
+  AnalyticsSite,
+  AnalyticsSiteInput,
+  AnalyticsSiteListResponse,
+  AnalyticsSiteResponse,
+  AnalyticsStats,
 } from "@cig/sdk";
 
 function getClient() {
@@ -118,6 +128,26 @@ export const searchResources = (query: string, params?: string, source?: GraphSo
 export const getDiscoveryStatus = () => getClient().getDiscoveryStatus();
 
 export const getHealth = () => getClient().getHealth();
+
+export const listAnalyticsSites = (): Promise<AnalyticsSiteListResponse> =>
+  getClient().listAnalyticsSites();
+
+export const createAnalyticsSite = (payload: AnalyticsSiteInput, idempotencyKey?: string): Promise<AnalyticsSiteResponse> =>
+  getClient().createAnalyticsSite(payload, idempotencyKey);
+
+export const updateAnalyticsSite = (siteId: string, payload: Partial<AnalyticsSiteInput>): Promise<AnalyticsSiteResponse> =>
+  getClient().updateAnalyticsSite(siteId, payload);
+
+export const provisionAnalyticsSite = (siteId: string): Promise<AnalyticsSiteResponse> =>
+  getClient().provisionAnalyticsSite(siteId);
+
+export const reconcileAnalyticsSites = () => getClient().reconcileAnalyticsSites();
+
+export const deleteAnalyticsSite = (siteId: string): Promise<AnalyticsSiteResponse> =>
+  getClient().deleteAnalyticsSite(siteId);
+
+export const getAnalyticsSiteStats = (siteId: string): Promise<AnalyticsStats> =>
+  getClient().getAnalyticsSiteStats(siteId);
 
 export const triggerDiscovery = () => getClient().triggerDiscovery();
 

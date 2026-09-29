@@ -17,4 +17,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./types"), exports);
 __exportStar(require("./vectordb"), exports);
 __exportStar(require("./rag"), exports);
+__exportStar(require("./inference"), exports);
 //# sourceMappingURL=index.js.map

@@ -140,6 +140,7 @@ export function resolveApiRuntimeConfig(
       config.privateSubnetIds ?? outputs?.privateSubnetIds,
       'privateSubnetIds'
     ),
+    assignPublicIp: config.assignPublicIp ?? false,
     securityGroupIds: requireStringArray(
       config.securityGroupIds ?? (outputs?.apiServiceSecurityGroupId ? [outputs.apiServiceSecurityGroupId] : undefined),
       'securityGroupIds'
@@ -175,5 +176,10 @@ export function resolveApiRuntimeConfig(
     imageTag: config.imageTag,
     supabaseUrlSecretArn: config.supabaseUrlSecretArn,
     supabaseServiceRoleKeySecretArn: config.supabaseServiceRoleKeySecretArn,
+    analyticsProvisioningMode: config.analyticsProvisioningMode ?? 'local',
+    umamiApiUrl: config.umamiApiUrl,
+    umamiApiTokenSecretArn: config.umamiApiTokenSecretArn,
+    analyticsCollectorUrl: config.analyticsCollectorUrl,
+    umamiTeamId: config.umamiTeamId,
   };
 }

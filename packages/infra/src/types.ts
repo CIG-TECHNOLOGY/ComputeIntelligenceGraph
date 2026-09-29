@@ -482,6 +482,8 @@ export interface ApiRuntimeConfig {
   publicSubnetIds: string[];
   /** Private subnet ids used by the ECS service */
   privateSubnetIds: string[];
+  /** Whether ECS tasks receive public IPv4 addresses (used only for the hibernated public-subnet profile) */
+  assignPublicIp?: boolean;
   /** Security group ids attached to the ECS service */
   securityGroupIds: string[];
   /** Secret ARN containing DATABASE_URL */
@@ -530,6 +532,16 @@ export interface ApiRuntimeConfig {
   supabaseUrlSecretArn?: string;
   /** Optional secret ARN containing SUPABASE_SERVICE_ROLE_KEY */
   supabaseServiceRoleKeySecretArn?: string;
+  /** Analytics provisioning mode */
+  analyticsProvisioningMode?: 'local' | 'upstream';
+  /** Private Umami service URL */
+  umamiApiUrl?: string;
+  /** Secret ARN containing the Umami provisioner API token */
+  umamiApiTokenSecretArn?: string;
+  /** Public collector URL */
+  analyticsCollectorUrl?: string;
+  /** Optional Umami team identifier */
+  umamiTeamId?: string;
 }
 
 /**
@@ -562,6 +574,8 @@ export interface ApiDeploymentConfig {
   publicSubnetIds?: string[];
   /** Optional private subnet ids override */
   privateSubnetIds?: string[];
+  /** Whether ECS tasks receive public IPv4 addresses */
+  assignPublicIp?: boolean;
   /** Optional service security groups override */
   securityGroupIds?: string[];
   /** Secret ARN containing DATABASE_URL */
@@ -626,6 +640,16 @@ export interface ApiDeploymentConfig {
   supabaseUrlSecretArn?: string;
   /** Optional secret ARN containing SUPABASE_SERVICE_ROLE_KEY */
   supabaseServiceRoleKeySecretArn?: string;
+  /** Analytics provisioning mode */
+  analyticsProvisioningMode?: 'local' | 'upstream';
+  /** Private Umami service URL */
+  umamiApiUrl?: string;
+  /** Secret ARN containing the Umami provisioner API token */
+  umamiApiTokenSecretArn?: string;
+  /** Public collector URL */
+  analyticsCollectorUrl?: string;
+  /** Optional Umami team identifier */
+  umamiTeamId?: string;
 }
 
 /**

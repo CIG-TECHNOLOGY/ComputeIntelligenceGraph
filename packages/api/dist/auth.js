@@ -16,6 +16,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
 const oidc_verify_1 = require("./middleware/oidc-verify");
 const supabase_verify_1 = require("./middleware/supabase-verify");
+const request_context_1 = require("./bootstrap/request-context");
 // Permission model (Requirements 16.8, 17.8)
 var Permission;
 (function (Permission) {
@@ -26,6 +27,19 @@ var Permission;
     Permission["ADMIN"] = "ADMIN";
 })(Permission || (exports.Permission = Permission = {}));
 const MANAGED_ADMIN_GROUPS = new Set(['admin', 'admins', 'cig-admin', 'cig-admins']);
+const LOCAL_SELF_HOSTED_SUBJECT = 'local-self-hosted';
+const LOCAL_SELF_HOSTED_ROUTE_PREFIXES = [
+    '/api/v1/chat',
+    '/api/v1/resources',
+    '/api/v1/relationships',
+    '/api/v1/graph/snapshot',
+    '/api/v1/costs',
+    '/api/v1/security',
+    '/api/v1/discovery/status',
+    '/api/v1/analytics',
+    '/api/v1/demo/status',
+    '/api/v1/demo/snapshot',
+];
 // In-memory API key store: hashedKey -> entry
 const apiKeyStore = new Map();
 const BCRYPT_ROUNDS = 10;
@@ -85,6 +99,18 @@ function permissionsFromSupabaseClaims(claims) {
         permissions.push(Permission.WRITE_RESOURCES, Permission.EXECUTE_ACTIONS, Permission.MANAGE_DISCOVERY, Permission.ADMIN);
     }
     return [...new Set(permissions)];
+}
+function resolveRoutePath(request) {
+    const routeOptions = request.routeOptions;
+    const routerPath = request.routerPath;
+    return routeOptions?.url ?? routerPath ?? request.url ?? '';
+}
+function isLocalSelfHostedBypassRoute(request) {
+    const routePath = resolveRoutePath(request);
+    if (!routePath) {
+        return false;
+    }
+    return LOCAL_SELF_HOSTED_ROUTE_PREFIXES.some((prefix) => routePath === prefix || routePath.startsWith(`${prefix}/`));
 }
 async function verifyBearerToken(token) {
     try {
@@ -150,6 +176,15 @@ async function authenticate(request, reply) {
             }
         }
         reply.status(401).send({ error: 'Invalid API key', statusCode: 401 });
+        return;
+    }
+    if (process.env.CIG_AUTH_MODE === 'self-hosted' &&
+        (0, request_context_1.isLocalBrowserRequest)(request) &&
+        isLocalSelfHostedBypassRoute(request)) {
+        request.user = {
+            sub: LOCAL_SELF_HOSTED_SUBJECT,
+            permissions: [Permission.READ_RESOURCES],
+        };
         return;
     }
     reply.status(401).send({ error: 'Authentication required', statusCode: 401 });

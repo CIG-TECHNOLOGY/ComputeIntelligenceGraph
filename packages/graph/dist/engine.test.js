@@ -466,22 +466,22 @@ function makeSession(runResult = {}) {
             const [query, params] = mockReadSession.run.mock.calls[0];
             (0, vitest_1.expect)(query).toContain('DEPENDS_ON|USES|CONNECTS_TO*1..$depth');
             (0, vitest_1.expect)(params.id).toBe('res-1');
-            (0, vitest_1.expect)(params.depth).toBe(1);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(1);
         });
         (0, vitest_1.it)('queries with specified depth', async () => {
             await queryEngine.getDependencies('res-1', 2);
             const [, params] = mockReadSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.depth).toBe(2);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(2);
         });
         (0, vitest_1.it)('caps depth at 3', async () => {
             await queryEngine.getDependencies('res-1', 10);
             const [, params] = mockReadSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.depth).toBe(3);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(3);
         });
         (0, vitest_1.it)('enforces minimum depth of 1', async () => {
             await queryEngine.getDependencies('res-1', 0);
             const [, params] = mockReadSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.depth).toBe(1);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(1);
         });
         (0, vitest_1.it)('maps returned records to Resource_Model', async () => {
             const fakeRecord = {
@@ -513,7 +513,7 @@ function makeSession(runResult = {}) {
             const [query, params] = mockReadSession.run.mock.calls[0];
             (0, vitest_1.expect)(query).toContain('DEPENDS_ON|USES|CONNECTS_TO*1..$depth');
             (0, vitest_1.expect)(params.id).toBe('res-1');
-            (0, vitest_1.expect)(params.depth).toBe(1);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(1);
         });
         (0, vitest_1.it)('uses reverse direction (dependents point TO the resource)', async () => {
             await queryEngine.getDependents('res-1');
@@ -524,7 +524,7 @@ function makeSession(runResult = {}) {
         (0, vitest_1.it)('caps depth at 3', async () => {
             await queryEngine.getDependents('res-1', 99);
             const [, params] = mockReadSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.depth).toBe(3);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(3);
         });
         (0, vitest_1.it)('maps returned records to Resource_Model', async () => {
             const fakeRecord = {
@@ -728,8 +728,8 @@ function makeSession(runResult = {}) {
                 .mockResolvedValueOnce({ records: [] });
             await queryEngine.listResourcesPaged();
             const [, params] = mockReadSession.run.mock.calls[1];
-            (0, vitest_1.expect)(params.limit).toBe(50);
-            (0, vitest_1.expect)(params.offset).toBe(0);
+            (0, vitest_1.expect)(params.limit.toNumber()).toBe(50);
+            (0, vitest_1.expect)(params.offset.toNumber()).toBe(0);
         });
         (0, vitest_1.it)('returns empty items and total 0 when no resources', async () => {
             mockReadSession.run
@@ -772,13 +772,13 @@ function makeSession(runResult = {}) {
             const [query, params] = mockReadSession.run.mock.calls[0];
             (0, vitest_1.expect)(query).toContain('MATCH (a:Resource)-[rel]->(b:Resource)');
             (0, vitest_1.expect)(query).toContain('LIMIT $limit');
-            (0, vitest_1.expect)(params.limit).toBe(25);
+            (0, vitest_1.expect)(params.limit.toNumber()).toBe(25);
         });
         (0, vitest_1.it)('clamps the limit to the safe upper bound', async () => {
             mockReadSession.run.mockResolvedValueOnce({ records: [] });
             await queryEngine.listRelationships(10_000);
             const [, params] = mockReadSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.limit).toBe(1000);
+            (0, vitest_1.expect)(params.limit.toNumber()).toBe(1000);
         });
     });
 });

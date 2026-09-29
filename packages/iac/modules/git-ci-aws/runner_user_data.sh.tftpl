@@ -160,6 +160,9 @@ TIMER
 systemctl daemon-reload
 systemctl enable --now forgejo-runner-register.service
 systemctl enable --now forgejo-runner.service
-systemctl enable --now git-ci-runner-idle-stop.timer
+# This runner must remain reachable to consume pushes. A stopped EC2 instance
+# cannot be woken by Forgejo when a workflow is queued, so idle shutdown would
+# silently leave tenant Actions jobs queued indefinitely.
+systemctl disable --now git-ci-runner-idle-stop.timer || true
 
 echo "CIG git-ci runner bootstrap complete"

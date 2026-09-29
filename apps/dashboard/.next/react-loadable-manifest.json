@@ -1,1 +1,12 @@
-{}
+{
+  "app/(dashboard)/graph/page.tsx -> ../../../components/Graph3DCanvas": {
+    "id": 62079,
+    "files": [
+      "static/chunks/679eb789.0fc3a6120d95c6d8.js",
+      "static/chunks/893f70bc.8ca615b023792d98.js",
+      "static/chunks/5ccddd21.8e06e22ae56f2590.js",
+      "static/chunks/1016.5c89784aa0eb07bd.js",
+      "static/chunks/2079.ef0f17aebeb286b5.js"
+    ]
+  }
+}

@@ -89,12 +89,26 @@ Core runtime inputs:
 - `API_SMTP_AUTH_ENABLED`
 - `API_SMTP_OTP_SUBJECT`
 - `API_SMTP_PASSWORD_SECRET_ARN`
+- `API_ASSIGN_PUBLIC_IP`
+- `ANALYTICS_PROVISIONING_MODE`
+- `UMAMI_API_URL`
+- `ANALYTICS_COLLECTOR_URL`
+- `UMAMI_TEAM_ID`
+- `API_UMAMI_API_TOKEN_SECRET_ARN`
 
 Any new API runtime variable or secret should be added here first, then mirrored into the workflow and deployment docs. That keeps the runtime contract centralized instead of splitting it across GitHub Actions shell logic.
 
 `API_SMTP_USER` mirrors `API_SMTP_FROM_EMAIL` in production. The repository uses a placeholder example address, not the production mailbox, and the application still falls back to `API_SMTP_FROM_EMAIL` if `API_SMTP_USER` is omitted.
 
 In production deploys, the runtime sender/login is resolved from AWS Secrets Manager as the `smtp-from-email` secret. The repo keeps the real mailbox address out of plain text, and the deployed task definition still receives the resolved value as `SMTP_FROM_EMAIL` / `SMTP_USER`.
+
+Analytics production wiring keeps the Umami control API private. Set
+`ANALYTICS_PROVISIONING_MODE=upstream`, `UMAMI_API_URL`, and
+`ANALYTICS_COLLECTOR_URL` as runtime configuration; provide
+`API_UMAMI_API_TOKEN_SECRET_ARN` so ECS injects `UMAMI_API_TOKEN` from Secrets
+Manager. `API_ASSIGN_PUBLIC_IP` is an explicit networking escape hatch for
+environments whose private NAT egress is unavailable; keep it `false` when
+private egress is healthy.
 
 Bootstrap-only mode uses:
 

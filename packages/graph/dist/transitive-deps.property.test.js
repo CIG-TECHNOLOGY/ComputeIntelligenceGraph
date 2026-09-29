@@ -81,7 +81,7 @@ function makeChainSession(nodeIds) {
     const [, b, c, d] = nodeIds;
     return {
         run: vitest_1.vi.fn().mockImplementation((_query, params) => {
-            const depth = params.depth;
+            const depth = Number(params.depth);
             const results = [];
             if (depth >= 1)
                 results.push(makeRecord(b));
@@ -169,7 +169,7 @@ const chainArb = fc
             (0, vitest_1.expect)(ids).toContain(d);
             // Verify the session was called with capped depth of 3
             const [, params] = mockSession.run.mock.calls[0];
-            (0, vitest_1.expect)(params.depth).toBe(3);
+            (0, vitest_1.expect)(params.depth.toNumber()).toBe(3);
         }), { numRuns: 50 });
     });
 });

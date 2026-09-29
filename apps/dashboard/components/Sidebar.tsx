@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@cig-technology/i18n/react";
-import { Cpu, HeartPulse, ScrollText, Settings, Activity } from "lucide-react";
+import { Cpu, HeartPulse, ScrollText, Settings, Activity, BarChart3 } from "lucide-react";
 import { useAppStore } from "../lib/store";
 import { useResolvedLandingUrl, useResolvedDocsUrl } from "@cig/ui/siteUrl.client";
 import { UserMenu } from "./UserMenu";
@@ -23,6 +23,7 @@ const platformItems: NavItem[] = [
   { labelKey: "nav.graph",     href: "/graph",     icon: <GraphIcon />,     color: "#8b5cf6" },
   { labelKey: "nav.costs",     href: "/costs",     icon: <CostsIcon />,     color: "#a855f7" },
   { labelKey: "nav.security",  href: "/security",  icon: <SecurityIcon />,  color: "#10b981" },
+  { labelKey: "nav.analytics", href: "/analytics", icon: <BarChart3 className="size-4" />, color: "#06b6d4" },
 ];
 
 const gpuComputeItems: NavItem[] = [

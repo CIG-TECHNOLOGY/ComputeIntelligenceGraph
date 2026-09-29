@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RAGPipeline = exports.EmbeddingService = void 0;
-const openai_1 = require("@langchain/openai");
+const inference_1 = require("./inference");
 function buildResourceText(resource) {
     const tags = resource.tags
         ? Object.entries(resource.tags)
@@ -12,15 +12,12 @@ function buildResourceText(resource) {
     return `${resource.name} ${resource.type} ${resource.provider} ${resource.region ?? ''} ${resource.state ?? ''} tags:${tags} deps:${deps}`.trim();
 }
 class EmbeddingService {
-    embeddings;
-    constructor() {
-        this.embeddings = new openai_1.OpenAIEmbeddings({
-            model: 'text-embedding-3-small',
-            apiKey: process.env.OPENAI_API_KEY,
-        });
-    }
     async embedText(text) {
-        return this.embeddings.embedQuery(text);
+        const embedding = await (0, inference_1.runEmbedding)({ input: text });
+        if (!embedding) {
+            throw new Error('No embedding provider is configured.');
+        }
+        return embedding;
     }
     async embedResource(resource) {
         return this.embedText(buildResourceText(resource));

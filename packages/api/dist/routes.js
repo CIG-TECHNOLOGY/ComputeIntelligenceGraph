@@ -27,6 +27,7 @@ const list_1 = require("./routes/nodes/list");
 const bootstrap_node_1 = require("./routes/bootstrap-node");
 const nodeStatus_1 = require("./sse/nodeStatus");
 const graph_2 = require("./routes/graph");
+const analytics_1 = require("./routes/analytics");
 // Shared instances
 const graphEngine = new graph_1.GraphEngine();
 const queryEngine = new graph_1.GraphQueryEngine();
@@ -92,6 +93,8 @@ async function registerRoutes(app) {
     await app.register(demo_1.demoRoutes);
     // ─── Graph snapshot, relationships, and refinement ────────────────────────
     await app.register(graph_2.graphRoutes);
+    // ─── Umami Analytics SaaS control plane and tracker ─────────────────────
+    await app.register(analytics_1.analyticsRoutes);
     // ─── CIG Node Onboarding (Phase 1, Requirements 3.1–3.9, 17.1–17.3) ─────────
     await app.register(onboarding_1.onboardingRoutes);
     // ─── CIG Node Enrollment (Phase 3, Requirements 7.1–7.3, 7.10, 3.4, 3.5, 22.4) ─

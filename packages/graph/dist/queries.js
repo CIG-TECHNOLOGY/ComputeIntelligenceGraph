@@ -1,12 +1,25 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GraphQueryEngine = void 0;
+const neo4j_driver_1 = __importDefault(require("neo4j-driver"));
 const neo4j_1 = require("./neo4j");
 const scope_1 = require("./scope");
 // ─── Constants ────────────────────────────────────────────────────────────────
 const QUERY_TIMEOUT_MS = 30_000;
 const MAX_DEPTH = 3;
 const DEFAULT_LIMIT = 50;
+function normalizeInteger(value, fallback) {
+    if (!Number.isFinite(value ?? NaN)) {
+        return fallback;
+    }
+    return Math.trunc(value);
+}
+function toNeo4jInteger(value) {
+    return neo4j_driver_1.default.int(value);
+}
 // ─── Record Mapping ───────────────────────────────────────────────────────────
 function toDate(value) {
     if (value instanceof Date)
@@ -62,9 +75,9 @@ class GraphQueryEngine {
      * Depth is capped at 3. Requirements: 8.3, 8.4
      */
     async getDependencies(resourceId, depth = 1, scope) {
-        const cappedDepth = Math.min(Math.max(1, depth), MAX_DEPTH);
+        const cappedDepth = Math.min(Math.max(1, normalizeInteger(depth, 1)), MAX_DEPTH);
         return runRead(async (session) => {
-            const params = { id: resourceId, depth: cappedDepth };
+            const params = { id: resourceId, depth: toNeo4jInteger(cappedDepth) };
             const conditions = [
                 ...(0, scope_1.buildGraphScopeConditions)('r', scope, params),
                 ...(0, scope_1.buildGraphScopeConditions)('dep', scope, params),
@@ -80,9 +93,9 @@ class GraphQueryEngine {
      * Requirements: 8.5
      */
     async getDependents(resourceId, depth = 1, scope) {
-        const cappedDepth = Math.min(Math.max(1, depth), MAX_DEPTH);
+        const cappedDepth = Math.min(Math.max(1, normalizeInteger(depth, 1)), MAX_DEPTH);
         return runRead(async (session) => {
-            const params = { id: resourceId, depth: cappedDepth };
+            const params = { id: resourceId, depth: toNeo4jInteger(cappedDepth) };
             const conditions = [
                 ...(0, scope_1.buildGraphScopeConditions)('dep', scope, params),
                 ...(0, scope_1.buildGraphScopeConditions)('r', scope, params),
@@ -172,11 +185,14 @@ class GraphQueryEngine {
      * Requirements: 8.9, 8.10, 24.8
      */
     async listResourcesPaged(filters, pagination, scope) {
-        const limit = pagination?.limit ?? DEFAULT_LIMIT;
-        const offset = pagination?.offset ?? 0;
+        const limit = Math.max(0, normalizeInteger(pagination?.limit, DEFAULT_LIMIT));
+        const offset = Math.max(0, normalizeInteger(pagination?.offset, 0));
         return runRead(async (session) => {
             const conditions = [];
-            const params = { limit, offset };
+            const params = {
+                limit: toNeo4jInteger(limit),
+                offset: toNeo4jInteger(offset),
+            };
             if (filters?.type) {
                 conditions.push('r.type = $type');
                 params['type'] = filters.type;
@@ -242,9 +258,9 @@ class GraphQueryEngine {
      * Requirements: 8.9, 24.8
      */
     async listRelationships(limit = DEFAULT_LIMIT, scope) {
-        const cappedLimit = Math.min(Math.max(1, limit), 1_000);
+        const cappedLimit = Math.min(Math.max(1, normalizeInteger(limit, DEFAULT_LIMIT)), 1_000);
         return runRead(async (session) => {
-            const params = { limit: cappedLimit };
+            const params = { limit: toNeo4jInteger(cappedLimit) };
             const conditions = [
                 ...(0, scope_1.buildGraphScopeConditions)('a', scope, params),
                 ...(0, scope_1.buildGraphScopeConditions)('b', scope, params),

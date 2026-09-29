@@ -1,6 +1,6 @@
 # Feature: Multi-Tenant Git/CI Fallback Hub — `packages/git-ci`
 
-**Status:** pending — not started
+**Status:** active — implementation exists; deployment, Hashpass onboarding, and failover validation remain
 **Priority:** high (delegated from Hashpass, which becomes the first paying/using tenant)
 **Package:** `packages/git-ci` (new standalone CIG package, provisioning scripts + relay service)
 **Infrastructure:** `packages/iac/modules/git-ci-aws/` (Terraform module, to build)

@@ -71,7 +71,7 @@ The API is a **rebuild**, not an instant scale-up: its load balancer, NAT gatewa
 ## Source of truth and follow-up
 
 - Current composition: `packages/iac/environments/lean-prod` and `packages/iac/environments/api-prod`
-- Existing Infisical migration task: `.agents/pending-tasks/infisical-secrets-manager/task.md`
-- Required follow-up: `.agents/pending-tasks/minimal-always-on-infra/task.md`
+- Existing Infisical migration task: `.agents/active/infisical-secrets-manager/task.md`
+- Required follow-up: `.agents/pending/minimal-always-on-infra/task.md`
 
 The pending task converts this emergency reduction into a reproducible minimal architecture: protected status and Infisical services, a cold Authentik standby, an opt-in API rebuild, Infisical-native secret delivery, backups, and billing guardrails.

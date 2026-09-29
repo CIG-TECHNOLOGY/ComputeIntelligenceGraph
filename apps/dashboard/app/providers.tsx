@@ -19,6 +19,7 @@ const resources = [
   { name: "graph",     list: "/graph" },
   { name: "costs",     list: "/costs" },
   { name: "security",  list: "/security" },
+  { name: "analytics", list: "/analytics" },
   { name: "settings",  list: "/settings" },
   { name: "profile",   list: "/profile" },
   // GPU Compute resources

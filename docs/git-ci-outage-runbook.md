@@ -3,7 +3,7 @@
 **Status:** draft — infrastructure code written, not yet deployed
 **Audience:** CIG operators
 **Service:** `packages/git-ci`, `packages/iac/modules/git-ci-aws/`
-**Related:** `.agents/pending-tasks/git-ci-fallback/task.md`, `docs/deployment/minimal-infrastructure.md`
+**Related:** `.agents/active/git-ci-fallback/task.md`, `docs/deployment/minimal-infrastructure.md`
 
 This runbook covers operating the multi-tenant Forgejo CI fallback
 (`ci.cig.technology`) during a real GitHub platform outage, and the manual
@@ -86,7 +86,7 @@ GitHub outage as the reason (for audit trail). Onboarding the tenant
 ## Deferred / out of scope (documented, not built)
 
 These are intentionally not part of this lean v1, per
-`.agents/pending-tasks/git-ci-fallback/task.md` Phase 4:
+`.agents/active/git-ci-fallback/task.md` Phase 4:
 
 - **Auto-start-on-push for the runner.** Starting the runner automatically
   when a mirrored push lands would require a public webhook receiver —
@@ -114,7 +114,7 @@ runbook will be updated with verified steps once that happens.
 
 ## Source of truth
 
-- Design spec: `.agents/pending-tasks/git-ci-fallback/task.md`
+- Design spec: `.agents/active/git-ci-fallback/task.md`
 - Terraform module: `packages/iac/modules/git-ci-aws/`
 - Package scripts and workflow templates: `packages/git-ci/`
 - AWS account guard: `520900722378`, region `us-east-2` — every mutating

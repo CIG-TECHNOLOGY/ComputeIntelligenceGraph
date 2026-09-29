@@ -2,7 +2,7 @@
 
 > **POLICY (2026-07-03):** For all new internal secrets, prefer the CIG Infisical instance at `secrets.cig.technology` over AWS Secrets Manager. AWS Secrets Manager is only acceptable as a bootstrap vehicle (e.g. storing an Infisical service token so an EC2 can authenticate on first boot). Any new module or script that would create a Secrets Manager secret should instead fetch from Infisical.
 
-**Status:** in_progress
+**Status:** active — in progress
 **Priority:** high — NOW ARCHITECTURAL MANDATE, not just cost saving
 **Architecture:** Standalone EC2 (dedicated Infisical host, NOT co-located with Authentik)
 **AWS cost eliminated:** ~$6.71/month (12.3% of total spend)

@@ -126,4 +126,25 @@ describe('CigClient', () => {
     expect(snapshot.source.kind).toBe('demo');
     expect(snapshot.source.available).toBe(true);
   });
+
+  it('creates an analytics site with an idempotency key', async () => {
+    const fetchImpl = vi.fn((_url: string, _init?: RequestInit) => Promise.resolve(new Response(
+      JSON.stringify({ site: { id: 'site_public', status: 'active' }, replayed: false }),
+      { status: 201, headers: { 'content-type': 'application/json' } },
+    )));
+    const client = new CigClient({ baseUrl: 'https://api.example.com', fetch: fetchImpl as unknown as typeof fetch });
+
+    await client.createAnalyticsSite({ name: 'Marketing', domain: 'example.com' }, 'launch-1');
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://api.example.com/api/v1/analytics/sites',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.any(Headers),
+        body: JSON.stringify({ name: 'Marketing', domain: 'example.com' }),
+      }),
+    );
+    const init = fetchImpl.mock.calls[0]?.[1] as RequestInit;
+    expect(new Headers(init.headers).get('idempotency-key')).toBe('launch-1');
+  });
 });

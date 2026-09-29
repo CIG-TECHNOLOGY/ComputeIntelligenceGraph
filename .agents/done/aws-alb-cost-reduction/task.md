@@ -1,6 +1,6 @@
 # Feature: Reduce Application Load Balancer Cost
 
-**Status:** pending
+**Status:** done — superseded by `../../pending/minimal-always-on-infra/task.md`
 **Priority:** high
 **Current AWS cost:** ~$15.99/month (29.3% of total spend — single largest cost)
 **Region:** us-east-2
@@ -10,6 +10,8 @@
 ## Goal
 
 Reduce or eliminate ALB cost without breaking production traffic routing.
+
+> **Disposition (2026-08-17):** The current minimal-infrastructure plan records that the API edge and API load balancer were intentionally removed. Do not run this old consolidation plan against the current estate. Any remaining infrastructure decision is tracked by the linked task.
 
 ---
 

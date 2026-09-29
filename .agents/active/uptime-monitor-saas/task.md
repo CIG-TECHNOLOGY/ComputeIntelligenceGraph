@@ -1,6 +1,6 @@
 # Feature: Multi-Tenant Uptime Monitoring SaaS — `packages/monitor-ui`
 
-**Status:** in_progress — EC2 running, bootstrap re-run pending after Secrets Manager apply
+**Status:** active — EC2 provisioned; bootstrap re-run, migrations, and tenant go-live remain
 **Priority:** high
 **Package:** `packages/monitor-ui` (new standalone CIG package, Next.js SaaS app)
 **Infrastructure:** `packages/iac/modules/monitor-aws/` (Terraform module, complete)

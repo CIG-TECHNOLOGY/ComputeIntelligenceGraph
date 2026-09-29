@@ -78,5 +78,7 @@ packages/infra -> ECS/Fargate runtime / ALB / DNS / deploy orchestration
 - Authentication notes: [../authentication/README.md](../authentication/README.md)
 - Archived blueprint material: [../archive/CIG_final_blueprint.md](../archive/CIG_final_blueprint.md)
 - CLI/runtime implementation snapshot: [cli-current-state.md](cli-current-state.md)
+- Analytics SaaS foundation decisions: [umami-analytics-saas-foundation.md](umami-analytics-saas-foundation.md)
+- Analytics MVP operations: [../analytics/README.md](../analytics/README.md)
 
 Use the implementation in `apps/`, `packages/`, `services/`, and `infra/` as the source of truth when documents drift.

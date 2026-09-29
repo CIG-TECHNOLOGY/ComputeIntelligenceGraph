@@ -4,14 +4,24 @@ import { getSupabaseClient } from "@cig/auth";
 import {
   isProtectedDashboardHostname,
   normalizeDashboardRedirectPath,
+  resolveDashboardUrl,
 } from "@cig/ui/siteUrl";
 
 const PENDING_DASHBOARD_REDIRECT_KEY = "cig_pending_dashboard_redirect";
 const PENDING_DASHBOARD_AUTH_INTENT_KEY = "cig_pending_dashboard_auth_intent";
-const DASHBOARD_URL =
-  process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
 const SUPABASE_HANDOFF_ATTEMPTS = 8;
 const SUPABASE_HANDOFF_DELAY_MS = 180;
+
+export function getDashboardHandoffUrl(): string {
+  if (typeof window !== "undefined") {
+    return resolveDashboardUrl({
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+    });
+  }
+
+  return process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -234,9 +244,10 @@ function getEmailOtpDashboardCallbackHash(): string | null {
 
 export async function goToDashboard(path = "/"): Promise<void> {
   const normalizedPath = normalizeDashboardRedirectPath(path, "/");
+  const dashboardUrl = getDashboardHandoffUrl();
   const dashboardHostname = (() => {
     try {
-      return new URL(DASHBOARD_URL).hostname;
+      return new URL(dashboardUrl).hostname;
     } catch {
       return "";
     }
@@ -247,7 +258,7 @@ export async function goToDashboard(path = "/"): Promise<void> {
   if (authentikHash) {
     clearPendingDashboardRedirect();
     window.location.replace(
-      `${DASHBOARD_URL}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${authentikHash}`,
+      `${dashboardUrl}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${authentikHash}`,
     );
     return;
   }
@@ -256,7 +267,7 @@ export async function goToDashboard(path = "/"): Promise<void> {
   if (supabaseHash) {
     clearPendingDashboardRedirect();
     window.location.replace(
-      `${DASHBOARD_URL}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${supabaseHash}`,
+      `${dashboardUrl}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${supabaseHash}`,
     );
     return;
   }
@@ -265,7 +276,7 @@ export async function goToDashboard(path = "/"): Promise<void> {
   if (emailOtpHash) {
     clearPendingDashboardRedirect();
     window.location.replace(
-      `${DASHBOARD_URL}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${emailOtpHash}`,
+      `${dashboardUrl}/auth/callback?redirect=${encodeURIComponent(normalizedPath)}#${emailOtpHash}`,
     );
     return;
   }
@@ -274,5 +285,5 @@ export async function goToDashboard(path = "/"): Promise<void> {
     throw new Error("Protected dashboard access requires an authenticated handoff.");
   }
 
-  window.location.replace(`${DASHBOARD_URL}${normalizedPath}`);
+  window.location.replace(`${dashboardUrl}${normalizedPath}`);
 }

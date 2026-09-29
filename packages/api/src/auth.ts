@@ -36,6 +36,7 @@ const LOCAL_SELF_HOSTED_ROUTE_PREFIXES = [
   '/api/v1/costs',
   '/api/v1/security',
   '/api/v1/discovery/status',
+  '/api/v1/analytics',
   '/api/v1/demo/status',
   '/api/v1/demo/snapshot',
 ];

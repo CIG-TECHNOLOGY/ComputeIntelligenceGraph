@@ -50,6 +50,45 @@ export interface HealthResponse {
   chat: ChatHealthStatus;
 }
 
+export type AnalyticsSiteStatus =
+  | "pending"
+  | "provisioning"
+  | "active"
+  | "failed"
+  | "deleting"
+  | "deleted";
+
+export interface AnalyticsSite {
+  id: string;
+  name: string;
+  domain: string;
+  status: AnalyticsSiteStatus;
+  createdAt: string;
+  updatedAt: string;
+  lastEventAt: string | null;
+  provisioningError?: string;
+}
+
+export interface AnalyticsSiteInput {
+  name: string;
+  domain: string;
+}
+
+export interface AnalyticsSiteListResponse {
+  items: AnalyticsSite[];
+}
+
+export interface AnalyticsSiteResponse {
+  site: AnalyticsSite;
+  replayed?: boolean;
+}
+
+export interface AnalyticsStats {
+  totals: { pageviews: number; events: number; accepted: number };
+  daily: Array<{ date: string; pageviews: number; events: number }>;
+  lastEventAt: string | null;
+}
+
 export interface GraphStats {
   nodeCount: number;
   edgeCount: number;

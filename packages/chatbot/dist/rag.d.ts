@@ -11,8 +11,6 @@ export interface ResourceDoc {
     relationships?: string[];
 }
 export declare class EmbeddingService {
-    private embeddings;
-    constructor();
     embedText(text: string): Promise<number[]>;
     embedResource(resource: ResourceDoc): Promise<number[]>;
 }

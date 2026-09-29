@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OpenClawAgent = exports.ConversationContext = void 0;
-const openai_1 = require("@langchain/openai");
-const messages_1 = require("@langchain/core/messages");
 const openfang_js_1 = require("./openfang.js");
+const chatbot_1 = require("@cig/chatbot");
 const API_URL = process.env['API_URL'] ?? 'http://localhost:8080';
 const COST_KEYWORDS = ['cost', 'costs', 'expensive', 'cheapest', 'spending', 'billing', 'price', 'how much', 'budget'];
 function isCostQuery(input) {
@@ -15,9 +14,36 @@ const SECURITY_KEYWORDS = [
     'risk', 'compliance', 'exposed', 'public access', 'ssh', 'open port',
     'iam', 'access key',
 ];
+const DEFAULT_CYPHER_QUERY = 'MATCH (n:Resource) RETURN n LIMIT 10';
 function isSecurityQuery(input) {
     const lower = input.toLowerCase();
     return SECURITY_KEYWORDS.some((kw) => lower.includes(kw));
+}
+function normalizeCypherOutput(raw) {
+    const cleaned = raw
+        .replace(/^```(?:cypher|json)?\n?/i, '')
+        .replace(/\n?```$/i, '')
+        .trim();
+    if (!cleaned) {
+        return DEFAULT_CYPHER_QUERY;
+    }
+    const lines = cleaned.split(/\r?\n/);
+    const cypherLine = lines.find((line) => {
+        const trimmed = line.trim().toUpperCase();
+        return trimmed.startsWith('MATCH') || trimmed.startsWith('CALL') || trimmed.startsWith('WITH');
+    });
+    if (cypherLine) {
+        return cypherLine.trim();
+    }
+    const keywordMatch = cleaned.match(/\b(MATCH|CALL|WITH)\b[\s\S]*/i);
+    if (keywordMatch && keywordMatch[0].trim()) {
+        const candidate = keywordMatch[0].trim();
+        const candidateUpper = candidate.toUpperCase();
+        if (candidateUpper.startsWith('MATCH') || candidateUpper.startsWith('CALL') || candidateUpper.startsWith('WITH')) {
+            return candidate;
+        }
+    }
+    return DEFAULT_CYPHER_QUERY;
 }
 const SYSTEM_PROMPT = `You are OpenClaw, an AI assistant specialized in infrastructure resource analysis and graph traversal.
 
@@ -28,6 +54,7 @@ When answering:
 - Answer questions about infrastructure resources clearly and concisely
 - When asked about relationships, dependencies, or graph traversal, generate a Neo4j Cypher query
 - If a query is ambiguous or lacks necessary details, ask a clarifying question
+- If the connector has not discovered resources yet or the architecture is not connected properly, tell the user to connect or discover the resources first instead of asking for clarification
 - When a user requests an infrastructure action (create, start, stop, delete), include an "action" field in the response
 - Always respond with valid JSON in this exact format:
   {
@@ -51,6 +78,123 @@ Cypher guidelines:
 - Use relationship types like :DEPENDS_ON, :CONNECTS_TO, :HOSTS
 - Always include RETURN clause
 - Keep queries efficient with LIMIT when appropriate`;
+const GRAPH_REFINEMENT_SYSTEM_PROMPT = `You are OpenClaw Graph Refiner, a safe Cypher proposal assistant.
+
+You receive a real infrastructure snapshot with discovered resources, relationships, and discovery health.
+You must only reference resources and relationships that appear in the snapshot.
+Do not invent nodes, relationships, providers, or regions.
+
+Return strict JSON with this shape:
+{
+  "summary": "short human readable summary",
+  "proposedCypher": "MATCH ... SET ... RETURN ...",
+  "previewDiff": [
+    { "kind": "resource" | "relationship", "action": "create" | "update" | "delete", "id": "resource-or-relationship-id", "label": "optional label", "detail": "optional detail" }
+  ],
+  "requiresApproval": true,
+  "rationale": "optional explanation"
+}
+
+Rules:
+- Use only discovered resource ids and relationship ids from the snapshot.
+- Prefer small, targeted updates over broad graph rewrites.
+- Mark requiresApproval=true for any destructive, topology-changing, or broad mutation Cypher.
+- Mark requiresApproval=false only for narrow, non-destructive updates that clearly target discovered infrastructure.
+- Never return prose outside the JSON object.
+`;
+function serializeGraphRefinementSnapshot(snapshot) {
+    const resourceLines = snapshot.resources
+        .slice(0, 12)
+        .map((resource, index) => {
+        const region = resource.region ? `, ${resource.region}` : '';
+        const state = resource.state ? `, ${resource.state}` : '';
+        return `  ${index + 1}. ${resource.id} — ${resource.name} (${resource.type}, ${resource.provider}${region}${state})`;
+    })
+        .join('\n');
+    const relationshipLines = snapshot.relationships
+        .slice(0, 12)
+        .map((relationship, index) => `  ${index + 1}. ${relationship.id} :: ${relationship.fromId} -[${relationship.type}]-> ${relationship.toId}`)
+        .join('\n');
+    const counts = Object.entries(snapshot.resourceCounts)
+        .map(([type, count]) => `${type}: ${count}`)
+        .join(', ');
+    return [
+        `[Graph Snapshot]`,
+        `Discovery healthy: ${snapshot.discovery.healthy}`,
+        `Discovery running: ${snapshot.discovery.running}`,
+        `Discovery last run: ${snapshot.discovery.lastRun ?? 'unknown'}`,
+        `Discovery next run: ${snapshot.discovery.nextRun ?? 'unknown'}`,
+        `Resource counts: ${counts || 'none'}`,
+        `Resources:`,
+        resourceLines || '  none',
+        `Relationships:`,
+        relationshipLines || '  none',
+    ].join('\n');
+}
+function normalizeGraphRefinementProposal(value) {
+    const fallback = {
+        summary: 'Could not produce a structured graph refinement proposal.',
+        proposedCypher: 'MATCH (n:Resource) RETURN n LIMIT 10',
+        previewDiff: [],
+        requiresApproval: true,
+        rationale: 'The model response was missing the required refinement structure.',
+    };
+    if (!value || typeof value !== 'object') {
+        return fallback;
+    }
+    const item = value;
+    const previewDiff = Array.isArray(item['previewDiff'])
+        ? item['previewDiff']
+            .map((entry) => {
+            if (!entry || typeof entry !== 'object') {
+                return null;
+            }
+            const diff = entry;
+            const kind = diff['kind'] === 'resource' || diff['kind'] === 'relationship' ? diff['kind'] : null;
+            const action = diff['action'] === 'create' || diff['action'] === 'update' || diff['action'] === 'delete'
+                ? diff['action']
+                : null;
+            const id = typeof diff['id'] === 'string' ? diff['id'].trim() : '';
+            if (!kind || !action || !id) {
+                return null;
+            }
+            const preview = {
+                kind,
+                action,
+                id,
+            };
+            const label = typeof diff['label'] === 'string' ? diff['label'].trim() : '';
+            const detail = typeof diff['detail'] === 'string' ? diff['detail'].trim() : '';
+            if (label) {
+                preview.label = label;
+            }
+            if (detail) {
+                preview.detail = detail;
+            }
+            return preview;
+        })
+            .filter((entry) => entry !== null)
+        : [];
+    const summary = typeof item['summary'] === 'string' && item['summary'].trim()
+        ? item['summary'].trim()
+        : fallback.summary;
+    const proposedCypher = typeof item['proposedCypher'] === 'string' && item['proposedCypher'].trim()
+        ? item['proposedCypher'].trim()
+        : fallback.proposedCypher;
+    const requiresApproval = typeof item['requiresApproval'] === 'boolean'
+        ? item['requiresApproval']
+        : true;
+    const rationale = typeof item['rationale'] === 'string' && item['rationale'].trim()
+        ? item['rationale'].trim()
+        : undefined;
+    return {
+        summary,
+        proposedCypher,
+        previewDiff,
+        requiresApproval,
+        rationale,
+    };
+}
 class ConversationContext {
     messages = [];
     maxTurns = 5;
@@ -90,11 +234,17 @@ class OpenClawAgent {
         this.ragPipeline = ragPipeline;
         this.actionExecutor = actionExecutor;
         this.userId = userId;
-        this.llm = new openai_1.ChatOpenAI({
-            model: 'gpt-4o-mini',
-            temperature: 0.1,
-            apiKey: process.env['OPENAI_API_KEY'],
-        });
+        this.llm = {
+            invoke: async (messages, options) => {
+                const content = await (0, chatbot_1.runChatCompletion)({
+                    model: options?.model,
+                    temperature: options?.temperature ?? 0.1,
+                    jsonMode: options?.jsonMode ?? true,
+                    messages,
+                });
+                return { content: content ?? '' };
+            },
+        };
     }
     async fetchCostContext() {
         try {
@@ -219,12 +369,15 @@ class OpenClawAgent {
         const systemContent = contextBlock
             ? `${SYSTEM_PROMPT}\n\n${contextBlock}`
             : SYSTEM_PROMPT;
-        const langchainMessages = [
-            new messages_1.SystemMessage(systemContent),
-            ...history.map((m) => m.role === 'user' ? new messages_1.HumanMessage(m.content) : new messages_1.AIMessage(m.content)),
-            new messages_1.HumanMessage(input),
+        const messages = [
+            { role: 'system', content: systemContent },
+            ...history.map((m) => ({
+                role: m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user',
+                content: m.content,
+            })),
+            { role: 'user', content: input },
         ];
-        const response = await this.llm.invoke(langchainMessages);
+        const response = await this.llm.invoke(messages);
         const raw = typeof response.content === 'string'
             ? response.content
             : JSON.stringify(response.content);
@@ -236,6 +389,9 @@ class OpenClawAgent {
         }
         catch {
             parsed = { answer: raw, needsClarification: false };
+        }
+        if (typeof parsed.cypher === 'string' && parsed.cypher.trim()) {
+            parsed.cypher = normalizeCypherOutput(parsed.cypher);
         }
         // Handle action intent from LLM response
         if (parsed.action && this.actionExecutor) {
@@ -272,14 +428,43 @@ class OpenClawAgent {
     }
     async generateCypher(naturalLanguage) {
         const messages = [
-            new messages_1.SystemMessage("You are a Neo4j Cypher expert. Convert the user's natural language request into a valid Cypher query. Return ONLY the Cypher query, no explanation."),
-            new messages_1.HumanMessage(naturalLanguage),
+            {
+                role: 'system',
+                content: "You are a Neo4j Cypher expert. Convert the user's natural language request into a valid Cypher query. Return ONLY the Cypher query, no explanation.",
+            },
+            { role: 'user', content: naturalLanguage },
         ];
         const response = await this.llm.invoke(messages);
         const cypher = typeof response.content === 'string'
             ? response.content
             : JSON.stringify(response.content);
-        return cypher.trim();
+        return normalizeCypherOutput(cypher);
+    }
+    async refineGraph(goal, snapshot) {
+        const messages = [
+            { role: 'system', content: GRAPH_REFINEMENT_SYSTEM_PROMPT },
+            {
+                role: 'user',
+                content: [
+                    `User goal: ${goal.trim()}`,
+                    '',
+                    serializeGraphRefinementSnapshot(snapshot),
+                    '',
+                    'Return only the JSON object.',
+                ].join('\n'),
+            },
+        ];
+        const response = await this.llm.invoke(messages);
+        const raw = typeof response.content === 'string'
+            ? response.content
+            : JSON.stringify(response.content);
+        try {
+            const cleaned = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
+            return normalizeGraphRefinementProposal(JSON.parse(cleaned));
+        }
+        catch {
+            return normalizeGraphRefinementProposal(null);
+        }
     }
 }
 exports.OpenClawAgent = OpenClawAgent;

@@ -27,6 +27,7 @@ interface ApiStackConfig {
   vpcId: string;
   publicSubnetIds: string[];
   privateSubnetIds: string[];
+  assignPublicIp: boolean;
   albSecurityGroupId: string;
   apiSecurityGroupIds: string[];
   databaseUrlSecretArn: string;
@@ -46,6 +47,11 @@ interface ApiStackConfig {
   healthCheckPath: string;
   supabaseUrlSecretArn?: string;
   supabaseServiceRoleKeySecretArn?: string;
+  analyticsProvisioningMode: 'local' | 'upstream';
+  umamiApiUrl?: string;
+  umamiApiTokenSecretArn?: string;
+  analyticsCollectorUrl?: string;
+  umamiTeamId?: string;
   projectTag: string;
   pipelineRepo?: string;
   pipelinePrefix: string;
@@ -151,6 +157,13 @@ export function loadApiStackConfig(): ApiStackConfig {
   }
   const smtpSecure = smtpSecureRaw ? smtpSecureRaw === 'true' : smtpPort === 465;
   const smtpAuthEnabled = smtpAuthEnabledRaw ? smtpAuthEnabledRaw === 'true' : true;
+  const analyticsProvisioningMode =
+    (optionalEnv('ANALYTICS_PROVISIONING_MODE') ?? (stage === 'production' ? 'upstream' : 'local')) as
+      | 'local'
+      | 'upstream';
+  if (!['local', 'upstream'].includes(analyticsProvisioningMode)) {
+    throw new Error('ANALYTICS_PROVISIONING_MODE must be local or upstream');
+  }
 
   if (!bootstrapOnly) {
     const missing = [
@@ -161,6 +174,12 @@ export function loadApiStackConfig(): ApiStackConfig {
         ? 'API_SMTP_PASSWORD_SECRET_ARN / SMTP_PASSWORD_SECRET_ARN'
         : undefined,
       !openAiApiKeySecretArn ? 'API_OPENAI_API_KEY_SECRET_ARN / OPENAI_API_KEY_SECRET_ARN' : undefined,
+      analyticsProvisioningMode === 'upstream' && !optionalEnv('UMAMI_API_URL')
+        ? 'UMAMI_API_URL'
+        : undefined,
+      analyticsProvisioningMode === 'upstream' && !optionalEnv('API_UMAMI_API_TOKEN_SECRET_ARN')
+        ? 'API_UMAMI_API_TOKEN_SECRET_ARN'
+        : undefined,
     ].filter((value): value is string => Boolean(value));
 
     if (missing.length > 0) {
@@ -188,6 +207,7 @@ export function loadApiStackConfig(): ApiStackConfig {
     vpcId: bootstrapOnly ? 'bootstrap-vpc' : requiredEnv('API_VPC_ID'),
     publicSubnetIds: bootstrapOnly ? [] : csvEnv('API_PUBLIC_SUBNET_IDS', true),
     privateSubnetIds: bootstrapOnly ? [] : csvEnv('API_PRIVATE_SUBNET_IDS', true),
+    assignPublicIp: booleanEnv('API_ASSIGN_PUBLIC_IP', false),
     albSecurityGroupId: bootstrapOnly ? 'bootstrap-alb-sg' : requiredEnv('API_ALB_SECURITY_GROUP_ID'),
     apiSecurityGroupIds: bootstrapOnly ? [] : csvEnv('API_SECURITY_GROUP_IDS', true),
     databaseUrlSecretArn: bootstrapOnly ? 'bootstrap-database-secret' : requiredEnv('API_DATABASE_URL_SECRET_ARN'),
@@ -215,6 +235,11 @@ export function loadApiStackConfig(): ApiStackConfig {
     supabaseServiceRoleKeySecretArn: optionalEnv(
       'API_SUPABASE_SERVICE_ROLE_KEY_SECRET_ARN'
     ),
+    analyticsProvisioningMode,
+    umamiApiUrl: optionalEnv('UMAMI_API_URL'),
+    umamiApiTokenSecretArn: optionalEnv('API_UMAMI_API_TOKEN_SECRET_ARN'),
+    analyticsCollectorUrl: optionalEnv('ANALYTICS_COLLECTOR_URL'),
+    umamiTeamId: optionalEnv('UMAMI_TEAM_ID'),
     smtpHost: smtpHost ?? '',
     smtpPort,
     smtpSecure,
@@ -248,6 +273,7 @@ export function secretArns(config: ApiStackConfig): string[] {
     config.supabaseUrlSecretArn,
     config.supabaseServiceRoleKeySecretArn,
     config.smtpPasswordSecretArn,
+    config.umamiApiTokenSecretArn,
   ].filter((value): value is string => Boolean(value));
 }
 
@@ -456,6 +482,12 @@ export function createInfrastructure() {
               { name: 'PORT', value: String(config.containerPort) },
               { name: 'LOG_LEVEL', value: 'info' },
               { name: 'CORS_ORIGINS', value: config.corsOrigins.join(',') },
+              { name: 'ANALYTICS_PROVISIONING_MODE', value: config.analyticsProvisioningMode },
+              ...(config.umamiApiUrl ? [{ name: 'UMAMI_API_URL', value: config.umamiApiUrl }] : []),
+              ...(config.analyticsCollectorUrl
+                ? [{ name: 'ANALYTICS_COLLECTOR_URL', value: config.analyticsCollectorUrl }]
+                : []),
+              ...(config.umamiTeamId ? [{ name: 'UMAMI_TEAM_ID', value: config.umamiTeamId }] : []),
               { name: 'NEO4J_URI', value: config.neo4jBoltUri },
               { name: 'NEO4J_USER', value: 'neo4j' },
               { name: 'NEO4J_DATABASE', value: 'neo4j' },
@@ -512,6 +544,9 @@ export function createInfrastructure() {
                 : []),
               ...(config.smtpPasswordSecretArn
                 ? [{ name: 'SMTP_PASSWORD', valueFrom: config.smtpPasswordSecretArn }]
+                : []),
+              ...(config.umamiApiTokenSecretArn
+                ? [{ name: 'UMAMI_API_TOKEN', valueFrom: config.umamiApiTokenSecretArn }]
                 : []),
             ],
             logConfiguration: {
@@ -601,7 +636,7 @@ export function createInfrastructure() {
       },
       healthCheckGracePeriodSeconds: 60,
       networkConfiguration: {
-        assignPublicIp: false,
+        assignPublicIp: config.assignPublicIp,
         subnets: config.privateSubnetIds,
         securityGroups: config.apiSecurityGroupIds,
       },

@@ -21,6 +21,7 @@ out/
 .env
 .env.local
 .env.*.local
+.env.hashpass-migration
 
 # IDE
 .vscode/

@@ -29,6 +29,10 @@ import type {
   TargetsResponse,
   RenameChatSessionPayload,
   SendChatMessagePayload,
+  AnalyticsSiteInput,
+  AnalyticsSiteListResponse,
+  AnalyticsSiteResponse,
+  AnalyticsStats,
 } from "./types";
 
 // Fetch API types for environments where lib "DOM" is not present (e.g. Node-only consumers).
@@ -180,6 +184,47 @@ export class CigClient {
 
   getHealth(): Promise<HealthResponse> {
     return this.request<HealthResponse>("/api/v1/health");
+  }
+
+  listAnalyticsSites(): Promise<AnalyticsSiteListResponse> {
+    return this.request<AnalyticsSiteListResponse>("/api/v1/analytics/sites");
+  }
+
+  createAnalyticsSite(payload: AnalyticsSiteInput, idempotencyKey?: string): Promise<AnalyticsSiteResponse> {
+    return this.request<AnalyticsSiteResponse>("/api/v1/analytics/sites", {
+      method: "POST",
+      headers: idempotencyKey ? { "idempotency-key": idempotencyKey } : undefined,
+      body: JSON.stringify(payload),
+    });
+  }
+
+  updateAnalyticsSite(siteId: string, payload: Partial<AnalyticsSiteInput>): Promise<AnalyticsSiteResponse> {
+    return this.request<AnalyticsSiteResponse>(`/api/v1/analytics/sites/${encodeURIComponent(siteId)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  provisionAnalyticsSite(siteId: string): Promise<AnalyticsSiteResponse> {
+    return this.request<AnalyticsSiteResponse>(`/api/v1/analytics/sites/${encodeURIComponent(siteId)}/provision`, {
+      method: "POST",
+    });
+  }
+
+  reconcileAnalyticsSites(): Promise<{ checked: number; active: number; failed: number }> {
+    return this.request<{ checked: number; active: number; failed: number }>("/api/v1/analytics/reconcile", {
+      method: "POST",
+    });
+  }
+
+  deleteAnalyticsSite(siteId: string): Promise<AnalyticsSiteResponse> {
+    return this.request<AnalyticsSiteResponse>(`/api/v1/analytics/sites/${encodeURIComponent(siteId)}`, {
+      method: "DELETE",
+    });
+  }
+
+  getAnalyticsSiteStats(siteId: string): Promise<AnalyticsStats> {
+    return this.request<AnalyticsStats>(`/api/v1/analytics/sites/${encodeURIComponent(siteId)}/stats`);
   }
 
   triggerDiscovery(): Promise<{ message: string }> {

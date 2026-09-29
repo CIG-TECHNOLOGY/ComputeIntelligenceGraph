@@ -12,6 +12,45 @@ export interface ActionIntent {
     resourceId: string;
     params: Record<string, unknown>;
 }
+export interface GraphRefinementResourceSummary {
+    id: string;
+    name: string;
+    type: string;
+    provider: string;
+    region?: string;
+    state?: string;
+}
+export interface GraphRefinementRelationshipSummary {
+    id: string;
+    type: string;
+    fromId: string;
+    toId: string;
+}
+export interface GraphRefinementSnapshot {
+    resourceCounts: Record<string, number>;
+    resources: GraphRefinementResourceSummary[];
+    relationships: GraphRefinementRelationshipSummary[];
+    discovery: {
+        healthy: boolean;
+        running: boolean;
+        lastRun: string | null;
+        nextRun: string | null;
+    };
+}
+export interface GraphRefinementPreviewChange {
+    kind: 'resource' | 'relationship';
+    action: 'create' | 'update' | 'delete';
+    id: string;
+    label?: string;
+    detail?: string;
+}
+export interface GraphRefinementProposal {
+    summary: string;
+    proposedCypher: string;
+    previewDiff: GraphRefinementPreviewChange[];
+    requiresApproval: boolean;
+    rationale?: string;
+}
 export interface OpenClawResponse {
     answer: string;
     cypher?: string;
@@ -42,5 +81,6 @@ export declare class OpenClawAgent {
     private getSession;
     query(input: string, sessionId?: string): Promise<OpenClawResponse>;
     generateCypher(naturalLanguage: string): Promise<string>;
+    refineGraph(goal: string, snapshot: GraphRefinementSnapshot): Promise<GraphRefinementProposal>;
 }
 //# sourceMappingURL=openclaw.d.ts.map

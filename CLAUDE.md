@@ -70,7 +70,7 @@ docker build -f packages/infra/docker/Dockerfile.dashboard -t cig-dashboard:loca
 
 Specifically:
 - Any new Terraform module or script that would add an `aws_secretsmanager_secret` resource must instead pull from Infisical.
-- AWS Secrets Manager already holds legacy secrets for Authentik and monitor bootstrap — those stay until the [infisical-secrets-manager task](`.agents/pending-tasks/infisical-secrets-manager/task.md`) migrates them.
+- AWS Secrets Manager already holds legacy secrets for Authentik and monitor bootstrap — those stay until the [infisical-secrets-manager task](.agents/active/infisical-secrets-manager/task.md) migrates them.
 - When writing bootstrap scripts for new EC2s: store **one** Infisical service token in Secrets Manager, then use `infisical run --env=production -- <command>` to inject all other secrets at runtime.
 
 ## AWS account guard

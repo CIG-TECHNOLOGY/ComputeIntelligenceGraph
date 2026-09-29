@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startBackgroundJobs = startBackgroundJobs;
+exports.runConfiguredMigrations = runConfiguredMigrations;
 exports.createServer = createServer;
 exports.start = start;
 const fastify_1 = __importDefault(require("fastify"));
@@ -16,13 +17,18 @@ const metrics_1 = require("./metrics");
 const heartbeat_monitor_1 = require("./jobs/heartbeat-monitor");
 const semantic_index_sync_1 = require("./jobs/semantic-index-sync");
 const demo_workspace_1 = require("./demo-workspace");
+const self_hosted_bootstrap_1 = require("./bootstrap/self-hosted-bootstrap");
+const migrate_1 = require("./db/migrate");
 const client_1 = require("./db/client");
+const cors_2 = require("./cors");
+const chatbot_1 = require("@cig/chatbot");
 const VERSION = '0.1.0';
 const RATE_LIMIT_EXEMPT_ROUTES = new Set(['GET /api/v1/health', 'GET /metrics']);
-const OPENAI_MODEL_DEFAULT = 'gpt-4o-mini';
 const OPENAI_HEALTH_CACHE_MS = 30_000;
-const OPENAI_HEALTH_TIMEOUT_MS = 2_500;
-let openAiHealthCache = null;
+const AUTO_MIGRATE_ENV = 'CIG_AUTO_MIGRATE';
+const DEMO_WORKSPACE_RETRY_ATTEMPTS = 10;
+const DEMO_WORKSPACE_RETRY_DELAY_MS = 1_500;
+let inferenceHealthCache = null;
 function startBackgroundJobs(app) {
     (0, heartbeat_monitor_1.startHeartbeatMonitor)();
     (0, semantic_index_sync_1.startSemanticIndexSync)(app.log);
@@ -32,87 +38,50 @@ function startBackgroundJobs(app) {
         });
     }
 }
-function resolveCorsOrigins() {
-    const configuredOrigins = process.env.CORS_ORIGINS?.trim();
-    if (configuredOrigins === '*') {
-        return true;
+async function runConfiguredMigrations(app) {
+    if (process.env[AUTO_MIGRATE_ENV] !== 'true') {
+        return;
     }
-    if (configuredOrigins) {
-        return configuredOrigins
-            .split(',')
-            .map((origin) => origin.trim())
-            .filter(Boolean);
+    const result = await (0, migrate_1.applyMigrations)();
+    app.log.info({
+        applied: result.applied,
+        skipped: result.skipped,
+    }, 'Configured local database migrations completed');
+}
+async function waitForDemoWorkspaceProvisioning(logger) {
+    if (process.env.CIG_AUTH_MODE !== 'managed' && process.env.CIG_DEMO_MODE !== 'true') {
+        return;
     }
-    if (process.env.NODE_ENV !== 'production') {
-        return true;
+    let lastError = null;
+    for (let attempt = 1; attempt <= DEMO_WORKSPACE_RETRY_ATTEMPTS; attempt += 1) {
+        try {
+            await (0, demo_workspace_1.ensureDemoWorkspaceProvisioned)(logger);
+            return;
+        }
+        catch (error) {
+            lastError = error;
+            logger.warn({
+                err: error,
+                attempt,
+                maxAttempts: DEMO_WORKSPACE_RETRY_ATTEMPTS,
+            }, 'Demo workspace provisioning not ready yet; retrying');
+            if (attempt < DEMO_WORKSPACE_RETRY_ATTEMPTS) {
+                await new Promise((resolve) => setTimeout(resolve, DEMO_WORKSPACE_RETRY_DELAY_MS * attempt));
+            }
+        }
     }
-    // Default production fallback during domain migration.
-    return [
-        'https://cig.lat',
-        'https://www.cig.lat',
-        'https://edwardcalderon.github.io',
-    ];
+    throw lastError instanceof Error
+        ? lastError
+        : new Error('Demo workspace provisioning failed');
 }
 async function resolveChatHealth(endpointReady) {
-    const model = process.env.OPENAI_CHAT_MODEL?.trim() || OPENAI_MODEL_DEFAULT;
-    const apiKey = process.env.OPENAI_API_KEY?.trim() || '';
     const now = Date.now();
-    if (openAiHealthCache && now - openAiHealthCache.checkedAt < OPENAI_HEALTH_CACHE_MS) {
-        return openAiHealthCache.status;
+    if (inferenceHealthCache && now - inferenceHealthCache.checkedAt < OPENAI_HEALTH_CACHE_MS) {
+        return inferenceHealthCache.status;
     }
-    const checkedAt = new Date().toISOString();
-    if (!apiKey) {
-        const status = {
-            provider: 'fallback',
-            model,
-            configured: false,
-            reachable: endpointReady,
-            providerReachable: false,
-            checkedAt,
-            latencyMs: null,
-        };
-        openAiHealthCache = { checkedAt: now, status };
-        return status;
-    }
-    const controller = new AbortController();
-    const startedAt = Date.now();
-    const timeout = setTimeout(() => controller.abort(), OPENAI_HEALTH_TIMEOUT_MS);
-    try {
-        const response = await fetch(`https://api.openai.com/v1/models/${encodeURIComponent(model)}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-            },
-            signal: controller.signal,
-        });
-        const status = {
-            provider: 'openai',
-            model,
-            configured: true,
-            reachable: endpointReady,
-            providerReachable: response.ok,
-            checkedAt,
-            latencyMs: Date.now() - startedAt,
-        };
-        openAiHealthCache = { checkedAt: now, status };
-        return status;
-    }
-    catch (_error) {
-        const status = {
-            provider: 'openai',
-            model,
-            configured: true,
-            reachable: endpointReady,
-            providerReachable: false,
-            checkedAt,
-            latencyMs: Date.now() - startedAt,
-        };
-        openAiHealthCache = { checkedAt: now, status };
-        return status;
-    }
-    finally {
-        clearTimeout(timeout);
-    }
+    const status = await (0, chatbot_1.probeInferenceHealth)(endpointReady);
+    inferenceHealthCache = { checkedAt: now, status };
+    return status;
 }
 async function createServer() {
     const multipart = require('@fastify/multipart');
@@ -127,7 +96,7 @@ async function createServer() {
     });
     // CORS
     await app.register(cors_1.default, {
-        origin: resolveCorsOrigins(),
+        origin: (0, cors_2.resolveCorsOrigins)(),
     });
     await app.register(multipart, {
         limits: {
@@ -171,6 +140,18 @@ async function createServer() {
             chat,
         });
     });
+    // DB keep-alive — external cron pings this to prevent Supabase from pausing on inactivity
+    RATE_LIMIT_EXEMPT_ROUTES.add('GET /api/v1/health/db');
+    app.get('/api/v1/health/db', async (_request, reply) => {
+        try {
+            await (0, client_1.query)('SELECT 1');
+            return reply.send({ db: 'ok' });
+        }
+        catch (err) {
+            app.log.warn({ err }, 'DB keep-alive ping failed');
+            return reply.status(503).send({ db: 'unavailable' });
+        }
+    });
     // Prometheus metrics endpoint (no auth — internal scraping, Requirement 25.1)
     app.get('/metrics', async (_request, reply) => {
         const metrics = await (0, metrics_1.getMetrics)();
@@ -194,6 +175,9 @@ async function start() {
     const host = process.env.HOST ?? '0.0.0.0';
     const app = await createServer();
     try {
+        await runConfiguredMigrations(app);
+        await (0, self_hosted_bootstrap_1.seedSelfHostedBootstrapTokens)(app.log);
+        await waitForDemoWorkspaceProvisioning(app.log);
         await app.listen({ port, host });
         app.log.info(`Server listening on ${host}:${port}`);
         // Start background jobs after the server is listening so startup remains responsive.

@@ -83,6 +83,12 @@ program
     .option('--ssh-user <user>', 'SSH user (default: root)', 'root')
     .option('--ssh-key-path <path>', 'Path to SSH private key file')
     .option('--ssh-port <port>', 'SSH port (default: 22)', '22')
+    .option('--inference <inference>', 'Self-hosted inference: ollama, gemma, or openai', (value) => {
+    if (value !== 'ollama' && value !== 'gemma' && value !== 'openai') {
+        throw new Error('--inference must be "ollama", "gemma", or "openai"');
+    }
+    return value;
+})
     .option('--demo', 'Include demo/mock data in the installation')
     .action(async (cmdOpts) => {
     const globals = getGlobalOptions();
@@ -102,6 +108,7 @@ program
         sshUser: cmdOpts['sshUser'] ?? 'root',
         sshKeyPath: cmdOpts['sshKeyPath'],
         sshPort: cmdOpts['sshPort'] ? parseInt(cmdOpts['sshPort'], 10) : 22,
+        inference: cmdOpts['inference'],
         demo: typeof cmdOpts['demo'] === 'boolean' ? cmdOpts['demo'] : undefined,
     });
 });
@@ -189,6 +196,12 @@ program
     .option('--mode <mode>', 'Installation mode: managed or self-hosted')
     .option('--profile <profile>', 'Installation profile: core, discovery, or full')
     .option('--api-url <url>', 'Control plane API URL')
+    .option('--inference <inference>', 'Self-hosted inference: ollama, gemma, or openai', (value) => {
+    if (value !== 'ollama' && value !== 'gemma' && value !== 'openai') {
+        throw new Error('--inference must be "ollama", "gemma", or "openai"');
+    }
+    return value;
+})
     .option('--demo', 'Include demo data in the installation')
     .action(async (cmdOpts) => {
     const { setup } = await import('./commands/setup.js');
@@ -196,6 +209,7 @@ program
         mode: cmdOpts.mode,
         profile: cmdOpts.profile,
         apiUrl: cmdOpts.apiUrl,
+        inference: cmdOpts.inference,
         // undefined when flag not passed → wizard will prompt; true when --demo passed → skip prompt
         demo: cmdOpts.demo,
     });

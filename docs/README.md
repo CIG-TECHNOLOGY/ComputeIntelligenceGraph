@@ -9,6 +9,8 @@ Last synchronized with the root documentation links on `2026-03-29`.
 - [../README.md](../README.md) — root project overview and multilingual entry page
 - [../PROJECT_STATUS.md](../PROJECT_STATUS.md) — current release-aware status snapshot
 - [architecture/README.md](architecture/README.md) — current system shape, runtime roles, and implementation boundaries
+- [architecture/umami-analytics-saas-foundation.md](architecture/umami-analytics-saas-foundation.md) — analytics SaaS upstream, topology, data-contract, and threat-model decisions
+- [analytics/README.md](analytics/README.md) — analytics onboarding, tracker installation, privacy, and runtime configuration
 - [development/README.md](development/README.md) — local workflow, validation, and release commands
 - [deployment/README.md](deployment/README.md) — domains, deployment surfaces, and build verification entry points
 - [deployment/minimal-infrastructure.md](deployment/minimal-infrastructure.md) — current minimal AWS footprint, protected services, and recovery paths

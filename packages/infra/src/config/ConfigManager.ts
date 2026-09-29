@@ -382,6 +382,26 @@ export class ConfigManager {
       if (process.env.API_SMTP_PASSWORD_SECRET_ARN) {
         config.api.smtpPasswordSecretArn = process.env.API_SMTP_PASSWORD_SECRET_ARN.trim();
       }
+      if (process.env.API_ASSIGN_PUBLIC_IP) {
+        config.api.assignPublicIp = this.parseBoolean(process.env.API_ASSIGN_PUBLIC_IP);
+      }
+      if (process.env.ANALYTICS_PROVISIONING_MODE) {
+        config.api.analyticsProvisioningMode = process.env.ANALYTICS_PROVISIONING_MODE as
+          | 'local'
+          | 'upstream';
+      }
+      if (process.env.UMAMI_API_URL) {
+        config.api.umamiApiUrl = process.env.UMAMI_API_URL.trim();
+      }
+      if (process.env.API_UMAMI_API_TOKEN_SECRET_ARN) {
+        config.api.umamiApiTokenSecretArn = process.env.API_UMAMI_API_TOKEN_SECRET_ARN.trim();
+      }
+      if (process.env.ANALYTICS_COLLECTOR_URL) {
+        config.api.analyticsCollectorUrl = process.env.ANALYTICS_COLLECTOR_URL.trim();
+      }
+      if (process.env.UMAMI_TEAM_ID) {
+        config.api.umamiTeamId = process.env.UMAMI_TEAM_ID.trim();
+      }
     }
 
     // IAC configuration

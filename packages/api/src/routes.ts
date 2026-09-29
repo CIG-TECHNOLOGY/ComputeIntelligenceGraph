@@ -26,6 +26,7 @@ import { nodeListRoutes } from './routes/nodes/list';
 import { bootstrapNodeRoutes } from './routes/bootstrap-node';
 import { nodeSSERoutes } from './sse/nodeStatus';
 import { graphRoutes } from './routes/graph';
+import { analyticsRoutes } from './routes/analytics';
 
 // Shared instances
 const graphEngine = new GraphEngine();
@@ -123,6 +124,9 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
   // ─── Graph snapshot, relationships, and refinement ────────────────────────
   await app.register(graphRoutes);
+
+  // ─── Umami Analytics SaaS control plane and tracker ─────────────────────
+  await app.register(analyticsRoutes);
 
   // ─── CIG Node Onboarding (Phase 1, Requirements 3.1–3.9, 17.1–17.3) ─────────
   await app.register(onboardingRoutes);

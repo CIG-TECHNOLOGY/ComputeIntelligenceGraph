@@ -41,6 +41,44 @@ module.exports = {
       targets: { api: 'PORT' },
     },
 
+    // ── Analytics / Umami ─────────────────────────────────────────────────
+    ANALYTICS_PROVISIONING_MODE: {
+      description: 'Analytics website provisioning mode (local rehearsal or upstream Umami)',
+      example: 'local',
+      targets: { api: 'ANALYTICS_PROVISIONING_MODE', infra: 'ANALYTICS_PROVISIONING_MODE' },
+    },
+    UMAMI_API_URL: {
+      description: 'Private Umami API base URL used by the control plane',
+      example: 'http://localhost:3000',
+      targets: { api: 'UMAMI_API_URL', infra: 'UMAMI_API_URL' },
+    },
+    UMAMI_API_TOKEN: {
+      description: 'Umami API token used only by the server-side provisioner',
+      example: '<YOUR_UMAMI_API_TOKEN>',
+      secret: true,
+      targets: { api: 'UMAMI_API_TOKEN' },
+    },
+    ANALYTICS_COLLECTOR_URL: {
+      description: 'Public CIG analytics collection endpoint injected into the tracker',
+      example: 'http://localhost:8080/api/v1/analytics/collect',
+      targets: { api: 'ANALYTICS_COLLECTOR_URL', infra: 'ANALYTICS_COLLECTOR_URL' },
+    },
+    UMAMI_TEAM_ID: {
+      description: 'Optional Umami team identifier for provisioned websites',
+      example: '',
+      targets: { api: 'UMAMI_TEAM_ID', infra: 'UMAMI_TEAM_ID' },
+    },
+    API_UMAMI_API_TOKEN_SECRET_ARN: {
+      description: 'AWS Secrets Manager ARN containing the server-side Umami API token',
+      example: 'arn:aws:secretsmanager:us-east-2:123456789012:secret:cig/prod/umami/provisioner-token',
+      targets: { infra: 'API_UMAMI_API_TOKEN_SECRET_ARN' },
+    },
+    API_ASSIGN_PUBLIC_IP: {
+      description: 'Assign public IPs to API tasks when the private egress path is unavailable',
+      example: 'false',
+      targets: { infra: 'API_ASSIGN_PUBLIC_IP' },
+    },
+
     // ── Neo4j ──────────────────────────────────────────────────────────────
     NEO4J_URI: {
       description: 'Neo4j connection URI',

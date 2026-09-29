@@ -1,6 +1,6 @@
 # Feature: Reduce VPC / NAT Gateway Cost
 
-**Status:** pending
+**Status:** done — superseded by `../../pending/minimal-always-on-infra/task.md`
 **Priority:** high
 **Current AWS cost:** ~$14.21/month (26% of total spend)
 **Region:** us-east-2
@@ -10,6 +10,8 @@
 ## Goal
 
 VPC costs at $14.21/month are almost entirely NAT Gateway charges. A single NAT Gateway costs $0.045/hour (~$32/month) plus $0.045/GB data processed. This task is to eliminate or minimize NAT Gateway usage.
+
+> **Disposition (2026-08-17):** The current minimal-infrastructure plan records that the API edge and NAT gateway were intentionally removed. Do not run these migration instructions against the current estate. Remaining reproducibility and cost-guardrail work belongs to the linked task.
 
 ---
 

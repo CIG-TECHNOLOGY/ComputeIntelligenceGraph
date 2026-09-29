@@ -20,6 +20,7 @@ import {
   cleanLandingAuthSearchParams,
   consumePendingDashboardRedirect,
   goToDashboard,
+  getDashboardHandoffUrl,
   persistPendingDashboardRedirect,
   resolveDashboardRedirectFromSearch,
 } from "../lib/dashboardHandoff";
@@ -109,7 +110,7 @@ function EmailPasswordView({ onSuccess }: { onSuccess: () => void }) {
           setError(t("auth.passwordMismatch"));
           return;
         }
-        const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+        const dashboardUrl = getDashboardHandoffUrl();
         const { data, error } = await supabase.auth.signUp({
           email: trimmedEmail,
           password,
@@ -170,7 +171,7 @@ function EmailPasswordView({ onSuccess }: { onSuccess: () => void }) {
     setResendError(null);
 
     try {
-      const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+      const dashboardUrl = getDashboardHandoffUrl();
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: submittedEmail,
@@ -441,7 +442,7 @@ function getAuthentikConfig() {
   if (!clientId) {
     throw new Error("NEXT_PUBLIC_AUTHENTIK_CLIENT_ID is required for Authentik social login");
   }
-  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+  const dashboardUrl = getDashboardHandoffUrl();
   return {
     issuerUrl,
     clientId,
@@ -1249,7 +1250,7 @@ export function AuthButton() {
       // Supabase fallback: use Supabase OAuth
       const supabase = getSupabaseClient();
       if (supabase) {
-        const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+        const dashboardUrl = getDashboardHandoffUrl();
         await supabase.auth.signInWithOAuth({
           provider,
           options: { redirectTo: `${dashboardUrl}/auth/callback` },
@@ -1258,7 +1259,7 @@ export function AuthButton() {
     } else {
       // Authentik: PKCE social login
       const config = getAuthentikConfig();
-      const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+      const dashboardUrl = getDashboardHandoffUrl();
       await startAuthentikSocialLogin(config, provider, dashboardUrl);
     }
   }, [authProvider]);

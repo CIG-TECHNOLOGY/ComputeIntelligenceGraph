@@ -77,6 +77,7 @@ export function buildApiSstEnvironment(
       resolved?.albSecurityGroupId ?? config.albSecurityGroupId ?? '',
     API_PUBLIC_SUBNET_IDS: (resolved?.publicSubnetIds ?? config.publicSubnetIds ?? []).join(','),
     API_PRIVATE_SUBNET_IDS: (resolved?.privateSubnetIds ?? config.privateSubnetIds ?? []).join(','),
+    API_ASSIGN_PUBLIC_IP: String(resolved?.assignPublicIp ?? config.assignPublicIp ?? false),
     API_SECURITY_GROUP_IDS: (resolved?.securityGroupIds ?? config.securityGroupIds ?? []).join(','),
     API_DATABASE_URL_SECRET_ARN:
       resolved?.databaseUrlSecretArn ?? config.databaseUrlSecretArn ?? '',
@@ -124,6 +125,14 @@ export function buildApiSstEnvironment(
     API_SMTP_OTP_SUBJECT: resolved?.smtpOtpSubject ?? config.smtpOtpSubject ?? '',
     API_SMTP_PASSWORD_SECRET_ARN:
       resolved?.smtpPasswordSecretArn ?? config.smtpPasswordSecretArn ?? '',
+    ANALYTICS_PROVISIONING_MODE:
+      resolved?.analyticsProvisioningMode ?? config.analyticsProvisioningMode ?? 'local',
+    UMAMI_API_URL: resolved?.umamiApiUrl ?? config.umamiApiUrl ?? '',
+    API_UMAMI_API_TOKEN_SECRET_ARN:
+      resolved?.umamiApiTokenSecretArn ?? config.umamiApiTokenSecretArn ?? '',
+    ANALYTICS_COLLECTOR_URL:
+      resolved?.analyticsCollectorUrl ?? config.analyticsCollectorUrl ?? '',
+    UMAMI_TEAM_ID: resolved?.umamiTeamId ?? config.umamiTeamId ?? '',
   };
 }
 
