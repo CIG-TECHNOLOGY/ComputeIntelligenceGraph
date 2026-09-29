@@ -91,6 +91,8 @@ jobs:
             NEXT_PUBLIC_AUTHENTIK_URL=${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
             NEXT_PUBLIC_AUTHENTIK_CLIENT_ID=${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'cig-dashboard' }}
             NEXT_PUBLIC_APP_VERSION=${{ needs.resolve-tag.outputs.tag }}
+            NEXT_PUBLIC_RELEASE_TAG=${{ needs.resolve-tag.outputs.tag }}
+            NEXT_PUBLIC_APP_BUILD=${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
