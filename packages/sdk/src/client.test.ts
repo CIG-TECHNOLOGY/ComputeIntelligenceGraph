@@ -1,7 +1,28 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CigClient } from './client';
+import { CigApiError } from './client';
 
 describe('CigClient', () => {
+  it('preserves status and endpoint context for API failures', async () => {
+    const fetchImpl = vi.fn(() => Promise.resolve(
+      new Response(JSON.stringify({ error: 'column "public_share_token_hash" does not exist' }), {
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: { 'content-type': 'application/json' },
+      }),
+    ));
+    const client = new CigClient({
+      baseUrl: 'https://api.example.com',
+      fetch: fetchImpl as unknown as typeof fetch,
+    });
+
+    await expect(client.getAnalyticsSiteStats('site_1')).rejects.toMatchObject({
+      name: 'CigApiError',
+      status: 500,
+      path: '/api/v1/analytics/sites/site_1/stats',
+    } satisfies Partial<CigApiError>);
+  });
+
   it('binds fetch to the global object before issuing requests', async () => {
     let observedThis: unknown;
 

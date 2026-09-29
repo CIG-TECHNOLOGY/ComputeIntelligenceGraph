@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@cig-technology/i18n.svg)](https://www.npmjs.com/package/@cig-technology/i18n)
 [![npm downloads](https://img.shields.io/npm/dm/@cig-technology/i18n.svg)](https://www.npmjs.com/package/@cig-technology/i18n)
-[![license](https://img.shields.io/npm/l/@cig-technology/i18n.svg)](https://github.com/edwardcalderon/cig-i18n/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/@cig-technology/i18n.svg)](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/blob/main/packages/i18n/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@cig-technology/i18n)](https://bundlephobia.com/package/@cig-technology/i18n)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-blue.svg)](https://www.typescriptlang.org/)
 

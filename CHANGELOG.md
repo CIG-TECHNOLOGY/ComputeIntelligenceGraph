@@ -1,3 +1,8 @@
+## [1.0.27](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.26...v1.0.27) (2026-09-29)
+
+- Dashboard/API clients now surface actionable workspace and analytics deployment errors.
+- Production API manual deployments now apply database migrations before rollout.
+- Canonical GitHub repository references now point to CIG-TECHNOLOGY/ComputeIntelligenceGraph.
 ## [1.0.26](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.25...v1.0.26) (2026-09-29)
 
 

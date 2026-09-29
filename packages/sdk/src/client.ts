@@ -66,6 +66,18 @@ function resolveUrl(baseUrl: string, path: string): string {
   return `${normalizeBaseUrl(baseUrl)}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export class CigApiError extends Error {
+  readonly status: number;
+  readonly path: string;
+
+  constructor(message: string, status: number, path: string) {
+    super(message);
+    this.name = 'CigApiError';
+    this.status = status;
+    this.path = path;
+  }
+}
+
 async function buildErrorMessage(response: Response): Promise<string> {
   const fallback = `API error ${response.status}: ${response.statusText}`;
 
@@ -132,7 +144,7 @@ export class CigClient {
     const response = await this.requestRaw(path, init);
 
     if (!response.ok) {
-      throw new Error(await buildErrorMessage(response));
+      throw new CigApiError(await buildErrorMessage(response), response.status, path);
     }
 
     if (response.status === 204) {
@@ -157,8 +169,7 @@ export class CigClient {
       }
 
       const message = await buildErrorMessage(response);
-      const error = new Error(message);
-      (error as Error & { status?: number }).status = response.status;
+      const error = new CigApiError(message, response.status, paths[index]);
 
       if (response.status === 404 && index < paths.length - 1) {
         lastError = error;

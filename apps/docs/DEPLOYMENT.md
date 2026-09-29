@@ -61,7 +61,7 @@ File: `apps/docs/docusaurus.config.ts`
 Key settings:
 - `url`: https://docs.cig.lat (for custom domain)
 - `baseUrl`: / (served at root of docs subdirectory)
-- `organizationName`: edwardcalderon
+- `organizationName`: CIG-TECHNOLOGY
 - `projectName`: ComputeIntelligenceGraph
 
 ### GitHub Pages Config

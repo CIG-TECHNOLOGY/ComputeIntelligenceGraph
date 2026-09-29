@@ -72,4 +72,18 @@ describe("dashboard organization workspace client", () => {
       body: JSON.stringify({ name: "Platform", domain: "acme.example" }),
     });
   });
+
+  it("returns actionable feedback when the deployed API does not have workspace routes", async () => {
+    const requestRaw = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+      json: async () => ({ error: "Route GET:/api/v1/organizations not found" }),
+    } as Response);
+    mockGetDashboardClient.mockReturnValue({ requestRaw } as never);
+
+    await expect(listOrganizations()).rejects.toThrow(
+      "Workspace services are not available on the current API deployment (HTTP 404). Deploy the latest API, then retry.",
+    );
+  });
 });

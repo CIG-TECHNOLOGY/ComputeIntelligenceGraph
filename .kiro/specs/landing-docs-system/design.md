@@ -176,7 +176,7 @@ module.exports = {
   tagline: 'Compute Intelligence Graph',
   url: 'https://docs.cig.lat',
   baseUrl: '/',
-  organizationName: 'edwardcalderon',
+  organizationName: 'CIG-TECHNOLOGY',
   projectName: 'ComputeIntelligenceGraph',
   
   i18n: {

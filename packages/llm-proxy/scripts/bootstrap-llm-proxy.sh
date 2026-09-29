@@ -173,7 +173,7 @@ create_codepipeline() {
 
   PIPELINE_NAME="llm-proxy-deployment-pipeline"
   REPOSITORY_NAME="ComputeIntelligenceGraph"
-  REPOSITORY_OWNER="edwardcalderon"
+  REPOSITORY_OWNER="CIG-TECHNOLOGY"
   REPOSITORY_BRANCH="main"
 
   # Check if pipeline already exists

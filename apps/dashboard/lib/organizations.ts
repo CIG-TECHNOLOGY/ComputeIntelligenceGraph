@@ -1,4 +1,5 @@
 import { getDashboardClient } from "./cigClient";
+import { formatDashboardApiError } from "./apiErrors";
 
 export type OrganizationRole = "owner" | "admin" | "member";
 
@@ -41,9 +42,12 @@ export function getActiveOrganizationId(): string | null {
 async function getErrorMessage(response: Response): Promise<string> {
   try {
     const payload = await response.json() as { error?: string; message?: string };
-    return payload.error ?? payload.message ?? "Unable to update the active workspace.";
+    return formatDashboardApiError({
+      status: response.status,
+      message: payload.error ?? payload.message,
+    }, "workspace");
   } catch {
-    return "Unable to update the active workspace.";
+    return formatDashboardApiError({ status: response.status }, "workspace");
   }
 }
 

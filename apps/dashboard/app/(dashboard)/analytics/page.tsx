@@ -14,6 +14,7 @@ import {
   provisionAnalyticsSite,
 } from "../../../lib/api";
 import { DASHBOARD_API_URL } from "../../../lib/cigClient";
+import { formatDashboardApiError } from "../../../lib/apiErrors";
 
 function statusClass(status: AnalyticsSite["status"]): string {
   if (status === "active") return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
@@ -63,7 +64,7 @@ export default function AnalyticsPage() {
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["analytics", "sites"] });
     },
-    onError: (mutationError) => setError(mutationError instanceof Error ? mutationError.message : "Unable to create site"),
+    onError: (mutationError) => setError(formatDashboardApiError(mutationError instanceof Error ? mutationError : {}, "analytics")),
   });
 
   const provisionMutation = useMutation({
@@ -72,7 +73,7 @@ export default function AnalyticsPage() {
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
-    onError: (mutationError) => setError(mutationError instanceof Error ? mutationError.message : "Unable to provision site"),
+    onError: (mutationError) => setError(formatDashboardApiError(mutationError instanceof Error ? mutationError : {}, "analytics")),
   });
 
   const deleteMutation = useMutation({
@@ -81,7 +82,7 @@ export default function AnalyticsPage() {
       setSelectedId(null);
       await queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
-    onError: (mutationError) => setError(mutationError instanceof Error ? mutationError.message : "Unable to delete site"),
+    onError: (mutationError) => setError(formatDashboardApiError(mutationError instanceof Error ? mutationError : {}, "analytics")),
   });
 
   const trackerTag = useMemo(() => {
@@ -120,8 +121,8 @@ export default function AnalyticsPage() {
           : "Signal room is ready. Open your site once to send the first approved pageview.",
       });
       if (openSignalRoom) router.push(`/analytics/${site.id}`);
-    } catch {
-      const message = "Your tag may be receiving events, but the signal-room API is not ready. The room was not opened; deploy or restore the analytics API, then verify again.";
+    } catch (caught) {
+      const message = formatDashboardApiError(caught instanceof Error ? caught : {}, "analytics");
       setPipelineCheck({ siteId: site.id, state: "error", message });
       setError(message);
     }
@@ -144,6 +145,11 @@ export default function AnalyticsPage() {
 
       {error && <div role="alert" className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">{error}</div>}
 
+      {sitesQuery.isError && !error && <div role="alert" className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">
+        <p>{formatDashboardApiError(sitesQuery.error instanceof Error ? sitesQuery.error : {}, "analytics")}</p>
+        <button type="button" onClick={() => void sitesQuery.refetch()} className="mt-2 font-semibold underline underline-offset-2">Retry loading analytics</button>
+      </div>}
+
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -154,7 +160,9 @@ export default function AnalyticsPage() {
             <button type="button" onClick={() => sitesQuery.refetch()} className="rounded-lg border border-cig p-2 text-cig-secondary hover:text-cig-primary" aria-label="Refresh sites"><RefreshCw className="size-4" /></button>
           </div>
 
-          {sitesQuery.isLoading ? <div className="rounded-xl border border-cig bg-cig-card p-8 text-sm text-cig-muted">Loading your sites…</div> : sites.length === 0 ? (
+          {sitesQuery.isLoading ? <div className="rounded-xl border border-cig bg-cig-card p-8 text-sm text-cig-muted">Loading your sites…</div> : sitesQuery.isError ? (
+            <div className="rounded-xl border border-red-400/30 bg-red-500/5 p-8 text-sm text-red-600 dark:text-red-300">Analytics sites could not be loaded. Use the retry action above after the API deployment is available.</div>
+          ) : sites.length === 0 ? (
             <div className="rounded-xl border border-dashed border-cyan-400/40 bg-cig-card p-8">
               <h3 className="text-base font-semibold text-cig-primary">Start tracking in under a minute</h3>
               <p className="mt-2 max-w-xl text-sm text-cig-secondary">Create your first website on the right. We’ll issue an opaque site ID, provision the analytics backend, and generate a ready-to-paste tag.</p>
@@ -170,6 +178,7 @@ export default function AnalyticsPage() {
 
           {selectedSite && selectedSite.status === "active" && (
             <div className="space-y-3">
+              {statsQuery.isError && <div role="alert" className="rounded-lg border border-red-400/30 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-300">{formatDashboardApiError(statsQuery.error instanceof Error ? statsQuery.error : {}, "analytics")}</div>}
               <div className="grid grid-cols-3 gap-3">
                 <Metric label="Pageviews (30d)" value={formatNumber(statsQuery.data?.totals.pageviews ?? 0)} />
                 <Metric label="Events (30d)" value={formatNumber(statsQuery.data?.totals.events ?? 0)} />

@@ -247,7 +247,7 @@ module.exports = {
     },
     NEXT_PUBLIC_LEGACY_SITE_URL: {
       description: 'Legacy public site URL',
-      example: 'https://edwardcalderon.github.io/ComputeIntelligenceGraph',
+      example: 'https://cig-technology.github.io/ComputeIntelligenceGraph',
       targets: { landing: 'NEXT_PUBLIC_LEGACY_SITE_URL' },
     },
     NEXT_PUBLIC_API_URL: {

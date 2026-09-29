@@ -115,7 +115,7 @@ The pipeline is configured to use:
 
 | Setting | Value |
 |---------|-------|
-| **Repository Owner** | `edwardcalderon` |
+| **Repository Owner** | `CIG-TECHNOLOGY` |
 | **Repository Name** | `ComputeIntelligenceGraph` |
 | **Branch** | `main` |
 | **Connection** | `github-cig` |

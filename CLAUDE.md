@@ -7,7 +7,7 @@ This repo has two remotes. **Both must stay in sync on every push.**
 | Remote | URL | Role |
 |--------|-----|------|
 | `origin` | `https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph` | Canonical org repo |
-| `upstream` | `https://github.com/edwardcalderon/ComputeIntelligenceGraph` | Personal mirror / upstream |
+| `upstream` | `https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph` | Canonical production repository |
 
 After every commit (including release bumps) push to **both**:
 

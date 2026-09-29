@@ -85,7 +85,7 @@ LLM_PROXY_DOMAIN=llm-proxy.cig.technology
 INFRA_APP_NAME=llm-proxy
 INFRA_PROJECT_TAG=llm-proxy
 INFRA_PIPELINE_REPO_NAME=ComputeIntelligenceGraph
-INFRA_PIPELINE_REPO_OWNER=edwardcalderon
+INFRA_PIPELINE_REPO_OWNER=CIG-TECHNOLOGY
 INFRA_CODESTAR_CONNECTION_ARN=arn:aws:codestar-connections:us-east-2:520900722378:connection/github-cig
 ```
 

@@ -9,6 +9,7 @@ import {
   type OrganizationWorkspace,
   updateOrganizationMembershipPolicy,
 } from "../lib/organizations";
+import { formatDashboardApiError } from "../lib/apiErrors";
 
 export function OrganizationManagement() {
   const [workspace, setWorkspace] = useState<OrganizationWorkspace | null>(null);
@@ -24,7 +25,10 @@ export function OrganizationManagement() {
     void listOrganizations().then((result) => {
       setWorkspace(result);
       setSelectedId(result.activeOrganizationId);
-    }).catch(() => setError("Organization settings could not be loaded."));
+    }).catch((caught) => setError(formatDashboardApiError(
+      caught instanceof Error ? caught : { message: "Organization settings could not be loaded." },
+      "workspace",
+    )));
   }, []);
 
   const organization = useMemo(
@@ -48,7 +52,7 @@ export function OrganizationManagement() {
       setInviteEmail("");
       setMessage("Invitation sent. It can only be accepted by that email address.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to send invitation.");
+      setError(formatDashboardApiError(caught instanceof Error ? caught : {}, "workspace"));
     }
   }
 
@@ -60,7 +64,7 @@ export function OrganizationManagement() {
       setShareUrl(link.url);
       setMessage(`Share link created. It expires ${new Date(link.expiresAt).toLocaleDateString()}.`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to create share link.");
+      setError(formatDashboardApiError(caught instanceof Error ? caught : {}, "workspace"));
     }
   }
 
@@ -74,7 +78,7 @@ export function OrganizationManagement() {
         ? "Verified users at this domain can now join this shared workspace."
         : "This workspace now requires an invitation or a controlled share link.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to update access policy.");
+      setError(formatDashboardApiError(caught instanceof Error ? caught : {}, "workspace"));
     }
   }
 
