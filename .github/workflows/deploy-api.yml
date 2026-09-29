@@ -33,7 +33,7 @@ env:
   DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || 'cigtechnology' }}
   DOCKERHUB_API_IMAGE: ${{ vars.DOCKERHUB_API_IMAGE || 'cig-api' }}
   API_HOSTED_ZONE_DOMAIN: ${{ vars.API_HOSTED_ZONE_DOMAIN || 'cig.technology' }}
-  API_CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'https://app.cig.lat,https://cig.lat' }}
+  API_CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'https://app.cig.technology,https://cig.technology,https://app.cig.lat,https://cig.lat' }}
   AWS_ROLE_TO_ASSUME: arn:aws:iam::520900722378:role/github-actions-role
   INFRA_APP_NAME: cig-api
   INFRA_PIPELINE_REPO: ${{ vars.INFRA_PIPELINE_REPO || 'CIG-TECHNOLOGY/ComputeIntelligenceGraph' }}

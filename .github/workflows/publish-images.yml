@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Resolve version and affected services
         id: meta
@@ -268,8 +268,8 @@ jobs:
                 echo 'context=.'
                 echo 'build_args<<EOF'
                 echo "NEXT_PUBLIC_API_URL=https://api.cig.technology"
-                echo "NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.lat' }}"
-                echo "NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.lat' }}"
+                echo "NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.technology' }}"
+                echo "NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.technology' }}"
                 echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}"
                 echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}"
                 echo "NEXT_PUBLIC_AUTHENTIK_URL=${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}"

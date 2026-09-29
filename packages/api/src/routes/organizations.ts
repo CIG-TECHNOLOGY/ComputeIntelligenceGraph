@@ -38,7 +38,7 @@ async function sendInvitationEmail(options: { email: string; organizationName: s
   if (!process.env.SMTP_HOST || !process.env.SMTP_FROM) return;
 
   const nodemailer = await import('nodemailer');
-  const dashboardUrl = (process.env.DASHBOARD_URL ?? process.env.SITE_URL ?? 'https://dashboard.cig.technology').replace(/\/$/, '');
+  const dashboardUrl = (process.env.DASHBOARD_URL ?? process.env.SITE_URL ?? 'https://app.cig.technology').replace(/\/$/, '');
   const acceptUrl = `${dashboardUrl}/organizations/invitations/${encodeURIComponent(options.token)}`;
   const transport = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -143,7 +143,7 @@ export async function organizationRoutes(app: FastifyInstance): Promise<void> {
         role: body.role ?? 'member',
         maxUses: body.maxUses ?? 10,
       });
-      const dashboardUrl = (process.env.DASHBOARD_URL ?? process.env.SITE_URL ?? 'https://dashboard.cig.technology').replace(/\/$/, '');
+      const dashboardUrl = (process.env.DASHBOARD_URL ?? process.env.SITE_URL ?? 'https://app.cig.technology').replace(/\/$/, '');
       return reply.status(201).send({
         joinLink: {
           id: joinLink.id,

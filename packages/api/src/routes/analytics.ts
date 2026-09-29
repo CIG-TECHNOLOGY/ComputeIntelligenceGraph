@@ -148,21 +148,31 @@ export async function analyticsRoutes(app: FastifyInstance): Promise<void> {
   app.post('/api/v1/analytics/sites/:siteId/public-access', { preHandler: [authenticate] }, async (request, reply) => {
     try {
       const { siteId } = request.params as { siteId: string };
-      const enabled = (request.body as { enabled?: boolean } | undefined)?.enabled === true;
-      return reply.send(await setPublicAccess(userId(request as AuthenticatedRequest), siteId, enabled));
+      const body = request.body as { enabled?: boolean; paused?: boolean; rotate?: boolean } | undefined;
+      return reply.send(await setPublicAccess(
+        userId(request as AuthenticatedRequest),
+        siteId,
+        body?.enabled === true,
+        body?.paused === true,
+        body?.rotate === true,
+      ));
     } catch (error) {
       return sendError(reply, error);
     }
   });
 
   app.get('/api/v1/analytics/public/:token', async (request, reply) => {
-    const { token } = request.params as { token: string };
-    const days = Number((request.query as { days?: string }).days ?? 30);
-    const result = await getPublicAnalyticsView(token, days);
-    if (!result) return reply.status(404).send({ error: 'Public analytics link not found', statusCode: 404 });
-    return reply
-      .header('cache-control', 'private, max-age=15, stale-while-revalidate=30')
-      .send(result);
+    try {
+      const { token } = request.params as { token: string };
+      const days = Number((request.query as { days?: string }).days ?? 30);
+      const result = await getPublicAnalyticsView(token, days);
+      if (!result) return reply.status(404).send({ error: 'Public analytics link not found', statusCode: 404 });
+      return reply
+        .header('cache-control', 'private, max-age=15, stale-while-revalidate=30')
+        .send(result);
+    } catch (error) {
+      return sendError(reply, error);
+    }
   });
 
   app.get('/api/v1/analytics/tracker.js', async (request, reply) => {

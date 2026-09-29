@@ -29,7 +29,7 @@ env:
   ECS_SERVICE: cig-dashboard-production-service
   ECS_TASK_FAMILY: cig-dashboard-production
   ECS_CONTAINER_NAME: dashboard
-  DASHBOARD_URL: https://app.cig.lat
+  DASHBOARD_URL: https://app.cig.technology
 
 jobs:
   resolve-tag:
@@ -84,8 +84,8 @@ jobs:
           tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ needs.resolve-tag.outputs.tag }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.cig.technology
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.lat' }}
-            NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.lat' }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.technology' }}
+            NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.technology' }}
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL || secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY }}
             NEXT_PUBLIC_AUTHENTIK_URL=${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
@@ -109,7 +109,7 @@ jobs:
       id-token: write
     environment:
       name: production
-      url: https://app.cig.lat
+      url: https://app.cig.technology
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

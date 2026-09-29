@@ -18,6 +18,7 @@ interface SiteRow {
   last_event_at: string | null;
   public_share_token_hash: string | null;
   public_share_enabled: boolean | number;
+  public_share_paused: boolean | number;
   public_share_created_at: string | null;
   created_at: string;
   updated_at: string;
@@ -43,6 +44,7 @@ export interface AnalyticsStats {
 
 export interface AnalyticsPublicAccess {
   enabled: boolean;
+  paused: boolean;
   url?: string;
   token?: string;
 }
@@ -87,7 +89,7 @@ function toSite(row: SiteRow): PublicAnalyticsSite {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     lastEventAt: row.last_event_at,
-    publicAccess: { enabled: Boolean(row.public_share_enabled) },
+    publicAccess: { enabled: Boolean(row.public_share_enabled), paused: Boolean(row.public_share_paused) },
     ...(row.last_error_code ? { provisioningError: row.last_error_code } : {}),
   };
 }
@@ -106,7 +108,8 @@ function selectSiteColumns(alias = ''): string {
   const prefix = alias ? `${alias}.` : '';
   return `${prefix}id, ${prefix}organization_id, ${prefix}name, ${prefix}domain, ${prefix}status,
             ${prefix}umami_website_id, ${prefix}last_error_code, ${prefix}last_event_at,
-            ${prefix}public_share_token_hash, ${prefix}public_share_enabled, ${prefix}public_share_created_at,
+            ${prefix}public_share_token_hash, ${prefix}public_share_enabled, ${prefix}public_share_paused,
+            ${prefix}public_share_created_at,
             ${prefix}created_at, ${prefix}updated_at`;
 }
 
@@ -409,26 +412,38 @@ export async function setPublicAccess(
   userId: string,
   siteId: string,
   enabled: boolean,
+  paused = false,
+  rotate = false,
 ): Promise<{ publicAccess: AnalyticsPublicAccess }> {
   const site = await findSiteForUser(userId, siteId);
   if (!site || site.status === 'deleted') throw Object.assign(new Error('Site not found'), { statusCode: 404 });
 
   if (!enabled) {
     await query(
-      `UPDATE analytics_sites SET public_share_token_hash = NULL, public_share_enabled = FALSE, public_share_created_at = NULL, updated_at = ? WHERE id = ?`,
+      `UPDATE analytics_sites SET public_share_token_hash = NULL, public_share_enabled = FALSE, public_share_paused = FALSE, public_share_created_at = NULL, updated_at = ? WHERE id = ?`,
       [new Date().toISOString(), siteId],
     );
     await writeAudit(site.organization_id, siteId, userId, 'public_access_disabled', 'success');
-    return { publicAccess: { enabled: false } };
+    return { publicAccess: { enabled: false, paused: false } };
+  }
+
+  const timestamp = new Date().toISOString();
+  if (site.public_share_token_hash && !rotate) {
+    await query(
+      `UPDATE analytics_sites SET public_share_enabled = TRUE, public_share_paused = CASE WHEN ? = 1 THEN TRUE ELSE FALSE END, updated_at = ? WHERE id = ?`,
+      [paused ? 1 : 0, timestamp, siteId],
+    );
+    await writeAudit(site.organization_id, siteId, userId, paused ? 'public_access_paused' : 'public_access_resumed', 'success');
+    return { publicAccess: { enabled: true, paused } };
   }
 
   const token = randomBytes(32).toString('base64url');
   await query(
-    `UPDATE analytics_sites SET public_share_token_hash = ?, public_share_enabled = TRUE, public_share_created_at = ?, updated_at = ? WHERE id = ?`,
-    [shareTokenHash(token), new Date().toISOString(), new Date().toISOString(), siteId],
+    `UPDATE analytics_sites SET public_share_token_hash = ?, public_share_enabled = TRUE, public_share_paused = CASE WHEN ? = 1 THEN TRUE ELSE FALSE END, public_share_created_at = ?, updated_at = ? WHERE id = ?`,
+    [shareTokenHash(token), paused ? 1 : 0, timestamp, timestamp, siteId],
   );
-  await writeAudit(site.organization_id, siteId, userId, 'public_access_enabled', 'success');
-  return { publicAccess: { enabled: true, token, url: publicShareUrlForSite(token) } };
+  await writeAudit(site.organization_id, siteId, userId, paused ? 'public_access_created_paused' : 'public_access_enabled', 'success');
+  return { publicAccess: { enabled: true, paused, token, url: publicShareUrlForSite(token) } };
 }
 
 async function findSiteByPublicToken(token: string): Promise<SiteRow | null> {
@@ -445,6 +460,9 @@ export async function getPublicAnalyticsView(token: string, rangeDays = 30): Pro
   if (!token || token.length > 200) return null;
   const site = await findSiteByPublicToken(token);
   if (!site) return null;
+  if (site.public_share_paused) {
+    throw Object.assign(new Error('Public analytics link is under maintenance'), { statusCode: 423 });
+  }
   return { site: toSite(site), insights: await buildInsights(site, rangeDays) };
 }
 

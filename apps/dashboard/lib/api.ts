@@ -156,8 +156,8 @@ export const getAnalyticsSiteStats = (siteId: string): Promise<AnalyticsStats> =
 export const getAnalyticsSiteInsights = (siteId: string, days = 30): Promise<AnalyticsInsightsResponse> =>
   getClient().getAnalyticsSiteInsights(siteId, days);
 
-export const setAnalyticsPublicAccess = (siteId: string, enabled: boolean): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
-  getClient().setAnalyticsPublicAccess(siteId, enabled);
+export const setAnalyticsPublicAccess = (siteId: string, enabled: boolean, paused = false, rotate = false): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
+  getClient().setAnalyticsPublicAccess(siteId, enabled, paused, rotate);
 
 export const getPublicAnalyticsView = (token: string, days = 30): Promise<AnalyticsInsightsResponse> =>
   getClient().getPublicAnalyticsView(token, days);

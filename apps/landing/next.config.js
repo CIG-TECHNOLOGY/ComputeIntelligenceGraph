@@ -126,7 +126,7 @@ const nextConfig = {
       'https://cig-technology.github.io/ComputeIntelligenceGraph',
     NEXT_PUBLIC_DASHBOARD_URL: process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001',
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
-    NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL || 'https://cig.lat/documentation',
+    NEXT_PUBLIC_DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL || 'https://cig.technology/documentation',
     NEXT_PUBLIC_AUTHENTIK_URL: process.env.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology',
     NEXT_PUBLIC_AUTHENTIK_CLIENT_ID: resolvedAuthentikClientId,
   },

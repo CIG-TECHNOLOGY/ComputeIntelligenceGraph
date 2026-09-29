@@ -69,7 +69,7 @@ export default function InstallContent({
   const [latestPublishedCliVersion, setLatestPublishedCliVersion] = useState<string | null | undefined>(undefined);
   const docsUrl = useResolvedDocsUrl();
   const landingUrl = useResolvedLandingUrl();
-  const installCommand = "curl -fsSL https://cig.lat/install.sh | bash";
+  const installCommand = "curl -fsSL https://cig.technology/install.sh | bash";
 
   useEffect(() => {
     let active = true;
@@ -110,7 +110,7 @@ export default function InstallContent({
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200/80 bg-cyan-50/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-900 dark:border-cyan-800/70 dark:bg-cyan-950/45 dark:text-cyan-100">
             <BadgeCheck size={14} />
-            cig.lat/install
+            cig.technology/install
           </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/80 px-4 py-1.5 text-xs font-medium text-zinc-600 dark:border-zinc-800/80 dark:bg-zinc-900/80 dark:text-zinc-300">
             <BadgeCheck size={14} />

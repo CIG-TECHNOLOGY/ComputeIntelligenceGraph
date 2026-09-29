@@ -157,6 +157,14 @@ export async function applyMigrations(
       continue;
     }
 
+    if (
+      fileName === '012_analytics_public_maintenance.sql' &&
+      (await columnExists('analytics_sites', 'public_share_paused'))
+    ) {
+      skipped.push(fileName);
+      continue;
+    }
+
     await withTransaction(async (txQuery) => {
       if (fileName === '001_auth_provisioning.sql') {
         await prepareLegacyUsersTableIfNeeded(txQuery);

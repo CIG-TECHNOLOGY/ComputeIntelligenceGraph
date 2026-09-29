@@ -249,10 +249,10 @@ export class CigClient {
     );
   }
 
-  setAnalyticsPublicAccess(siteId: string, enabled: boolean): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+  setAnalyticsPublicAccess(siteId: string, enabled: boolean, paused = false, rotate = false): Promise<{ publicAccess: AnalyticsPublicAccess }> {
     return this.request<{ publicAccess: AnalyticsPublicAccess }>(
       `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/public-access`,
-      { method: "POST", body: JSON.stringify({ enabled }) },
+      { method: "POST", body: JSON.stringify({ enabled, paused, rotate }) },
     );
   }
 

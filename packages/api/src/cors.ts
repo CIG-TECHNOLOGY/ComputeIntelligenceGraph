@@ -1,4 +1,7 @@
 const PRODUCTION_CORS_ORIGINS = [
+  'https://cig.technology',
+  'https://www.cig.technology',
+  'https://app.cig.technology',
   'https://cig.lat',
   'https://www.cig.lat',
   'https://app.cig.lat',

@@ -21,13 +21,13 @@ The web installer resolves the published npm package version first so the
 curl | bash path uses the same binary and provenance as npm installs.
 
 Web installer:
-  curl -fsSL https://cig.lat/install.sh | bash
+  curl -fsSL https://cig.technology/install.sh | bash
 
 Debug tracing:
-  CIG_INSTALL_TRACE=1 curl -fsSL https://cig.lat/install.sh | bash
+  CIG_INSTALL_TRACE=1 curl -fsSL https://cig.technology/install.sh | bash
 
 Install guide:
-  https://cig.lat/install
+  https://cig.technology/install
 EOF
 }
 

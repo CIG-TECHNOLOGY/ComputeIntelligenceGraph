@@ -1,7 +1,12 @@
-const DEFAULT_LANDING_URL = "https://cig.lat";
-const DEFAULT_DASHBOARD_URL = "https://app.cig.lat";
-const DEFAULT_DOCS_URL = "https://cig.lat/documentation";
-const PRODUCTION_DASHBOARD_HOSTNAME = "app.cig.lat";
+const DEFAULT_LANDING_URL = "https://cig.technology";
+const DEFAULT_DASHBOARD_URL = "https://app.cig.technology";
+const DEFAULT_DOCS_URL = "https://cig.technology/documentation";
+const PRODUCTION_DASHBOARD_HOSTNAMES = new Set([
+  "app.cig.technology",
+  // Keep the former cosmetic hostname recognized while it redirects to the
+  // canonical product dashboard.
+  "app.cig.lat",
+]);
 
 export type UrlContext = {
   hostname?: string | null;
@@ -37,7 +42,7 @@ export function isLoopbackHostname(hostname: string | null | undefined): boolean
 }
 
 export function isProtectedDashboardHostname(hostname: string | null | undefined): boolean {
-  return (hostname ?? "").trim().toLowerCase() === PRODUCTION_DASHBOARD_HOSTNAME;
+  return PRODUCTION_DASHBOARD_HOSTNAMES.has((hostname ?? "").trim().toLowerCase());
 }
 
 function formatLocalOriginUrl(hostname: string, protocol: string, port: number): string {

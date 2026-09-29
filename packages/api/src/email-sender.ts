@@ -57,7 +57,7 @@ const COPY: Record<string, LocaleCopy> = {
     resourcesTitle: 'EXPLORE MORE',
     docsCta: 'Read the Docs',
     githubCta: 'View on GitHub',
-    footerNote: 'You received this email because you subscribed at cig.lat.',
+    footerNote: 'You received this email because you subscribed at cig.technology.',
     unsubscribeLabel: 'Unsubscribe',
     copyright: '© {year} Compute Intelligence Graph · Open-source under MIT License',
   },
@@ -99,7 +99,7 @@ const COPY: Record<string, LocaleCopy> = {
     resourcesTitle: 'EXPLORAR MÁS',
     docsCta: 'Leer la documentación',
     githubCta: 'Ver en GitHub',
-    footerNote: 'Recibiste este correo porque te suscribiste en cig.lat.',
+    footerNote: 'Recibiste este correo porque te suscribiste en cig.technology.',
     unsubscribeLabel: 'Cancelar suscripción',
     copyright: '© {year} Compute Intelligence Graph · Código abierto bajo licencia MIT',
   },
@@ -311,9 +311,9 @@ export async function sendWelcomeNewsletter(opts: SendWelcomeEmailOptions): Prom
   }
 
   const copy = getCopy(opts.locale);
-  const siteUrl = process.env.SITE_URL ?? 'https://cig.lat';
-  const dashboardUrl = process.env.DASHBOARD_URL ?? 'https://app.cig.lat';
-  const docsUrl = process.env.DOCS_URL ?? 'https://cig.lat/documentation';
+  const siteUrl = process.env.SITE_URL ?? 'https://cig.technology';
+  const dashboardUrl = process.env.DASHBOARD_URL ?? 'https://app.cig.technology';
+  const docsUrl = process.env.DOCS_URL ?? 'https://cig.technology/documentation';
   const githubUrl = 'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph';
   const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${opts.unsubscribeToken}`;
 

@@ -53,6 +53,22 @@ describe("siteUrl", () => {
     ).toBe("https://cig.lat");
   });
 
+  it("uses the canonical technology domains when no public URLs are configured", () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    delete process.env.NEXT_PUBLIC_DASHBOARD_URL;
+    delete process.env.NEXT_PUBLIC_DOCS_URL;
+
+    expect(resolveLandingUrl({ hostname: "app.cig.technology", protocol: "https:" })).toBe(
+      "https://cig.technology",
+    );
+    expect(resolveDashboardUrl({ hostname: "cig.technology", protocol: "https:" })).toBe(
+      "https://app.cig.technology",
+    );
+    expect(resolveDocsUrl({ hostname: "cig.technology", protocol: "https:" })).toBe(
+      "https://cig.technology/documentation",
+    );
+  });
+
   it("uses localhost docs when the dashboard runs on loopback", () => {
     process.env.NEXT_PUBLIC_DOCS_URL = "https://cig.lat/documentation";
 

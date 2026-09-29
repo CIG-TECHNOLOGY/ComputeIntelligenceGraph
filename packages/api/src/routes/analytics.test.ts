@@ -33,6 +33,7 @@ describe('analytics routes', () => {
         id TEXT PRIMARY KEY, organization_id TEXT NOT NULL, name TEXT NOT NULL, domain TEXT NOT NULL,
         status TEXT NOT NULL, umami_website_id TEXT, last_error_code TEXT, idempotency_key TEXT,
         last_event_at TEXT, public_share_token_hash TEXT, public_share_enabled INTEGER NOT NULL DEFAULT 0,
+        public_share_paused INTEGER NOT NULL DEFAULT 0,
         public_share_created_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
       )
     `);
@@ -179,6 +180,32 @@ describe('analytics routes', () => {
     expect(enabled.json().publicAccess.url).toMatch(/\/analytics\/share\/[A-Za-z0-9_-]+$/);
 
     const shareToken = enabled.json().publicAccess.token as string;
+
+    const paused = await app.inject({
+      method: 'POST',
+      url: `/api/v1/analytics/sites/${siteId}/public-access`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { enabled: true, paused: true },
+    });
+    expect(paused.statusCode).toBe(200);
+    expect(paused.json()).toMatchObject({ publicAccess: { enabled: true, paused: true } });
+
+    const maintenanceView = await app.inject({
+      method: 'GET',
+      url: `/api/v1/analytics/public/${shareToken}`,
+    });
+    expect(maintenanceView.statusCode).toBe(423);
+    expect(maintenanceView.json()).toMatchObject({ error: 'Public analytics link is under maintenance' });
+
+    const resumed = await app.inject({
+      method: 'POST',
+      url: `/api/v1/analytics/sites/${siteId}/public-access`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { enabled: true, paused: false },
+    });
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toMatchObject({ publicAccess: { enabled: true, paused: false } });
+
     const publicView = await app.inject({
       method: 'GET',
       url: `/api/v1/analytics/public/${shareToken}`,

@@ -170,7 +170,7 @@ function sumResourceCounts(counts: Record<string, number>): number {
 
 function buildDocsUrl(mode: ChatInfrastructureSnapshot['deploymentMode']): string {
   return mode === 'managed'
-    ? 'https://cig.lat/documentation'
+    ? 'https://cig.technology/documentation'
     : 'http://localhost:3004/documentation';
 }
 

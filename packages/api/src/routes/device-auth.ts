@@ -25,7 +25,7 @@ import { writeAuditEvent } from '../audit';
 
 const DEVICE_CODE_EXPIRY_SECONDS = 900; // 15 minutes
 const POLL_RATE_LIMIT_MS = 5_000; // 1 request per 5 seconds per device_code
-const VERIFICATION_URI = process.env['VERIFICATION_URI'] ?? 'https://cig.lat/device';
+const VERIFICATION_URI = process.env['VERIFICATION_URI'] ?? 'https://cig.technology/device';
 
 // ---------------------------------------------------------------------------
 // Helpers

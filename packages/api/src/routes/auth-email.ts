@@ -83,7 +83,8 @@ function getEmailRedirectTo(): string {
     return configured;
   }
 
-  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? 'http://localhost:3001';
+  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL
+    ?? (process.env.NODE_ENV === 'production' ? 'https://app.cig.technology' : 'http://localhost:3001');
   return new URL('/auth/callback', dashboardUrl).toString();
 }
 

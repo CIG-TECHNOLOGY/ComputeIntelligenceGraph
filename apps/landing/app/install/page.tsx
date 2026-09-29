@@ -9,7 +9,7 @@ import {
 export const metadata: Metadata = {
   title: "Install CIG",
   description:
-    "Install CIG from the public cig.lat installer, then use the guided setup wizard to bootstrap the discovery-first bundle from pinned Docker Hub images.",
+    "Install CIG from the public cig.technology installer, then use the guided setup wizard to bootstrap the discovery-first bundle from pinned Docker Hub images.",
   alternates: {
     canonical: "/install",
   },

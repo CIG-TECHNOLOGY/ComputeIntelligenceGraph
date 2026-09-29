@@ -76,7 +76,7 @@ variable "github_auth_client_secret" {
 variable "dashboard_url" {
   description = "Public dashboard URL registered in Authentik"
   type        = string
-  default     = "https://app.cig.lat"
+  default     = "https://app.cig.technology"
 }
 
 variable "redirect_uris" {
@@ -88,10 +88,6 @@ variable "redirect_uris" {
   default = [
     {
       url           = "https://app.cig.lat/auth/callback"
-      matching_mode = "strict"
-    },
-    {
-      url           = "https://app.cig.technology/auth/callback"
       matching_mode = "strict"
     },
     {

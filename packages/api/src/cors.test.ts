@@ -38,6 +38,9 @@ describe('resolveCorsOrigins', () => {
 
   it('keeps production origins limited when no override is present', () => {
     expect(resolveCorsOrigins({ NODE_ENV: 'production' })).toEqual([
+      'https://cig.technology',
+      'https://www.cig.technology',
+      'https://app.cig.technology',
       'https://cig.lat',
       'https://www.cig.lat',
       'https://app.cig.lat',
