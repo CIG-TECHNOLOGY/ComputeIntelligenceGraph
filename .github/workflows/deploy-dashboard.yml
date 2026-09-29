@@ -163,5 +163,7 @@ jobs:
           STATUS=$(curl -fsS -o /dev/null -w "%{http_code}" --max-time 20 "$DASHBOARD_URL")
           [[ "$STATUS" == "200" ]]
           curl -fsS --max-time 20 "$DASHBOARD_URL/runtime-version.json" | tee release-marker.json
-          jq -e --arg expected "${{ needs.resolve-tag.outputs.tag }}" '.version == $expected' release-marker.json >/dev/null
+          jq -e --arg expected "${{ needs.resolve-tag.outputs.tag }}" \
+            '(.version == $expected) or (.releaseTag == $expected) or (.releaseTag == ("v" + $expected))' \
+            release-marker.json >/dev/null
           echo "Dashboard $DASHBOARD_URL is serving release ${{ needs.resolve-tag.outputs.tag }}"
