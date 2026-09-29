@@ -21,13 +21,13 @@ The script prefers the published npm package, then a local built CLI
 fallback, and finally an installed `cig` binary as a fallback.
 
 Web installer:
-  curl -fsSL https://cig.lat/install.sh | bash
+  curl -fsSL https://cig.technology/install.sh | bash
 
 Debug tracing:
-  CIG_INSTALL_TRACE=1 curl -fsSL https://cig.lat/install.sh | bash
+  CIG_INSTALL_TRACE=1 curl -fsSL https://cig.technology/install.sh | bash
 
 Install guide:
-  https://cig.lat/install
+  https://cig.technology/install
 EOF
 }
 

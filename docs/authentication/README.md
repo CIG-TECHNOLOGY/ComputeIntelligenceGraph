@@ -34,8 +34,8 @@ CIG uses **Authentik** as the primary identity provider and **Supabase** as a fe
 
 | Component | Production origin | Role |
 | --------- | ----------------- | ---- |
-| Landing (`apps/landing`) | `https://cig.lat` | Public entrypoint, login buttons, canonical logout completion target |
-| Dashboard (`apps/dashboard`) | `https://app.cig.lat` | Protected app, PKCE relay, login callback bridge |
+| Landing (`apps/landing`) | `https://cig.technology` | Public entrypoint, login buttons, canonical logout completion target |
+| Dashboard (`apps/dashboard`) | `https://app.cig.technology` | Protected app, PKCE relay, login callback bridge |
 | Authentik | `https://auth.cig.technology` | OIDC provider, user directory, social-source broker |
 | Google / GitHub | External | Upstream social identity providers |
 
@@ -44,7 +44,7 @@ CIG uses **Authentik** as the primary identity provider and **Supabase** as a fe
 ### Social login sequence
 
 ```
-Landing (cig.lat)                  Dashboard (app.cig.lat)                   Authentik                    Google/GitHub
+Landing (cig.technology)           Dashboard (app.cig.technology)            Authentik                    Google/GitHub
        |                                      |                                  |                              |
   1. User clicks a social login button         |                                  |                              |
        |                                      |                                  |                              |
@@ -97,7 +97,7 @@ The landing app and dashboard are different origins. `sessionStorage` is origin-
 
 That removes the rendered "redirecting" interstitial while keeping the same origin boundary and PKCE safety model.
 
-The login-callback bridge also rebuilds the callback URL from the configured dashboard origin, not from the incoming request URL. That matters behind HTTPS-terminating proxies, where the internal request scheme can be `http:` even though the public callback must stay `https://app.cig.lat/auth/callback`.
+The login-callback bridge also rebuilds the callback URL from the configured dashboard origin, not from the incoming request URL. That matters behind HTTPS-terminating proxies, where the internal request scheme can be `http:` even though the public callback must stay `https://app.cig.technology/auth/callback`.
 
 ### Why per-provider login flows exist
 
@@ -195,7 +195,7 @@ What to fix:
 - redeploy the dashboard after fixing the runtime env
 - rerun one real social-login smoke test after deploy, because this failure only appears when the server-side sync route is exercised
 
-If the failure only happens in production and the logs mention a redirect URI mismatch, also confirm `NEXT_PUBLIC_DASHBOARD_URL` resolves to the public dashboard origin (`https://app.cig.lat`) so the login-callback bridge exchanges the code against the registered callback URL.
+If the failure only happens in production and the logs mention a redirect URI mismatch, also confirm `NEXT_PUBLIC_DASHBOARD_URL` resolves to the public dashboard origin (`https://app.cig.technology`) so the login-callback bridge exchanges the code against the registered callback URL.
 
 ### Authentik client ID: build-time requirement and error path
 
@@ -248,7 +248,7 @@ Dashboard or Landing                  Landing                              Authe
      - Build RP-initiated end-session   |                                     |
        URL using `id_token_hint`        |                                     |
      - Set post_logout_redirect_uri     |                                     |
-       to `https://cig.lat/?logged_out=1`                                     |
+       to `https://cig.technology/?logged_out=1`                                     |
         |------------------------------>| /end-session/...                     |
         |                               |                                     |
   3. Authentik provider invalidation flow runs                                 |
@@ -283,7 +283,7 @@ Current live CIG production provider:
 - Client type: `public`
 - Authorization flow: `default-provider-authorization-implicit-consent`
 - Redirect URIs:
-  - `https://app.cig.lat/auth/callback`
+  - `https://app.cig.technology/auth/callback`
   - `http://localhost:3001/auth/callback`
   - The dashboard middleware forwards these code callbacks internally to `/auth/login-callback`.
 - Scope mappings currently attached:
@@ -388,7 +388,7 @@ Current CIG production behavior:
 - that flow must contain:
   - `CIG: Full logout`
   - `CIG: Return to landing after logout`
-  - the redirect target `https://cig.lat/?logged_out=1`
+  - the redirect target `https://cig.technology/?logged_out=1`
 
 Recommended provider-agnostic pattern:
 
@@ -442,7 +442,7 @@ How to enable both at once:
 
   Or click to sign in: {{ .ConfirmationURL }}
 
-- Ensure your Redirect URLs allow the dashboard callback (e.g. `https://app.cig.lat/auth/callback` and `http://localhost:3001/auth/callback`).
+- Ensure your Redirect URLs allow the dashboard callback (e.g. `https://app.cig.technology/auth/callback` and `http://localhost:3001/auth/callback`).
 - Keep the client calls as implemented:
   - OTP flow: `signInWithOtp({ email, options: { shouldCreateUser: true } })` then `verifyOtp({ email, token, type: 'email' })`.
   - Magic link flow: `signInWithOtp({ email, options: { emailRedirectTo: '<dashboard>/auth/callback', shouldCreateUser: true } })`.

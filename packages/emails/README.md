@@ -29,7 +29,7 @@ Required variables present in the template:
 - `{{ .ConfirmationURL }}`: renders the magic link destination.
 
 Redirect URLs (required for magic link):
-- Add your dashboard callback, e.g. `https://app.cig.lat/auth/callback` and `http://localhost:3001/auth/callback` in Auth → URL Configuration.
+- Add your dashboard callback, e.g. `https://app.cig.technology/auth/callback` and `http://localhost:3001/auth/callback` in Auth → URL Configuration.
 
 ## Local preview
 

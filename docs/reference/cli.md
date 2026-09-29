@@ -64,7 +64,7 @@ npm install -g @cig-technology/cli
 Or run with `npx`:
 
 ```bash
-npx @cig-technology/cli login --api-url https://app.cig.lat
+npx @cig-technology/cli login --api-url https://api.cig.technology
 ```
 
 For first-time onboarding, use the interactive setup wizard:
@@ -76,7 +76,7 @@ cig setup
 Or run the public bash installer:
 
 ```bash
-curl -fsSL https://cig.lat/install.sh | bash
+curl -fsSL https://cig.technology/install.sh | bash
 ```
 
 The public installer resolves the published npm package version first, prints
@@ -99,8 +99,8 @@ administrator shell or a sudo-capable account.
 
 Installation guide:
 
-- https://cig.lat/install
-- Dashboard: https://app.cig.lat
+- https://cig.technology/install
+- Dashboard: https://app.cig.technology
 
 ## Package Maintenance
 
@@ -257,7 +257,7 @@ Current behavior:
 ```bash
 cig connect aws --role-arn arn:aws:iam::123456789012:role/CIGDiscovery
 cig connect gcp --service-account ./service-account.json
-cig connect api --url https://app.cig.lat --auth-mode managed
+cig connect api --url https://api.cig.technology --auth-mode managed
 ```
 
 Current behavior:

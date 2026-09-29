@@ -13,8 +13,8 @@ This page summarizes the current deployment surfaces for CIG.
 
 | Surface | Origin | Purpose |
 | --- | --- | --- |
-| Landing | `https://cig.lat` | Public site and authentication entrypoint |
-| Dashboard | `https://app.cig.lat` | Protected application UI |
+| Landing | `https://cig.technology` | Public site and authentication entrypoint |
+| Dashboard | `https://app.cig.technology` | Protected application UI |
 | API | `https://api.cig.technology` | Canonical public API origin and AWS provisioning target |
 | Authentik | `https://auth.cig.technology` | Identity provider and social-login broker |
 
@@ -58,4 +58,3 @@ CHAT_AUDIO_MAX_SECONDS=120
 - microphone capture should run over `https` in cloud environments
 - `localhost` remains valid for local development
 - raw audio files are not stored in the chat history tables
-

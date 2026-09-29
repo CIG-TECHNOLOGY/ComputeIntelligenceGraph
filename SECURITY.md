@@ -41,8 +41,8 @@ When reporting, please include:
 
 For legal terms and data processing details, see:
 
-- Terms of Service: <https://cig.lat/documentation/docs/en/legal/terms-of-service>
-- Privacy Policy: <https://cig.lat/documentation/docs/en/legal/privacy-policy>
+- Terms of Service: <https://cig.technology/documentation/docs/en/legal/terms-of-service>
+- Privacy Policy: <https://cig.technology/documentation/docs/en/legal/privacy-policy>
 
 ## Scope Notes
 

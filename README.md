@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <a href="https://cig.lat/">https://cig.lat/</a>
+  <a href="https://cig.technology/">https://cig.technology/</a>
 </p>
 
 ## Shared Links
@@ -45,8 +45,8 @@ For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub release
 
 ## Current Product State
 
-- `apps/landing` is the public entrypoint and authentication handoff surface at `https://cig.lat`
-- `apps/dashboard` is the protected application at `https://app.cig.lat` with live/demo graph source switching, 2D/3D graph visualization, chat workflows, and the self-hosted bootstrap shell that shows demo data directly during first-run setup
+- `apps/landing` is the public entrypoint and authentication handoff surface at `https://cig.technology`
+- `apps/dashboard` is the protected application at `https://app.cig.technology` with live/demo graph source switching, 2D/3D graph visualization, chat workflows, and the self-hosted bootstrap shell that shows demo data directly during first-run setup
 - `packages/api` is the canonical Fastify API for REST, GraphQL, WebSocket, chat, graph snapshots, semantic retrieval, auth bridges, and bootstrap completion workflows
 - `packages/cli` is the operator and install surface, including interactive demo-data provisioning, self-hosted bootstrap token generation, and dashboard handoff for new installs
 - `packages/discovery`, `services/cartography`, `packages/graph`, `packages/chatbot`, and `packages/agents` power discovery, graph indexing, retrieval, and refinement workflows
@@ -136,7 +136,7 @@ docker-compose -f docker-compose.dev.yml up -d
 #### Provision demo or self-hosted installs
 
 ```bash
-curl -fsSL https://cig.lat/install.sh | bash
+curl -fsSL https://cig.technology/install.sh | bash
 cig install
 cig install --demo
 cig install --mode self-hosted --profile discovery

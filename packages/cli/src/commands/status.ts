@@ -15,7 +15,7 @@ import { ApiClient } from '../services/api-client.js';
 import { CredentialManager } from '../credentials.js';
 import type { NodeIdentity } from '../types/runtime.js';
 
-const DEFAULT_API_URL = process.env['CIG_API_URL'] ?? 'https://api.cig.lat';
+const DEFAULT_API_URL = process.env['CIG_API_URL'] ?? 'https://api.cig.technology';
 
 interface NodeDetail {
   id: string;

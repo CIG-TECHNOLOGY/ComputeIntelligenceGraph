@@ -11,8 +11,8 @@ Compute Intelligence Graph is a monorepo for a self-hosted and managed infrastru
 
 The current repository state is aligned around these primary surfaces:
 
-- `apps/landing` is the public landing site and authentication entrypoint at `https://cig.lat`
-- `apps/dashboard` is the main protected application at `https://app.cig.lat` with graph source switching, 2D/3D graph visualization, chat workflows, and the self-hosted bootstrap shell
+- `apps/landing` is the public landing site and authentication entrypoint at `https://cig.technology`
+- `apps/dashboard` is the main protected application at `https://app.cig.technology` with graph source switching, 2D/3D graph visualization, chat workflows, and the self-hosted bootstrap shell
 - `packages/api` is the Fastify API layer for REST, GraphQL, WebSocket, auth, metrics, chat, graph snapshots, and bootstrap completion endpoints
 - `packages/graph` is the Neo4j graph engine
 - `packages/discovery` plus `services/cartography` provide discovery orchestration and inventory collection
@@ -54,8 +54,8 @@ The current release line is maintained by the version metadata above. The releas
 
 | Surface | Origin | Role |
 | --- | --- | --- |
-| Landing | `https://cig.lat` | Public site, login entry, canonical logout return |
-| Dashboard | `https://app.cig.lat` | Protected application UI |
+| Landing | `https://cig.technology` | Public site, login entry, canonical logout return |
+| Dashboard | `https://app.cig.technology` | Protected application UI |
 | API | `https://api.cig.technology` | Canonical public API origin and AWS provisioning target |
 | Authentik | `https://auth.cig.technology` | Identity provider and social-login broker |
 

@@ -5,7 +5,7 @@ existing AWS ECS/Fargate cluster in `us-east-2`.
 
 | Surface | AWS resource |
 | --- | --- |
-| Public URL | `https://app.cig.lat` |
+| Public URL | `https://app.cig.technology` |
 | ECS cluster | `cig-api-production-cluster` |
 | ECS service | `cig-dashboard-production-service` |
 | Task family | `cig-dashboard-production` |

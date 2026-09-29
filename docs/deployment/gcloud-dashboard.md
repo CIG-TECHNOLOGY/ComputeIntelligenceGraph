@@ -31,7 +31,7 @@ User → app.cig.lat
 | Project number | `469673226548` |
 | Region | `us-central1` |
 | DNS zone | `cig-lat` → `cig.lat.` |
-| Dashboard URL | `https://app.cig.lat` |
+| Dashboard URL | `https://app.cig.technology` |
 | Service account | `cig-lat@cig-technology.iam.gserviceaccount.com` |
 
 ---
@@ -154,7 +154,7 @@ The script outputs two values. Add them as **GitHub Actions secrets**:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service-role key for server-side provisioning | Yes |
 | `NEXT_PUBLIC_API_URL` | Production API URL (e.g. `https://api.cig.technology`) | No |
-| `NEXT_PUBLIC_SITE_URL` | `https://cig.lat` | No |
+| `NEXT_PUBLIC_SITE_URL` | `https://cig.technology` | No |
 
 > **Do not add `GCP_SA_KEY`** — the workflow no longer uses it.
 
@@ -191,7 +191,7 @@ gcloud run deploy dashboard \
   --max-instances=5 \
   --concurrency=80 \
   --timeout=30s \
-  --set-env-vars="NODE_ENV=production,NEXT_PUBLIC_SITE_URL=https://cig.lat,SUPABASE_URL=https://your-project.supabase.co,SUPABASE_SERVICE_ROLE_KEY=..." \
+  --set-env-vars="NODE_ENV=production,NEXT_PUBLIC_SITE_URL=https://cig.technology,SUPABASE_URL=https://your-project.supabase.co,SUPABASE_SERVICE_ROLE_KEY=..." \
   --project=cig-technology
 ```
 
@@ -274,7 +274,7 @@ The CI workflow passes them via `--build-arg` during `docker build`:
 ```bash
 docker build \
   --build-arg NEXT_PUBLIC_API_URL=https://api.cig.technology \
-  --build-arg NEXT_PUBLIC_SITE_URL=https://cig.lat \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://cig.technology \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=... \
   --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=... \
   -f packages/infra/docker/Dockerfile.dashboard \

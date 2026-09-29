@@ -2,8 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@cig-technology/cli?logo=npm&label=npm)](https://www.npmjs.com/package/@cig-technology/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@cig-technology/cli?logo=npm)](https://www.npmjs.com/package/@cig-technology/cli)
-[![Install guide](https://img.shields.io/badge/docs-cig.lat%2Finstall-0ea5e9)](https://cig.lat/install)
-[![Dashboard](https://img.shields.io/badge/dashboard-app.cig.lat-7c3aed)](https://app.cig.lat)
+[![Install guide](https://img.shields.io/badge/docs-cig.technology%2Finstall-0ea5e9)](https://cig.technology/install)
+[![Dashboard](https://img.shields.io/badge/dashboard-app.cig.technology-7c3aed)](https://app.cig.technology)
 
 Production-oriented CLI for Compute Intelligence Graph.
 
@@ -27,7 +27,7 @@ seeded demo graph/data bundle unless you pass `--demo` explicitly.
 This package is a real foundation release with the new onboarding flow, but not the final platform shape.
 
 The published npm package is the canonical release artifact. The public
-installer at `https://cig.lat/install.sh` resolves `@cig-technology/cli`
+installer at `https://cig.technology/install.sh` resolves `@cig-technology/cli`
 from npm first, prints the resolved package version, fetches the matching
 `images.json` bundle manifest for that CLI release when it exists, or falls
 back to the latest pinned Docker Hub image digests for the same release line
@@ -42,8 +42,8 @@ created after the API seeds the bootstrap token state.
 
 ### Quick links
 
-- Install guide: https://cig.lat/install
-- Dashboard: https://app.cig.lat
+- Install guide: https://cig.technology/install
+- Dashboard: https://app.cig.technology
 - Package: https://www.npmjs.com/package/@cig-technology/cli
 - GitHub releases: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases
 
@@ -60,7 +60,7 @@ For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub release
 Recommended for most users:
 
 ```bash
-curl -fsSL https://cig.lat/install.sh | bash
+curl -fsSL https://cig.technology/install.sh | bash
 ```
 
 That public installer resolves `@cig-technology/cli` from the npm registry
@@ -104,7 +104,7 @@ package metadata:
 npm view @cig-technology/cli version dist.integrity --json
 ```
 
-Full installation guide: https://cig.lat/install
+Full installation guide: https://cig.technology/install
 
 ## Prerequisites
 
@@ -174,13 +174,13 @@ It is stored in the encrypted secrets store.
 Authenticate:
 
 ```bash
-cig login --api-url https://app.cig.lat
+cig login --api-url https://api.cig.technology
 ```
 
 Install a managed profile:
 
 ```bash
-cig install --mode managed --profile discovery --api-url https://app.cig.lat
+cig install --mode managed --profile discovery --api-url https://api.cig.technology
 ```
 
 What this does today:
@@ -241,7 +241,7 @@ cig bootstrap-reset
 ```bash
 cig connect aws --role-arn arn:aws:iam::123456789012:role/CIGDiscovery
 cig connect gcp --service-account ./service-account.json
-cig connect api --url https://app.cig.lat --auth-mode managed
+cig connect api --url https://api.cig.technology --auth-mode managed
 ```
 
 Current behavior:

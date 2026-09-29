@@ -190,7 +190,7 @@ program
   .option('--target <target>', 'Target type: local, ssh, or host (overrides global --target)')
   .option('--ssh-host <host>', 'SSH host to check reachability for (required when --target ssh)')
   .option('--ssh-key-path <path>', 'Path to SSH private key file (required when --target ssh)')
-  .option('--control-plane-url <url>', 'Control plane URL to check reachability against', 'https://api.cig.lat')
+  .option('--control-plane-url <url>', 'Control plane URL to check reachability against', 'https://api.cig.technology')
   .action(async (cmdOpts: { target?: string; sshHost?: string; sshKeyPath?: string; controlPlaneUrl?: string }) => {
     const globals = getGlobalOptions();
     const { doctor } = await import('./commands/doctor.js');

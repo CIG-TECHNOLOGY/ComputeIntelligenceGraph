@@ -14,7 +14,7 @@ import * as net from 'net';
 import * as https from 'https';
 import * as http from 'http';
 
-const DEFAULT_CONTROL_PLANE_URL = 'https://api.cig.lat';
+const DEFAULT_CONTROL_PLANE_URL = 'https://api.cig.technology';
 
 export interface DoctorOptions {
   target?: string;

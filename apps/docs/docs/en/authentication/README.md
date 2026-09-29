@@ -13,8 +13,8 @@ CIG uses **Authentik** as the primary identity provider and **Supabase** as a fe
 
 | Component | Production origin | Role |
 | --------- | ----------------- | ---- |
-| Landing (`apps/landing`) | `https://cig.lat` | Public entrypoint, login buttons, canonical logout completion target |
-| Dashboard (`apps/dashboard`) | `https://app.cig.lat` | Protected app, PKCE relay, login callback bridge |
+| Landing (`apps/landing`) | `https://cig.technology` | Public entrypoint, login buttons, canonical logout completion target |
+| Dashboard (`apps/dashboard`) | `https://app.cig.technology` | Protected app, PKCE relay, login callback bridge |
 | Authentik | `https://auth.cig.technology` | OIDC provider and social-source broker |
 
 ## Current Login Flow
@@ -37,4 +37,3 @@ If those values are missing, provisioning fails closed and the user is returned 
 ## Logout
 
 Logout is centralized in the landing app. It clears local session state and redirects through the sign-out flow so the browser session is fully reset.
-

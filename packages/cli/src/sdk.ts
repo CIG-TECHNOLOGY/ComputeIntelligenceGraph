@@ -24,7 +24,7 @@ export interface SetupManifest {
   nodeIdentitySeed: string;
   installProfile: 'core' | 'discovery' | 'full';
   targetMode: 'local' | 'ssh' | 'host';
-  /** https://api.cig.lat or http://localhost:3003 */
+  /** https://api.cig.technology or http://localhost:3003 */
   controlPlaneEndpoint: string;
   awsConfig?: AWSManifestConfig;
   gcpConfig?: GCPManifestConfig;

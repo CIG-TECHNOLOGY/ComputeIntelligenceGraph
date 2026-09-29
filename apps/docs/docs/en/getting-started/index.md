@@ -15,10 +15,10 @@ CIG is a platform for discovering infrastructure, indexing it into a graph, quer
 
 ## Current Surfaces
 
-- Landing: `https://cig.lat`
-- Dashboard: `https://app.cig.lat`
+- Landing: `https://cig.technology`
+- Dashboard: `https://app.cig.technology`
 - API: `https://api.cig.technology`
-- Docs: `https://cig.lat/documentation`
+- Docs: `https://cig.technology/documentation`
 
 ## Operating Modes
 

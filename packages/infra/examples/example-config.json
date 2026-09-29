@@ -24,7 +24,7 @@
     "memoryMiB": 1024,
     "desiredCount": 1,
     "createPipeline": false,
-    "corsOrigins": ["https://app.cig.lat", "https://cig.lat"],
+    "corsOrigins": ["https://app.cig.technology", "https://cig.technology"],
     "databaseUrlSecretArn": "arn:aws:secretsmanager:us-east-2:123456789012:secret:cig/prod/api/database-url",
     "jwtSecretArn": "arn:aws:secretsmanager:us-east-2:123456789012:secret:cig/prod/api/jwt-secret",
     "authentikSecretRefs": {

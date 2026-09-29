@@ -32,7 +32,7 @@ npm install -g @cig-technology/cli
 Or run with `npx`:
 
 ```bash
-npx @cig-technology/cli login --api-url https://app.cig.lat
+npx @cig-technology/cli login --api-url https://api.cig.technology
 ```
 
 For first-time onboarding, use the interactive setup wizard:
@@ -44,7 +44,7 @@ cig setup
 Or run the public bash installer:
 
 ```bash
-curl -fsSL https://cig.lat/install.sh | bash
+curl -fsSL https://cig.technology/install.sh | bash
 ```
 
 ## Current Install Modes
