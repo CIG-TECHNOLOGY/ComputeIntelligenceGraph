@@ -50,7 +50,7 @@
   "install.title": "Install CIG",
   "install.badge": "Public installer and onboarding guide",
   "install.headline": "Install CIG with one command, then let the wizard handle the rest.",
-  "install.description": "The public installer at cig.lat is the fastest path into the platform. It validates your machine, launches the guided setup flow, and boots the first graph snapshot so you can connect to the dashboard right away.",
+  "install.description": "The public installer at cig.technology is the fastest path into the platform. It validates your machine, launches the guided setup flow, and boots the first graph snapshot so you can connect to the dashboard right away.",
   "install.downloadBtn": "Download install.sh",
   "install.backHome": "Back to home",
 
@@ -77,7 +77,7 @@
   "install.modes.managed.desc": "Best for a Linux host that will enroll against the API and stage the node runtime bundle.",
 
   "install.steps.download.title": "Download the installer",
-  "install.steps.download.desc": "Use the public cig.lat endpoint to fetch the same install script that lives in the repository.",
+  "install.steps.download.desc": "Use the public cig.technology endpoint to fetch the same install script that lives in the repository.",
   "install.steps.wizard.title": "Run the setup wizard",
   "install.steps.wizard.desc": "The wizard validates prerequisites, asks for the install mode, and launches the correct bootstrap path.",
   "install.steps.mode.title": "Choose the install mode",
@@ -210,7 +210,7 @@
   "unsubscribe.confirm": "Confirm Unsubscribe",
   "unsubscribe.processing": "Processing…",
   "unsubscribe.success": "You've been unsubscribed",
-  "unsubscribe.successDesc": "Your email has been removed from our list. You can always resubscribe at cig.lat.",
+  "unsubscribe.successDesc": "Your email has been removed from our list. You can always resubscribe at cig.technology.",
   "unsubscribe.error": "Invalid or expired link",
   "unsubscribe.errorDesc": "This unsubscribe link is invalid or has already been used.",
   "unsubscribe.backHome": "Back to home"

@@ -50,7 +50,7 @@
   "install.title": "安装 CIG",
   "install.badge": "公共安装程序和上手指南",
   "install.headline": "一条命令安装 CIG，向导将处理剩余工作。",
-  "install.description": "cig.lat 的公共安装程序是进入平台的最快途径。它会验证您的机器，启动引导式设置流程，并启动第一张图谱快照，让您立即连接到仪表盘。",
+  "install.description": "cig.technology 的公共安装程序是进入平台的最快途径。它会验证您的机器，启动引导式设置流程，并启动第一张图谱快照，让您立即连接到仪表盘。",
   "install.downloadBtn": "下载 install.sh",
   "install.backHome": "返回首页",
 
@@ -77,7 +77,7 @@
   "install.modes.managed.desc": "最适合将针对 API 注册并暂存节点运行时包的 Linux 主机。",
 
   "install.steps.download.title": "下载安装程序",
-  "install.steps.download.desc": "使用公共 cig.lat 端点获取与仓库中相同的安装脚本。",
+  "install.steps.download.desc": "使用公共 cig.technology 端点获取与仓库中相同的安装脚本。",
   "install.steps.wizard.title": "运行设置向导",
   "install.steps.wizard.desc": "向导验证先决条件，询问安装模式，并启动正确的引导路径。",
   "install.steps.mode.title": "选择安装模式",
@@ -210,7 +210,7 @@
   "unsubscribe.confirm": "确认取消订阅",
   "unsubscribe.processing": "处理中…",
   "unsubscribe.success": "已成功取消订阅",
-  "unsubscribe.successDesc": "您的邮箱已从我们的列表中移除，随时可以在 cig.lat 重新订阅。",
+  "unsubscribe.successDesc": "您的邮箱已从我们的列表中移除，随时可以在 cig.technology 重新订阅。",
   "unsubscribe.error": "链接无效或已过期",
   "unsubscribe.errorDesc": "此取消订阅链接无效或已被使用。",
   "unsubscribe.backHome": "返回主页"

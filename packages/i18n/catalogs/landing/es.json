@@ -50,7 +50,7 @@
   "install.title": "Instalar CIG",
   "install.badge": "Instalador público y guía de incorporación",
   "install.headline": "Instala CIG con un comando, deja que el asistente haga el resto.",
-  "install.description": "El instalador público en cig.lat es la ruta más rápida hacia la plataforma. Valida tu máquina, lanza el flujo de configuración guiada e inicia la primera instantánea del grafo para que puedas conectarte al panel de inmediato.",
+  "install.description": "El instalador público en cig.technology es la ruta más rápida hacia la plataforma. Valida tu máquina, lanza el flujo de configuración guiada e inicia la primera instantánea del grafo para que puedas conectarte al panel de inmediato.",
   "install.downloadBtn": "Descargar install.sh",
   "install.backHome": "Volver al inicio",
 
@@ -77,7 +77,7 @@
   "install.modes.managed.desc": "Mejor para un host Linux que se inscribirá contra la API y preparará el bundle de tiempo de ejecución del nodo.",
 
   "install.steps.download.title": "Descargar el instalador",
-  "install.steps.download.desc": "Usa el endpoint público de cig.lat para obtener el mismo script de instalación que vive en el repositorio.",
+  "install.steps.download.desc": "Usa el endpoint público de cig.technology para obtener el mismo script de instalación que vive en el repositorio.",
   "install.steps.wizard.title": "Ejecutar el asistente de configuración",
   "install.steps.wizard.desc": "El asistente valida los requisitos previos, pregunta por el modo de instalación y lanza la ruta de arranque correcta.",
   "install.steps.mode.title": "Elegir el modo de instalación",
@@ -210,7 +210,7 @@
   "unsubscribe.confirm": "Confirmar cancelación",
   "unsubscribe.processing": "Procesando…",
   "unsubscribe.success": "Has cancelado tu suscripción",
-  "unsubscribe.successDesc": "Tu correo ha sido eliminado de nuestra lista. Puedes volver a suscribirte en cig.lat.",
+  "unsubscribe.successDesc": "Tu correo ha sido eliminado de nuestra lista. Puedes volver a suscribirte en cig.technology.",
   "unsubscribe.error": "Enlace inválido o expirado",
   "unsubscribe.errorDesc": "Este enlace de cancelación es inválido o ya fue utilizado.",
   "unsubscribe.backHome": "Volver al inicio"
