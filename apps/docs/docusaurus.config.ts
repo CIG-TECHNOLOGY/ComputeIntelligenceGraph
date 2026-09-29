@@ -19,7 +19,7 @@ const config: Config = {
 
   // Set the production url of your site here
   url: 'https://cig.technology',
-  // Served at cig.lat/documentation via the landing GitHub Pages deployment
+  // Served at cig.technology/documentation via the landing GitHub Pages deployment
   baseUrl: '/documentation/',
 
   // GitHub pages deployment config.

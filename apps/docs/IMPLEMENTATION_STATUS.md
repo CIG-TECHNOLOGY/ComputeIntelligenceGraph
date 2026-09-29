@@ -220,4 +220,4 @@ git push origin main
 
 - **GitHub Pages**: https://cig-technology.github.io/ComputeIntelligenceGraph/
 - **Primary Domain**: https://cig.technology/documentation (served through the canonical `cig.technology` product domain)
-- **Secondary Domain**: https://docs.cig.lat (pending GCloud setup)
+- **Secondary Domain**: None. Documentation is served from the canonical `https://cig.technology/documentation` path.

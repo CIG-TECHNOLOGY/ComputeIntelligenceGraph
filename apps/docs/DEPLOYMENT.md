@@ -49,7 +49,8 @@ Documentation is deployed when:
 
 After deployment:
 
-- **URL**: https://cig-technology.github.io/ComputeIntelligenceGraph/documentation/
+- **Canonical URL**: https://cig.technology/documentation/
+- **GitHub Pages fallback**: https://cig-technology.github.io/ComputeIntelligenceGraph/documentation/
 - **Sections**: Getting Started, Architecture, API Reference, User Guide, Developer Guide, Troubleshooting, Resources
 
 ## Configuration
@@ -59,7 +60,7 @@ After deployment:
 File: `apps/docs/docusaurus.config.ts`
 
 Key settings:
-- `url`: https://docs.cig.lat (for custom domain)
+- `url`: https://cig.technology (the canonical product domain)
 - `baseUrl`: / (served at root of docs subdirectory)
 - `organizationName`: CIG-TECHNOLOGY
 - `projectName`: ComputeIntelligenceGraph
@@ -192,7 +193,7 @@ Potential improvements:
 
 1. **Multi-Language Support**: Full i18n with 7 languages
 2. **GCloud CDN**: Optional CDN for faster global delivery
-3. **Custom Domain**: docs.cig.lat with DNS configuration
+3. **Custom Domain**: `cig.technology` with DNS configuration
 4. **Analytics**: Track documentation usage
 5. **Versioning**: Support multiple documentation versions
 6. **Search Analytics**: Track popular search queries
