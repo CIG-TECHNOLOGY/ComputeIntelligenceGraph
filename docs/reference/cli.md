@@ -100,7 +100,7 @@ administrator shell or a sudo-capable account.
 Installation guide:
 
 - https://cig.technology/install
-- Dashboard: https://app.cig.technology
+- Dashboard: https://app.cig.lat
 
 ## Package Maintenance
 

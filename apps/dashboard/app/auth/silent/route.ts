@@ -7,7 +7,7 @@ import { resolveDashboardUrl } from "../../../lib/siteUrl";
  * Attempts to complete the OIDC handshake silently, without going through
  * Google/GitHub again. Used when the dashboard has no local session but the
  * user may already have an active Authentik session — e.g. right after
- * landing on app.cig.technology (or the legacy app.cig.lat alias) from Authentik's own post-login app-launch
+ * landing on app.cig.lat (or the technology feature-product alias) from Authentik's own post-login app-launch
  * (chaining the OAuth2 authorize request through the Google/GitHub source
  * login proved unreliable: Authentik's session-based `next` tracking gets
  * overwritten by the separate default-source-authentication flow's own

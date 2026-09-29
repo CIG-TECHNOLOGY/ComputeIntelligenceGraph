@@ -76,7 +76,7 @@ variable "github_auth_client_secret" {
 variable "dashboard_url" {
   description = "Public dashboard URL registered in Authentik"
   type        = string
-  default     = "https://app.cig.technology"
+  default     = "https://app.cig.lat"
 }
 
 variable "redirect_uris" {

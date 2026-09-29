@@ -14,7 +14,7 @@ CIG uses **Authentik** as the primary identity provider and **Supabase** as a fe
 | Component | Production origin | Role |
 | --------- | ----------------- | ---- |
 | Landing (`apps/landing`) | `https://cig.technology` | Public entrypoint, login buttons, canonical logout completion target |
-| Dashboard (`apps/dashboard`) | `https://app.cig.technology` | Protected app, PKCE relay, login callback bridge |
+| Dashboard (`apps/dashboard`) | `https://app.cig.lat` | Protected app, PKCE relay, login callback bridge |
 | Authentik | `https://auth.cig.technology` | OIDC provider and social-source broker |
 
 ## Current Login Flow

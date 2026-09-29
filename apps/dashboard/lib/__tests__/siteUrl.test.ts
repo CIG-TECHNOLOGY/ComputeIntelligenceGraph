@@ -53,16 +53,16 @@ describe("siteUrl", () => {
     ).toBe("https://cig.lat");
   });
 
-  it("uses the canonical technology domains when no public URLs are configured", () => {
+  it("uses the landing technology domain and main dashboard lat domain when no public URLs are configured", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
     delete process.env.NEXT_PUBLIC_DASHBOARD_URL;
     delete process.env.NEXT_PUBLIC_DOCS_URL;
 
-    expect(resolveLandingUrl({ hostname: "app.cig.technology", protocol: "https:" })).toBe(
+    expect(resolveLandingUrl({ hostname: "app.cig.lat", protocol: "https:" })).toBe(
       "https://cig.technology",
     );
     expect(resolveDashboardUrl({ hostname: "cig.technology", protocol: "https:" })).toBe(
-      "https://app.cig.technology",
+      "https://app.cig.lat",
     );
     expect(resolveDocsUrl({ hostname: "cig.technology", protocol: "https:" })).toBe(
       "https://cig.technology/documentation",

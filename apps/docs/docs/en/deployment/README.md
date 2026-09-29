@@ -14,7 +14,7 @@ This page summarizes the current deployment surfaces for CIG.
 | Surface | Origin | Purpose |
 | --- | --- | --- |
 | Landing | `https://cig.technology` | Public site and authentication entrypoint |
-| Dashboard | `https://app.cig.technology` | Protected application UI |
+| Dashboard | `https://app.cig.lat` | Protected application UI |
 | API | `https://api.cig.technology` | Canonical public API origin and AWS provisioning target |
 | Authentik | `https://auth.cig.technology` | Identity provider and social-login broker |
 

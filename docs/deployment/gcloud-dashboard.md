@@ -31,7 +31,7 @@ User → app.cig.lat
 | Project number | `469673226548` |
 | Region | `us-central1` |
 | DNS zone | `cig-lat` → `cig.lat.` |
-| Dashboard URL | `https://app.cig.technology` |
+| Dashboard URL | `https://app.cig.lat` |
 | Service account | `cig-lat@cig-technology.iam.gserviceaccount.com` |
 
 ---

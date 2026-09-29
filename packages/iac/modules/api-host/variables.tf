@@ -76,7 +76,7 @@ variable "neo4j_version" {
 variable "cors_origins" {
   description = "Comma-separated CORS origins for the API"
   type        = list(string)
-  default     = ["https://app.cig.technology", "https://cig.technology", "https://app.cig.lat", "https://cig.lat"]
+  default     = ["https://app.cig.lat", "https://cig.technology", "https://app.cig.technology", "https://cig.lat"]
 }
 
 variable "smtp_host" {

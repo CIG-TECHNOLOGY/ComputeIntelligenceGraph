@@ -10,7 +10,7 @@ mkdirSync(outDir, { recursive: true });
 
 const html = readFileSync(templatePath, 'utf8')
   .replaceAll('{{ .Token }}', '123456')
-  .replaceAll('{{ .ConfirmationURL }}', 'https://app.cig.technology/auth/callback#demo');
+  .replaceAll('{{ .ConfirmationURL }}', 'https://app.cig.lat/auth/callback#demo');
 
 writeFileSync(outFile, html, 'utf8');
 console.log(`Wrote preview to ${outFile}`);

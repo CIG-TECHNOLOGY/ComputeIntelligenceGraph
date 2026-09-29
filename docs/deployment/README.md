@@ -9,7 +9,7 @@ Last synchronized with the current release workflow on `2026-03-29`.
 | Surface | Origin | Purpose |
 | --- | --- | --- |
 | Landing | `https://cig.technology` | Public site and authentication entrypoint |
-| Dashboard | `https://app.cig.technology` | Protected application UI |
+| Dashboard | `https://app.cig.lat` | Protected application UI |
 | API | `https://api.cig.technology` | Canonical public API origin and AWS provisioning target |
 | Authentik | `https://auth.cig.technology` | Identity provider and social-login broker |
 

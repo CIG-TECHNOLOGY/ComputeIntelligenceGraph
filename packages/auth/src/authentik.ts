@@ -106,7 +106,7 @@ export async function buildAuthentikAuthUrl(
  *      follows ?next= → OIDC authorize (user is now authenticated) → issues code → redirect_uri.
  *   5. exchangeAuthentikCode() reads the verifier from sessionStorage and exchanges it.
  *
- * `dashboardUrl` must be the origin of the dashboard app (e.g. https://app.cig.technology
+ * `dashboardUrl` must be the origin of the dashboard app (e.g. https://app.cig.lat
  * or http://localhost:3001) — the relay route lives there.
  */
 export async function startAuthentikSocialLogin(

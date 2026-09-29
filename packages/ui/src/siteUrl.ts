@@ -1,11 +1,10 @@
 const DEFAULT_LANDING_URL = "https://cig.technology";
-const DEFAULT_DASHBOARD_URL = "https://app.cig.technology";
+const DEFAULT_DASHBOARD_URL = "https://app.cig.lat";
 const DEFAULT_DOCS_URL = "https://cig.technology/documentation";
 const PRODUCTION_DASHBOARD_HOSTNAMES = new Set([
-  "app.cig.technology",
-  // Keep the former cosmetic hostname recognized while it redirects to the
-  // canonical product dashboard.
   "app.cig.lat",
+  // Keep the technology hostname recognized for existing sessions and links.
+  "app.cig.technology",
 ]);
 
 export type UrlContext = {

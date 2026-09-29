@@ -48,7 +48,7 @@ import {
 interface AuthentikConfig {
   issuerUrl: string;    // e.g. "https://auth.cig.technology"
   clientId: string;     // OIDC public client ID
-  redirectUri: string;  // e.g. "https://app.cig.technology/auth/callback"
+  redirectUri: string;  // e.g. "https://app.cig.lat/auth/callback"
 }
 ```
 

@@ -20,7 +20,7 @@ export function getDashboardHandoffUrl(): string {
     });
   }
 
-  return process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "http://localhost:3001";
+  return process.env.NEXT_PUBLIC_DASHBOARD_URL ?? (process.env.NODE_ENV === "production" ? "https://app.cig.lat" : "http://localhost:3001");
 }
 
 function delay(ms: number): Promise<void> {

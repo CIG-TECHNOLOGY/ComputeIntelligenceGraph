@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@cig-technology/cli?logo=npm&label=npm)](https://www.npmjs.com/package/@cig-technology/cli)
 [![npm downloads](https://img.shields.io/npm/dm/@cig-technology/cli?logo=npm)](https://www.npmjs.com/package/@cig-technology/cli)
 [![Install guide](https://img.shields.io/badge/docs-cig.technology%2Finstall-0ea5e9)](https://cig.technology/install)
-[![Dashboard](https://img.shields.io/badge/dashboard-app.cig.technology-7c3aed)](https://app.cig.technology)
+[![Dashboard](https://img.shields.io/badge/dashboard-app.cig.lat-7c3aed)](https://app.cig.lat)
 
 Production-oriented CLI for Compute Intelligence Graph.
 
@@ -43,7 +43,7 @@ created after the API seeds the bootstrap token state.
 ### Quick links
 
 - Install guide: https://cig.technology/install
-- Dashboard: https://app.cig.technology
+- Dashboard: https://app.cig.lat
 - Package: https://www.npmjs.com/package/@cig-technology/cli
 - GitHub releases: https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases
 
