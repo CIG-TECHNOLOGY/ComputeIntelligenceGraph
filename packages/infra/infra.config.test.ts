@@ -42,6 +42,8 @@ beforeEach(() => {
   process.env.API_SMTP_USER = 'smtp-login@example.com';
   process.env.API_SMTP_OTP_SUBJECT = 'Your one-time code';
   process.env.API_SMTP_PASSWORD_SECRET_ARN = 'arn:aws:secretsmanager:::smtp-password';
+  process.env.UMAMI_API_URL = 'https://umami.example.com';
+  process.env.API_UMAMI_API_TOKEN_SECRET_ARN = 'arn:aws:secretsmanager:::umami-token';
 });
 
 afterEach(() => {
@@ -63,6 +65,9 @@ describe('infra config', () => {
     expect(config.smtpUser).toBe('smtp-login@example.com');
     expect(config.smtpOtpSubject).toBe('Your one-time code');
     expect(config.smtpPasswordSecretArn).toBe('arn:aws:secretsmanager:::smtp-password');
+    expect(config.umamiApiUrl).toBe('https://umami.example.com');
+    expect(config.umamiApiTokenSecretArn).toBe('arn:aws:secretsmanager:::umami-token');
     expect(secretArns(config)).toContain('arn:aws:secretsmanager:::smtp-password');
+    expect(secretArns(config)).toContain('arn:aws:secretsmanager:::umami-token');
   });
 });

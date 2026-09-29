@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, Clipboard, ExternalLink, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import type { AnalyticsSite } from "@cig/sdk";
 import {
   createAnalyticsSite,
   deleteAnalyticsSite,
+  getAnalyticsSiteInsights,
   getAnalyticsSiteStats,
   listAnalyticsSites,
   provisionAnalyticsSite,
@@ -27,11 +28,17 @@ function formatNumber(value: number): string {
 
 export default function AnalyticsPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [siteName, setSiteName] = useState("");
   const [domain, setDomain] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pipelineCheck, setPipelineCheck] = useState<{
+    siteId: string;
+    state: "checking" | "ready" | "error";
+    message: string;
+  } | null>(null);
 
   const sitesQuery = useQuery({ queryKey: ["analytics", "sites"], queryFn: listAnalyticsSites });
   const sites = useMemo(() => sitesQuery.data?.items ?? [], [sitesQuery.data?.items]);
@@ -89,6 +96,37 @@ export default function AnalyticsPage() {
     window.setTimeout(() => setCopied(false), 1800);
   }
 
+  async function verifyAnalyticsPipeline(site: AnalyticsSite, openSignalRoom = false) {
+    setPipelineCheck({ siteId: site.id, state: "checking", message: "Checking the tag, latest event, and signal room…" });
+    setError(null);
+
+    try {
+      const [statsResult] = await Promise.all([
+        statsQuery.refetch(),
+        // Cache the same query the signal room uses so opening it does not
+        // repeat an expensive insights request after a successful preflight.
+        queryClient.fetchQuery({
+          queryKey: ["analytics", "insights", site.id, 30],
+          queryFn: () => getAnalyticsSiteInsights(site.id, 30),
+          staleTime: 15_000,
+        }),
+      ]);
+      const received = Boolean(statsResult.data?.lastEventAt);
+      setPipelineCheck({
+        siteId: site.id,
+        state: "ready",
+        message: received
+          ? `Tag verified: an approved event arrived ${new Date(statsResult.data!.lastEventAt!).toLocaleString()}.`
+          : "Signal room is ready. Open your site once to send the first approved pageview.",
+      });
+      if (openSignalRoom) router.push(`/analytics/${site.id}`);
+    } catch {
+      const message = "Your tag may be receiving events, but the signal-room API is not ready. The room was not opened; deploy or restore the analytics API, then verify again.";
+      setPipelineCheck({ siteId: site.id, state: "error", message });
+      setError(message);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <header className="rounded-2xl border border-cyan-400/20 bg-[radial-gradient(circle_at_top_right,_rgba(6,182,212,.18),transparent_38%),linear-gradient(135deg,#0f172a,#111827)] p-7 text-white shadow-xl sm:p-9">
@@ -137,9 +175,23 @@ export default function AnalyticsPage() {
                 <Metric label="Events (30d)" value={formatNumber(statsQuery.data?.totals.events ?? 0)} />
                 <Metric label="Accepted" value={formatNumber(statsQuery.data?.totals.accepted ?? 0)} />
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cig bg-cig-card px-4 py-3 text-xs text-cig-secondary">
-                <span>{statsQuery.data?.lastEventAt ? `Last event ${new Date(statsQuery.data.lastEventAt).toLocaleString()}` : "Waiting for the first approved-origin event"}</span>
-                <div className="flex items-center gap-3"><button type="button" onClick={() => statsQuery.refetch()} className="font-semibold text-cyan-600 hover:text-cyan-500 dark:text-cyan-300">Verify latest event</button><Link href={`/analytics/${selectedSite.id}`} className="rounded-lg bg-cyan-500 px-3 py-2 font-semibold text-slate-950 hover:bg-cyan-400">Open signal room</Link></div>
+              <div className="rounded-xl border border-cig bg-cig-card px-4 py-3 text-xs text-cig-secondary">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-cig-primary">Connection check</p>
+                    <p className="mt-1">{statsQuery.data?.lastEventAt ? `Last event ${new Date(statsQuery.data.lastEventAt).toLocaleString()}` : "Waiting for the first approved-origin event"}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button type="button" onClick={() => void verifyAnalyticsPipeline(selectedSite)} disabled={pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "checking"} className="font-semibold text-cyan-600 hover:text-cyan-500 disabled:opacity-60 dark:text-cyan-300">Verify tag</button>
+                    <button type="button" onClick={() => void verifyAnalyticsPipeline(selectedSite, true)} disabled={pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "checking"} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-3 py-2 font-semibold text-slate-950 hover:bg-cyan-400 disabled:opacity-60">{pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "checking" && <Loader2 className="size-3.5 animate-spin" />}Open signal room</button>
+                  </div>
+                </div>
+                <ol className="mt-3 grid gap-2 border-t border-cig pt-3 sm:grid-cols-3">
+                  <li className="flex items-center gap-2"><Check className="size-3.5 text-emerald-500" />Tracker active</li>
+                  <li className="flex items-center gap-2"><Check className={`size-3.5 ${statsQuery.data?.lastEventAt ? "text-emerald-500" : "text-cig-muted"}`} />{statsQuery.data?.lastEventAt ? "Event received" : "Awaiting event"}</li>
+                  <li className="flex items-center gap-2"><Check className={`size-3.5 ${pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "ready" ? "text-emerald-500" : pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "error" ? "text-red-500" : "text-cig-muted"}`} />{pipelineCheck?.siteId === selectedSite.id && pipelineCheck.state === "ready" ? "Room ready" : "Room check"}</li>
+                </ol>
+                {pipelineCheck?.siteId === selectedSite.id && <p role="status" className={`mt-3 ${pipelineCheck.state === "error" ? "text-red-600 dark:text-red-300" : "text-cig-secondary"}`}>{pipelineCheck.message}</p>}
               </div>
             </div>
           )}

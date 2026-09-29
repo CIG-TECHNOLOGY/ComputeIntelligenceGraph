@@ -1,3 +1,15 @@
+## [1.0.24](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.23...v1.0.24) (2026-09-29)
+
+### Bug Fixes
+
+* **analytics:** verify the signal-room route before opening it and fail clearly when the deployed API contract is unavailable
+* **release:** synchronize all landing and authenticated footer version displays from the runtime release marker
+* **ci:** deploy API changes across the full release-tag range and verify the analytics insights route after deployment
+* **release:** rebuild the native SQLite test adapter after a clean workspace install
+
+
+
+
 ## [1.0.23](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.22...v1.0.23) (2026-09-29)
 
 

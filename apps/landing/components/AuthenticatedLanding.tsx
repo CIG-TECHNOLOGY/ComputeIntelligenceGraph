@@ -22,6 +22,7 @@ import { FooterBar } from "@cig/ui/components";
 import { useResolvedDashboardUrl, useResolvedDocsUrl } from "@cig/ui/siteUrl.client";
 import { goToDashboard } from "../lib/dashboardHandoff";
 import { BackToTop } from "./BackToTop";
+import { useRuntimeVersion } from "./useRuntimeVersion";
 
 /* ─── Icons ───────────────────────────────────────────────────────────── */
 
@@ -830,7 +831,7 @@ export function AuthenticatedLanding() {
   const isDark = theme === "dark";
   const [modalFeature, setModalFeature] = useState<Feature | null>(null);
   const [isConnectingToDashboard, setIsConnectingToDashboard] = useState(false);
-  const version = process.env.NEXT_PUBLIC_APP_VERSION || "";
+  const version = useRuntimeVersion();
   const build = process.env.NEXT_PUBLIC_APP_BUILD || "";
   const meta = [
     t("footer.licenseNotice", { year: new Date().getFullYear() }),

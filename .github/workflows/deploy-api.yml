@@ -69,10 +69,16 @@ jobs:
         id: detect
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            BASE="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || true)"
+            # A release commit contains version metadata; the API work is in
+            # the commits since the previous release tag. Comparing only to
+            # HEAD^ skips that work and can leave dashboard routes ahead of
+            # the API runtime.
+            PARENT="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || true)"
+            BASE="$(git describe --tags --abbrev=0 "$PARENT" 2>/dev/null || true)"
             if [[ -z "$BASE" ]]; then
               BASE="$(git hash-object -t tree /dev/null)"
             fi
+            echo "Comparing API impact from ${BASE} to ${GITHUB_SHA}"
             node scripts/detect-api-impact.mjs --base "$BASE" --head "$GITHUB_SHA"
           else
             node scripts/detect-api-impact.mjs --head "$GITHUB_SHA"
@@ -725,6 +731,17 @@ jobs:
             -H "Authorization: Bearer ${SMOKE_JWT}" \
             "https://${API_DOMAIN}/api/v1/resources?limit=1" >/tmp/api-resources.json
           cat /tmp/api-resources.json
+
+      - name: Signal-room route contract check
+        env:
+          SMOKE_JWT: ${{ steps.smoke-jwt.outputs.token }}
+        run: |
+          set -euo pipefail
+          status=$(curl --show-error --silent --output /tmp/analytics-insights.json --write-out '%{http_code}' \
+            -H "Authorization: Bearer ${SMOKE_JWT}" \
+            "https://${API_DOMAIN}/api/v1/analytics/sites/smoke-contract/insights?days=1")
+          [[ "$status" == "404" ]]
+          jq -e '.error == "Site not found"' /tmp/analytics-insights.json >/dev/null
 
       - name: GraphQL check
         run: |

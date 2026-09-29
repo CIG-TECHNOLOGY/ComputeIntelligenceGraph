@@ -56,7 +56,8 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
   }
 
   if (insightsQuery.isError || !site || !insights) {
-    return <div className="mx-auto max-w-3xl rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-700 dark:text-red-200">This analytics view is unavailable. The link may have been revoked or the site may still be provisioning.</div>;
+    const reason = insightsQuery.error instanceof Error ? insightsQuery.error.message : "The request did not return analytics data.";
+    return <div className="mx-auto max-w-3xl rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-sm text-red-700 dark:text-red-200"><p className="font-semibold">This signal room is unavailable.</p><p className="mt-2">The tracker can be active while the analytics API is still missing the signal-room route or the link has been revoked.</p><p className="mt-2 font-mono text-xs opacity-80">{reason}</p><button type="button" onClick={() => insightsQuery.refetch()} className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-400/30 px-3 py-2 text-xs font-semibold hover:bg-red-500/10"><RotateCw className="size-3.5" />Try again</button></div>;
   }
 
   return (

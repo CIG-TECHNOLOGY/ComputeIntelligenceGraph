@@ -11,6 +11,7 @@ import { useCIGAuth } from "../components/AuthProvider";
 import { useTranslation, useLocale } from "@cig-technology/i18n/react";
 import { FooterBar } from "@cig/ui/components";
 import { useResolvedDocsUrl } from "@cig/ui/siteUrl.client";
+import { useRuntimeVersion } from "../components/useRuntimeVersion";
 import {
   consumePendingDashboardRedirect,
   goToDashboard,
@@ -766,7 +767,7 @@ function GetStartedSection() {
 
 function Footer() {
   const t = useTranslation();
-  const version = process.env.NEXT_PUBLIC_APP_VERSION || "";
+  const version = useRuntimeVersion();
   const build = process.env.NEXT_PUBLIC_APP_BUILD || "";
   const docsUrl = useResolvedDocsUrl();
 

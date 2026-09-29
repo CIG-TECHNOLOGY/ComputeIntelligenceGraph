@@ -418,6 +418,11 @@ if ! $DRY_RUN; then
   success "Workspace env artifacts are in sync"
   pnpm install --frozen-lockfile 2>&1
   success "Workspace dependencies are in sync"
+  # Ensure the API's SQLite test adapter is available after a clean install.
+  # In some environments pnpm restores this native package without running its
+  # install hook; rebuilding here keeps the release test gate deterministic.
+  pnpm --filter @cig/api exec npm rebuild better-sqlite3 2>&1
+  success "API native test dependency is ready"
 else
   info "[dry-run] Would run: pnpm exec versioning env sync"
   info "[dry-run] Would run: pnpm install --frozen-lockfile"

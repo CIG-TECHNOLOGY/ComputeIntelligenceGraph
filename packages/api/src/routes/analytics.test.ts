@@ -149,6 +149,14 @@ describe('analytics routes', () => {
     expect(stats.statusCode).toBe(200);
     expect(stats.json().totals.pageviews).toBe(1);
     expect(stats.json().lastEventAt).toBeTruthy();
+
+    const insights = await app.inject({
+      method: 'GET',
+      url: `/api/v1/analytics/sites/${siteId}/insights?days=7`,
+      headers: { authorization: `Bearer ${userToken('user-a')}` },
+    });
+    expect(insights.statusCode).toBe(200);
+    expect(insights.json()).toMatchObject({ site: { id: siteId }, insights: { rangeDays: 7 } });
   });
 
   it('creates a revocable read-only public dashboard link', async () => {
