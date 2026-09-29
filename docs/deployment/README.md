@@ -101,7 +101,8 @@ Production behavior now splits clearly:
 ## Related Deployment Docs
 
 - API on AWS: [api-aws.md](api-aws.md)
-- GCP dashboard deployment: [gcloud-dashboard.md](gcloud-dashboard.md)
+- Dashboard on AWS ECS: [dashboard-aws.md](dashboard-aws.md)
+- Retired GCP dashboard notes: [gcloud-dashboard.md](gcloud-dashboard.md)
 - Root overview: [../../README.md](../../README.md)
 - Status snapshot: [../../PROJECT_STATUS.md](../../PROJECT_STATUS.md)
 - Authentication runtime details: [../authentication/README.md](../authentication/README.md)

@@ -1,4 +1,9 @@
-# Dashboard → app.cig.lat — GCP Cloud Run Deployment
+# Retired: GCP dashboard deployment
+
+> GCP is no longer part of the production dashboard path. The dashboard now
+> runs on AWS ECS/Fargate; use [dashboard-aws.md](dashboard-aws.md) and
+> `.github/workflows/deploy-dashboard.yml` for all current deployments. The
+> historical notes below are retained only for migration reference.
 
 ## Overview
 

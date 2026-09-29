@@ -1,133 +1,104 @@
-name: Deploy Dashboard → app.cig.lat
+name: Deploy Dashboard -> AWS ECS
 
-# ─── Triggers ────────────────────────────────────────────────────────────────
 on:
   push:
     tags:
       - "v*.*.*"
 
-  # Allow manual trigger with optional image tag override
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Docker image tag to deploy (leave blank to build fresh)"
+        description: "Existing ECR image tag to deploy (leave blank to build from source)"
         required: false
         default: ""
       dry_run:
-        description: "Dry run — build & push but skip Cloud Run deploy"
+        description: "Build and push only; skip the ECS rollout"
         type: boolean
         default: false
 
-# ─── Concurrency ─────────────────────────────────────────────────────────────
-# Cancel in-flight deploys on the same branch when a newer push arrives.
 concurrency:
   group: deploy-dashboard-${{ github.ref }}
   cancel-in-progress: true
 
-# ─── Global env ──────────────────────────────────────────────────────────────
 env:
-  GCP_PROJECT:   cig-technology
-  GCP_REGION:    us-central1
-  SERVICE_NAME:  dashboard
-  REGISTRY:      us-central1-docker.pkg.dev
-  IMAGE:         us-central1-docker.pkg.dev/cig-technology/cig/dashboard
+  AWS_REGION: us-east-2
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::520900722378:role/github-actions-role
+  ECR_REGISTRY: 520900722378.dkr.ecr.us-east-2.amazonaws.com
+  ECR_REPOSITORY: cig-dashboard-production
+  ECS_CLUSTER: cig-api-production-cluster
+  ECS_SERVICE: cig-dashboard-production-service
+  ECS_TASK_FAMILY: cig-dashboard-production
+  ECS_CONTAINER_NAME: dashboard
+  DASHBOARD_URL: https://app.cig.lat
 
 jobs:
-  # ───────────────────────────────────────────────────────────────────────────
-  # JOB 1 — Resolve the image tag that will be deployed
-  # ───────────────────────────────────────────────────────────────────────────
   resolve-tag:
     name: Resolve image tag
-    if: ${{ github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/') || !contains(github.ref_name, '+') }}
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.value }}
     steps:
       - name: Determine tag
         id: tag
+        shell: bash
         run: |
           if [[ -n "${{ github.event.inputs.image_tag }}" ]]; then
-            echo "value=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+            echo "value=${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
-            # Strip leading 'v' and replace '+' with '-' for Docker tag compatibility
-            # e.g. v0.1.29+build.8 → 0.1.29-build.8
-            DOCKER_TAG="${GITHUB_REF_NAME#v}"
-            DOCKER_TAG="${DOCKER_TAG//+/-}"
-            echo "value=${DOCKER_TAG}" >> $GITHUB_OUTPUT
+            TAG="${GITHUB_REF_NAME#v}"
+            echo "value=${TAG//+/-}" >> "$GITHUB_OUTPUT"
           else
-            # Short SHA for branch pushes
-            echo "value=sha-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+            echo "value=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           fi
 
-  # ───────────────────────────────────────────────────────────────────────────
-  # JOB 2 — Build image and push to Artifact Registry
-  #          (skipped when a specific image_tag was provided)
-  # ───────────────────────────────────────────────────────────────────────────
   build:
-    name: Build & push container
+    name: Build and push dashboard image
     runs-on: ubuntu-latest
     needs: resolve-tag
-    # Skip build when caller already specified an existing image tag
     if: ${{ github.event.inputs.image_tag == '' || github.event.inputs.image_tag == null }}
     permissions:
       contents: read
-      id-token: write   # Needed for Workload Identity (preferred) or SA key
-
-    outputs:
-      image: ${{ env.IMAGE }}:${{ needs.resolve-tag.outputs.tag }}
-
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Authenticate to GCP (Workload Identity)
-        uses: google-github-actions/auth@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT }}
-
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: packages/infra/docker/Dockerfile.dashboard
           push: true
-          tags: |
-            ${{ env.IMAGE }}:${{ needs.resolve-tag.outputs.tag }}
-            ${{ env.IMAGE }}:latest
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ needs.resolve-tag.outputs.tag }}
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.cig.technology
-            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://cig.lat' }}
-            NEXT_PUBLIC_DASHBOARD_URL=${{ secrets.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.lat' }}
-            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_AUTHENTIK_URL=${{ secrets.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
-            NEXT_PUBLIC_AUTHENTIK_CLIENT_ID=${{ secrets.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://cig.lat' }}
+            NEXT_PUBLIC_DASHBOARD_URL=${{ vars.NEXT_PUBLIC_DASHBOARD_URL || 'https://app.cig.lat' }}
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL || secrets.SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_AUTHENTIK_URL=${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
+            NEXT_PUBLIC_AUTHENTIK_CLIENT_ID=${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'cig-dashboard' }}
             NEXT_PUBLIC_APP_VERSION=${{ needs.resolve-tag.outputs.tag }}
-          # Registry-based layer cache — dramatically speeds up repeat builds
-          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
-          cache-to:   type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
-          provenance: false   # Avoid attestation manifest issues with older registries
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
 
-  # ───────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Deploy to Cloud Run
-  # ───────────────────────────────────────────────────────────────────────────
   deploy:
-    name: Deploy to Cloud Run
+    name: Roll out dashboard to ECS
     runs-on: ubuntu-latest
     needs: [resolve-tag, build]
-    # Allow deploy even if build was skipped (pre-existing image_tag)
     if: |
       always() &&
       needs.resolve-tag.result == 'success' &&
@@ -136,76 +107,61 @@ jobs:
     permissions:
       contents: read
       id-token: write
-
     environment:
       name: production
       url: https://app.cig.lat
-
     steps:
-      - name: Authenticate to GCP (Workload Identity)
-        uses: google-github-actions/auth@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.GCP_PROJECT }}
-
-      - name: Deploy to Cloud Run
+      - name: Register task definition and update service
         id: deploy
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service:  ${{ env.SERVICE_NAME }}
-          region:   ${{ env.GCP_REGION }}
-          image:    ${{ env.IMAGE }}:${{ needs.resolve-tag.outputs.tag }}
-          flags: |
-            --allow-unauthenticated
-            --port=3000
-            --cpu=1
-            --memory=512Mi
-            --min-instances=0
-            --max-instances=5
-            --concurrency=80
-            --timeout=30s
-          env_vars: |
-            NODE_ENV=production
-            NEXT_TELEMETRY_DISABLED=1
-            SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-      - name: Print deployed URL
+        shell: bash
+        env:
+          IMAGE_URI: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ needs.resolve-tag.outputs.tag }}
         run: |
-          echo "### ✅ Deployed!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| URL | ${{ steps.deploy.outputs.url }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Custom domain | https://app.cig.lat |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | \`${{ env.IMAGE }}:${{ needs.resolve-tag.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Revision | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          aws ecs describe-task-definition \
+            --region "$AWS_REGION" \
+            --task-definition "$ECS_TASK_FAMILY" \
+            --query taskDefinition > task-definition.json
 
-  # ───────────────────────────────────────────────────────────────────────────
-  # JOB 4 — Smoke test (runs after deploy, non-blocking on failure)
-  # ───────────────────────────────────────────────────────────────────────────
-  smoke-test:
-    name: Smoke test
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: needs.deploy.result == 'success'
-    continue-on-error: true   # Never block the workflow on a smoke-test failure
+          jq --arg image "$IMAGE_URI" --arg container "$ECS_CONTAINER_NAME" \
+            'del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)
+             | .containerDefinitions |= map(if .name == $container then .image = $image else . end)' \
+            task-definition.json > task-definition-register.json
 
-    steps:
-      - name: Wait for Cloud Run to be ready
-        run: sleep 15
+          TASK_DEFINITION=$(aws ecs register-task-definition \
+            --region "$AWS_REGION" \
+            --cli-input-json file://task-definition-register.json \
+            --query taskDefinition.taskDefinitionArn \
+            --output text)
 
-      - name: Check HTTP 200 on app.cig.lat
+          aws ecs update-service \
+            --region "$AWS_REGION" \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --task-definition "$TASK_DEFINITION" \
+            --force-new-deployment >/dev/null
+
+          echo "task_definition=$TASK_DEFINITION" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for ECS service stability
         run: |
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" --max-time 20 https://app.cig.lat)
-          echo "HTTP status: $STATUS"
-          if [[ "$STATUS" != "200" ]]; then
-            echo "⚠️  Smoke test returned $STATUS — investigate but deploy is already live."
-            exit 1
-          fi
-          echo "✅ app.cig.lat returned 200"
+          aws ecs wait services-stable \
+            --region "$AWS_REGION" \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE"
+
+      - name: Smoke test dashboard and release marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATUS=$(curl -fsS -o /dev/null -w "%{http_code}" --max-time 20 "$DASHBOARD_URL")
+          [[ "$STATUS" == "200" ]]
+          curl -fsS --max-time 20 "$DASHBOARD_URL/runtime-version.json" | tee release-marker.json
+          jq -e --arg expected "${{ needs.resolve-tag.outputs.tag }}" '.version == $expected' release-marker.json >/dev/null
+          echo "Dashboard $DASHBOARD_URL is serving release ${{ needs.resolve-tag.outputs.tag }}"
