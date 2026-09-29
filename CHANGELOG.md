@@ -1,3 +1,25 @@
+## [1.0.26](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.25...v1.0.26) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** deploy Pages artifacts from tag builds ([dec373b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/dec373bb6280f2024b29bdae9d06b74114c06a39))
+
+
+
+
+
+## [1.0.26](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.25...v1.0.26) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** deploy Pages artifacts from tag builds ([dec373b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/dec373bb6280f2024b29bdae9d06b74114c06a39))
+
+
+
+
+
 ## [1.0.25](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.24...v1.0.25) (2026-09-29)
 
 
