@@ -46,6 +46,63 @@ const emptyInsights = (): UmamiInsights => ({
   realtime: { visitors: 0, countries: [], pages: [], updatedAt: new Date().toISOString() },
 });
 
+type RealtimeRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): RealtimeRecord {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return value as RealtimeRecord;
+}
+
+function numericValue(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const record = value as RealtimeRecord;
+  for (const key of ['visitors', 'value', 'count', 'active', 'total']) {
+    const candidate = record[key];
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) return candidate;
+  }
+  return undefined;
+}
+
+function breakdownRows(value: unknown): UmamiBreakdown[] {
+  const record = asRecord(value);
+  const data = Object.keys(record).length === 1 && 'data' in record ? record.data : value;
+  if (Array.isArray(data)) {
+    return data.map((row) => {
+      const item = asRecord(row);
+      return {
+        label: String(item.x ?? item.name ?? item.label ?? item.country ?? 'Unknown'),
+        value: Number(item.y ?? item.value ?? item.count ?? 0),
+      };
+    }).filter((row) => Number.isFinite(row.value) && row.value > 0);
+  }
+  if (data && typeof data === 'object') {
+    return Object.entries(data as RealtimeRecord).map(([label, value]) => ({ label, value: Number(value) }))
+      .filter((row) => Number.isFinite(row.value) && row.value > 0);
+  }
+  return [];
+}
+
+/** Normalize the several realtime response shapes used by Umami versions. */
+export function normalizeRealtime(realtime: unknown, active: unknown): UmamiInsights['realtime'] {
+  const record = asRecord(realtime);
+  const totals = asRecord(record.totals);
+  const data = asRecord(record.data);
+  const visitors = numericValue(record.visitors)
+    ?? numericValue(totals.visitors)
+    ?? numericValue(data.visitors)
+    ?? numericValue(record.count)
+    ?? numericValue(active)
+    ?? 0;
+
+  return {
+    visitors,
+    countries: breakdownRows(record.countries ?? data.countries),
+    pages: breakdownRows(record.pages ?? record.paths ?? record.urls ?? data.pages ?? data.urls),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 class LocalUmamiProvisioner implements UmamiProvisioner {
   async findWebsite(input: UmamiWebsiteInput): Promise<{ websiteId: string } | null> {
     void input;
@@ -186,17 +243,7 @@ class HttpUmamiProvisioner implements UmamiProvisioner {
     })).filter((row) => Number.isFinite(row.value) && row.value > 0);
 
     const pageviewRows = rows(pageviews, 'pageviews');
-    const realtimeRecord = realtime && typeof realtime === 'object' ? realtime as Record<string, unknown> : {};
-    const realtimeCountries = breakdown(realtimeRecord.countries);
-    const realtimePages = breakdown(realtimeRecord.pages ?? realtimeRecord.paths ?? realtimeRecord.urls);
-    const realtimeTotals = realtimeRecord.totals && typeof realtimeRecord.totals === 'object'
-      ? realtimeRecord.totals as Record<string, unknown>
-      : {};
-    const activeValue = typeof active === 'number'
-      ? active
-      : active && typeof active === 'object' && 'visitors' in active
-        ? Number((active as Record<string, unknown>).visitors)
-        : 0;
+    const normalizedRealtime = normalizeRealtime(realtime, active);
 
     return {
       totals: {
@@ -213,12 +260,7 @@ class HttpUmamiProvisioner implements UmamiProvisioner {
       })).filter((row) => row.date),
       countries: breakdown(countries),
       pages: breakdown(pages),
-      realtime: {
-        visitors: Number(realtimeRecord.visitors ?? realtimeTotals.visitors ?? realtimeRecord.count ?? activeValue ?? 0),
-        countries: realtimeCountries,
-        pages: realtimePages,
-        updatedAt: new Date().toISOString(),
-      },
+      realtime: normalizedRealtime,
     };
   }
 }

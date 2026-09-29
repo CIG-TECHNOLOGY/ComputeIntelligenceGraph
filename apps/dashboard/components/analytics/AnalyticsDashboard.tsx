@@ -79,7 +79,20 @@ export function AnalyticsDashboard({ siteId, publicToken }: Props) {
           </div>
         </div>
         <div className="relative mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-4">
-          <div className="flex items-center gap-2 text-xs text-slate-400"><Radio className="size-3.5 text-emerald-300" />Updated {new Date(insights.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            <span className="flex items-center gap-2"><Radio className="size-3.5 text-emerald-300" />Updated {new Date(insights.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            <button
+              type="button"
+              onClick={() => void insightsQuery.refetch()}
+              disabled={insightsQuery.isFetching}
+              aria-label="Refresh analytics"
+              title="Refresh analytics"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[.05] px-2 py-1.5 text-[11px] font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
+            >
+              <RotateCw className={`size-3.5 ${insightsQuery.isFetching ? "animate-spin" : ""}`} />
+              {insightsQuery.isFetching ? "Refreshing" : "Refresh"}
+            </button>
+          </div>
           <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[.05] p-1">
             {[7, 30, 90].map((option) => <button key={option} type="button" onClick={() => setDays(option)} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${days === option ? "bg-cyan-300 text-slate-950" : "text-slate-300 hover:bg-white/10"}`}>{option}d</button>)}
           </div>

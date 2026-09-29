@@ -58,6 +58,26 @@ export interface AnalyticsInsights {
   realtime: UmamiInsights['realtime'];
 }
 
+/**
+ * Keep the signal room honest when the optional Umami upstream is unavailable.
+ * The control plane already records the last accepted event, so a recent event
+ * is a useful conservative live indicator instead of silently rendering zero.
+ */
+export function localRealtimeFromLastEvent(
+  lastEventAt: string | null,
+  now = Date.now(),
+  windowMs = 30 * 60 * 1000,
+): UmamiInsights['realtime'] {
+  const timestamp = lastEventAt ? Date.parse(lastEventAt) : Number.NaN;
+  const visitors = Number.isFinite(timestamp) && now - timestamp >= 0 && now - timestamp <= windowMs ? 1 : 0;
+  return {
+    visitors,
+    countries: [],
+    pages: [],
+    updatedAt: new Date(now).toISOString(),
+  };
+}
+
 function toSite(row: SiteRow): PublicAnalyticsSite {
   return {
     id: row.id,
@@ -337,7 +357,7 @@ async function buildInsights(site: SiteRow, rangeDays: number): Promise<Analytic
     series: localRows.rows.map((row) => ({ date: row.usage_date, pageviews: Number(row.pageviews), visitors: 0 })),
     countries: [],
     pages: [],
-    realtime: { visitors: 0, countries: [], pages: [], updatedAt: new Date().toISOString() },
+    realtime: localRealtimeFromLastEvent(site.last_event_at, endAt),
   };
 
   let insights = localInsights;
@@ -346,8 +366,25 @@ async function buildInsights(site: SiteRow, rangeDays: number): Promise<Analytic
     try {
       const provisioner = getAnalyticsProvisioner();
       if (provisioner.getInsights) {
-        insights = await provisioner.getInsights(site.umami_website_id, startAt, endAt);
-        source = 'umami';
+        const upstreamInsights = await provisioner.getInsights(site.umami_website_id, startAt, endAt);
+        const hasUpstreamData = upstreamInsights.totals.pageviews > 0
+          || upstreamInsights.totals.visitors > 0
+          || upstreamInsights.totals.visits > 0
+          || upstreamInsights.series.length > 0
+          || upstreamInsights.countries.length > 0
+          || upstreamInsights.pages.length > 0
+          || upstreamInsights.realtime.visitors > 0;
+
+        if (hasUpstreamData) {
+          insights = {
+            ...upstreamInsights,
+            realtime: {
+              ...upstreamInsights.realtime,
+              visitors: Math.max(upstreamInsights.realtime.visitors, localInsights.realtime.visitors),
+            },
+          };
+          source = 'umami';
+        }
       }
     } catch {
       // Keep local control-plane counters available while upstream analytics recovers.
