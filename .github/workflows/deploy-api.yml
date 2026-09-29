@@ -434,6 +434,8 @@ jobs:
       API_SMTP_SECURE: ${{ vars.SMTP_SECURE || 'true' }}
       API_SMTP_AUTH_ENABLED: ${{ vars.SMTP_AUTH_ENABLED || 'true' }}
       API_SMTP_OTP_SUBJECT: ${{ vars.SMTP_OTP_SUBJECT || 'Your CIG one-time code' }}
+      UMAMI_API_URL: ${{ vars.UMAMI_API_URL }}
+      API_UMAMI_API_TOKEN_SECRET_ARN: ${{ vars.API_UMAMI_API_TOKEN_SECRET_ARN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
