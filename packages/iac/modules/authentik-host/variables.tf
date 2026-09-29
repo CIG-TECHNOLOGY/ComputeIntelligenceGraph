@@ -91,7 +91,23 @@ variable "redirect_uris" {
       matching_mode = "strict"
     },
     {
+      url           = "https://app.cig.lat/auth/login-callback"
+      matching_mode = "strict"
+    },
+    {
+      url           = "https://app.cig.technology/auth/callback"
+      matching_mode = "strict"
+    },
+    {
+      url           = "https://app.cig.technology/auth/login-callback"
+      matching_mode = "strict"
+    },
+    {
       url           = "http://localhost:3001/auth/callback"
+      matching_mode = "strict"
+    },
+    {
+      url           = "http://localhost:3001/auth/login-callback"
       matching_mode = "strict"
     },
   ]
