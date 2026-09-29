@@ -1,3 +1,25 @@
+## [1.0.21](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.20...v1.0.21) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** decouple Supabase keep-alive from api.cig.technology, run daily ([296918b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/296918b24f8be39b867451d7eb0361107c53df98))
+
+
+
+
+
+## [1.0.21](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.20...v1.0.21) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** decouple Supabase keep-alive from api.cig.technology, run daily ([296918b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/296918b24f8be39b867451d7eb0361107c53df98))
+
+
+
+
+
 ## [1.0.20](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.19...v1.0.20) (2026-08-09)
 
 

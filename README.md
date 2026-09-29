@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.20-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.21-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,11 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.20)
+## 📋 Latest Changes (v1.0.21)
 
 ### Bug Fixes
 
-* **auth:** stop silent re-auth one-shot flag from blocking post-login retry ([fe726e1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/fe726e124df3cf9ac80df56cd119a8985d2803e8))
+* **ci:** decouple Supabase keep-alive from api.cig.technology, run daily ([296918b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/296918b24f8be39b867451d7eb0361107c53df98))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
