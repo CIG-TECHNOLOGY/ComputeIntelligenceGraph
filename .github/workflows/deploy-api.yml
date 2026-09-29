@@ -203,6 +203,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    environment:
+      name: production
     outputs:
       image_uri: ${{ steps.finalize.outputs.image_uri }}
       image_digest: ${{ steps.finalize.outputs.image_digest }}
@@ -354,6 +356,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    environment:
+      name: production
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -366,7 +370,7 @@ jobs:
 
       - name: Run migrations from the built image
         env:
-          DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.SUPABASE_DIRECT_URL_POOLER || secrets.SUPABASE_DATABASE_URL }}
         run: |
           IMAGE_URI="${{ needs.build-image.outputs.image_uri }}"
           docker pull "$IMAGE_URI"
@@ -383,6 +387,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    environment:
+      name: production
     env:
       TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
     steps:
