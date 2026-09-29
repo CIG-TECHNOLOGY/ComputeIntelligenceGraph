@@ -1,3 +1,25 @@
+## [1.0.23](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.22...v1.0.23) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** accept release tag prefix in dashboard smoke test ([335cd13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/335cd135361ce3b03281537aae4ceaf47a3e5e3e))
+
+
+
+
+
+## [1.0.23](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.22...v1.0.23) (2026-09-29)
+
+
+### Bug Fixes
+
+* **ci:** accept release tag prefix in dashboard smoke test ([335cd13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/335cd135361ce3b03281537aae4ceaf47a3e5e3e))
+
+
+
+
+
 ## [1.0.22](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.21...v1.0.22) (2026-09-29)
 
 

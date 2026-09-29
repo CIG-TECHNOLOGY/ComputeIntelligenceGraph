@@ -1,8 +1,8 @@
 # CIG Project Status
 
 Last updated: 2026-09-29
-Version: 1.0.22
-Latest released tag: `v1.0.22`
+Version: 1.0.23
+Latest released tag: `v1.0.23`
 Status: Active development
 
 ## Current Snapshot

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.22-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.23-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,17 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.22)
+## 📋 Latest Changes (v1.0.23)
 
 ### Bug Fixes
 
-* **ci:** pass production Umami runtime config ([327faf9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/327faf9012430b6f8a2cf8e604fa60d8c739cd0a))
-* **ci:** scope API deployment jobs to production ([a97e7a2](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a97e7a22189651451e6db72e9f5c0ddc439c6f6b))
-
-
-### Features
-
-* **analytics:** add detailed signal room sharing ([91dd140](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/91dd14055da237dad838cc950a6db4b5eec87f68))
+* **ci:** accept release tag prefix in dashboard smoke test ([335cd13](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/335cd135361ce3b03281537aae4ceaf47a3e5e3e))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
