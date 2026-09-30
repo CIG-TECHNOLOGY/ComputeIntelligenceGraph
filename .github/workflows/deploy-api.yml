@@ -126,7 +126,13 @@ jobs:
 
       - name: Build workspace packages
         if: ${{ needs.detect-api-impact.outputs.api_source_changed == 'true' }}
-        run: pnpm --filter @cig/graph --filter @cig/sdk --filter @cig/chatbot --filter @cig/discovery --filter @cig/config build
+        run: |
+          # Workspace TypeScript builds use composite incremental metadata. The
+          # repository historically contained stale tsbuildinfo files, which
+          # can make tsc report success while leaving ignored dist files
+          # missing (notably discovery/retry.js) on a clean runner.
+          find packages -name tsconfig.tsbuildinfo -delete
+          pnpm --filter @cig/graph --filter @cig/sdk --filter @cig/chatbot --filter @cig/discovery --filter @cig/config build
 
       - name: Lint and test API
         if: ${{ needs.detect-api-impact.outputs.api_source_changed == 'true' }}
