@@ -144,11 +144,10 @@ jobs:
       - name: Verify deployed runtime version
         env:
           EXPECTED_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          CANONICAL_SITE_URL: https://cig.lat
         run: |
           set -euo pipefail
-          [[ -n "$PAGE_URL" ]]
-          marker_url="${PAGE_URL%/}/runtime-version.json"
+          marker_url="${CANONICAL_SITE_URL}/runtime-version.json"
           curl --fail --show-error --silent --location --retry 12 --retry-delay 5 "$marker_url" | tee runtime-version.json
           if [[ -n "$EXPECTED_TAG" ]]; then
             expected_version="${EXPECTED_TAG#v}"
