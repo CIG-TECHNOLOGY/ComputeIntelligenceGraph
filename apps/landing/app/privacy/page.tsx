@@ -119,7 +119,7 @@ export default function PrivacyPage() {
           description={t("legal.privacy.description")}
           backHref="/"
           backLabel={t("common.back")}
-          fullPolicyHref="https://cig.technology/documentation/docs/en/legal/privacy-policy"
+          fullPolicyHref="https://cig.lat/documentation/docs/en/legal/privacy-policy"
           fullPolicyLabel={t("legal.fullPolicy")}
           note={t("legal.privacy.note")}
           sections={[

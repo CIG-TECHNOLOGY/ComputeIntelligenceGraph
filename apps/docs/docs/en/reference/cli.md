@@ -44,7 +44,7 @@ cig setup
 Or run the public bash installer:
 
 ```bash
-curl -fsSL https://cig.technology/install.sh | bash
+curl -fsSL https://cig.lat/install.sh | bash
 ```
 
 ## Current Install Modes

@@ -55,7 +55,7 @@ docker-compose -f docker-compose.dev.yml up -d
 Use the public installer for a guided setup. In self-hosted mode, the dashboard now hosts the bootstrap flow and the first-admin creation screen directly:
 
 ```bash
-curl -fsSL https://cig.technology/install.sh | bash
+curl -fsSL https://cig.lat/install.sh | bash
 ```
 
 Or run the CLI directly:

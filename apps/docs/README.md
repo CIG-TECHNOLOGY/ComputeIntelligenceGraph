@@ -168,10 +168,10 @@ The documentation is automatically deployed to GitHub Pages when changes are pus
 
 To deploy to custom domains:
 
-1. **cig.technology**: Keep the GitHub Pages custom domain set to `cig.technology` and publish the apex through DNS `A` and `AAAA` records pointed at GitHub Pages:
+1. **cig.lat**: Keep the GitHub Pages custom domain set to `cig.lat` and publish the apex through DNS `A` and `AAAA` records pointed at GitHub Pages:
    - `A`: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
    - `AAAA`: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
-2. **cig.technology/documentation**: Documentation is deployed under the landing site; no secondary production domain is required.
+2. **cig.lat/documentation**: Documentation is deployed under the landing site; no secondary production domain is required.
 
 ## Testing
 

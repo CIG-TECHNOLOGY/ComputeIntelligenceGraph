@@ -1,3 +1,13 @@
+## [1.0.32](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.31...v1.0.32) (2026-09-30)
+
+### Changed
+
+* make `cig.lat` the canonical landing and documentation host
+* keep product and API endpoints on `cig.technology`
+
+
+
+
 ## [1.0.31](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.30...v1.0.31) (2026-09-30)
 
 ### Bug Fixes

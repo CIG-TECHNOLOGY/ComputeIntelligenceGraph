@@ -4,7 +4,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import './styles.css';
 
 function useLandingUrl(): string {
-  const [url, setUrl] = useState('https://cig.technology');
+  const [url, setUrl] = useState('https://cig.lat');
   useEffect(() => {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {

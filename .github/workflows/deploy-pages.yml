@@ -93,11 +93,12 @@ jobs:
         run: pnpm --filter @cig/landing build
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_SITE_URL: https://cig.technology
+          NEXT_PUBLIC_SITE_URL: https://cig.lat
           NEXT_PUBLIC_API_URL: https://api.cig.technology
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_DASHBOARD_URL: ${{ secrets.NEXT_PUBLIC_DASHBOARD_URL }}
+          NEXT_PUBLIC_DOCS_URL: https://cig.lat/documentation
           NEXT_PUBLIC_AUTHENTIK_URL: ${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
           NEXT_PUBLIC_AUTHENTIK_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'cig-dashboard' }}
 
@@ -148,7 +149,7 @@ jobs:
           set -euo pipefail
           [[ -n "$PAGE_URL" ]]
           marker_url="${PAGE_URL%/}/runtime-version.json"
-          curl --fail --show-error --silent --retry 12 --retry-delay 5 "$marker_url" | tee runtime-version.json
+          curl --fail --show-error --silent --location --retry 12 --retry-delay 5 "$marker_url" | tee runtime-version.json
           if [[ -n "$EXPECTED_TAG" ]]; then
             expected_version="${EXPECTED_TAG#v}"
             expected_version="${expected_version%%+build.*}"

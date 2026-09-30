@@ -1,8 +1,8 @@
 # CIG Project Status
 
 Last updated: 2026-09-30
-Version: 1.0.31
-Latest released tag: `v1.0.31`
+Version: 1.0.32
+Latest released tag: `v1.0.32`
 Status: Active development
 
 ## Current Snapshot
@@ -11,7 +11,7 @@ Compute Intelligence Graph is a monorepo for a self-hosted and managed infrastru
 
 The current repository state is aligned around these primary surfaces:
 
-- `apps/landing` is the public landing site and authentication entrypoint at `https://cig.technology`
+- `apps/landing` is the public landing site and authentication entrypoint at `https://cig.lat`
 - `apps/dashboard` is the main protected application at `https://app.cig.lat` with graph source switching, 2D/3D graph visualization, chat workflows, and the self-hosted bootstrap shell
 - `packages/api` is the Fastify API layer for REST, GraphQL, WebSocket, auth, metrics, chat, graph snapshots, and bootstrap completion endpoints
 - `packages/graph` is the Neo4j graph engine
@@ -54,7 +54,7 @@ The current release line is maintained by the version metadata above. The releas
 
 | Surface | Origin | Role |
 | --- | --- | --- |
-| Landing | `https://cig.technology` | Public site, login entry, canonical logout return |
+| Landing | `https://cig.lat` | Public site, login entry, canonical logout return |
 | Dashboard | `https://app.cig.lat` | Protected application UI |
 | API | `https://api.cig.technology` | Canonical public API origin and AWS provisioning target |
 | Authentik | `https://auth.cig.technology` | Identity provider and social-login broker |
