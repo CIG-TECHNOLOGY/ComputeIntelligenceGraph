@@ -252,7 +252,7 @@ pnpm monitor:provision:authentik
 ### Step 2 — Build and push the Docker image
 ```bash
 git add packages/monitor-ui && git commit -m "feat(monitor): initial monitor-ui SaaS app"
-git push origin main && git push upstream main
+git push origin main
 # GitHub Actions (.github/workflows/monitor-ui-publish.yml) builds and pushes
 # ghcr.io/cig-technology/monitor-ui:sha-<hash> automatically
 # Update prod.tfvars with the published sha tag after the action completes

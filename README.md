@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.31-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.33-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,14 +35,11 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.31)
+## 📋 Latest Changes (v1.0.33)
 
-### Detected changes
-- root: CHANGELOG.md
-- apps: apps/dashboard/components/analytics/AnalyticsDashboard.tsx
-- packages: 2 changed file(s)
-  - packages/api/src/cors.test.ts
-  - packages/api/src/cors.ts
+### Bug Fixes
+
+* **release:** align app and landing release markers ([49131b6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/49131b6d7481c3502763c59b25d47e4e8a8f551c))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 

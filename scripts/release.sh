@@ -599,15 +599,13 @@ fi
 
 if $SKIP_PUSH; then
   warn "Push skipped (--no-push). Run manually:"
-  echo "  git push origin \"${BRANCH}\" && git push upstream \"${BRANCH}\""
-  echo "  git push origin \"${RELEASE_TAG}\" && git push upstream \"${RELEASE_TAG}\""
+  echo "  git push origin \"${BRANCH}\""
+  echo "  git push origin \"${RELEASE_TAG}\""
 elif ! $DRY_RUN; then
-  info "Pushing only ${BRANCH} and ${RELEASE_TAG}; do not push --tags from release runs."
+  info "Pushing only ${BRANCH} and ${RELEASE_TAG} to canonical origin; do not push --tags from release runs."
   git push origin "$BRANCH"
-  git push upstream "$BRANCH"
   git push origin "${RELEASE_TAG}"
-  git push upstream "${RELEASE_TAG}"
-  success "Pushed ${BRANCH} + tag ${RELEASE_TAG} to origin and upstream"
+  success "Pushed ${BRANCH} + tag ${RELEASE_TAG} to canonical origin"
 
   # Notify the monitor SaaS about this deployment
   if [ -n "${MONITOR_API_KEY:-}" ] && [ -n "${MONITOR_URL:-}" ]; then
@@ -619,7 +617,7 @@ elif ! $DRY_RUN; then
       || warn "Monitor deployment marker failed (non-fatal)"
   fi
 else
-  info "[dry-run] Would push branch + tag to origin and upstream"
+  info "[dry-run] Would push branch + tag to canonical origin"
 fi
 
 # ── Done ────────────────────────────────────────────────────────────────────

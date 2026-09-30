@@ -27,7 +27,7 @@ execFileSync(
 
 const readme = readFileSync(readmePath, 'utf8')
   .replace(
-    'https://github.com/edcalderon/my-second-brain/releases',
+    'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases',
     githubReleasesUrl
   )
   .replace(/\.\/+CHANGELOG\.md/g, './CHANGELOG.md');

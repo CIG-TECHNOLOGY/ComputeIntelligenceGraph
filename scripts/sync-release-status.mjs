@@ -73,7 +73,7 @@ function replaceOrThrow(content, pattern, replacement, filePath) {
 
 const readme = ensureLatestChangesSection(readText(readmePath))
   .replace(
-    'https://github.com/edcalderon/my-second-brain/releases',
+    'https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases',
     githubReleasesUrl
   );
 writeText(readmePath, readme);

@@ -10,7 +10,7 @@ This spec is based on the working implementation in this repository.
 
 Related issue:
 
-- https://github.com/edcalderon/my-second-brain/issues/9
+- https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/issues/9
 
 ## Problem Statement
 

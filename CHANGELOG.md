@@ -1,3 +1,14 @@
+## [1.0.33](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.32...v1.0.33) (2026-09-30)
+
+
+### Bug Fixes
+
+* **release:** align app and landing release markers ([49131b6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/49131b6d7481c3502763c59b25d47e4e8a8f551c))
+
+
+
+
+
 ## [1.0.32](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.31...v1.0.32) (2026-09-30)
 
 ### Changed

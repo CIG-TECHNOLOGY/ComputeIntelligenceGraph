@@ -1,29 +1,28 @@
 # CLAUDE.md — CIG project conventions for Claude Code
 
-## Git remotes — always push to both
+## Git remotes — origin is canonical
 
-This repo has two remotes. **Both must stay in sync on every push.**
+This repo may have a legacy `upstream` remote for reference, but production
+changes and releases are pushed only to the canonical organization repository.
 
 | Remote | URL | Role |
 |--------|-----|------|
 | `origin` | `https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph` | Canonical org repo |
-| `upstream` | `https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph` | Canonical production repository |
+| `upstream` | legacy/reference remote only | Historical upstream; never a production target |
 
-After every commit (including release bumps) push to **both**:
+After every commit (including release bumps) push to `origin`:
 
 ```bash
 git push origin main
-git push upstream main
 ```
 
-For tags, push only the new tag (the pre-push hook rejects old mismatched tags on a fresh remote):
+For tags, push only the new tag:
 
 ```bash
 git push origin v1.0.1
-git push upstream v1.0.1
 ```
 
-Never push only to one remote and call the work done.
+Treat `origin` as the only production push target; keep `upstream` read-only.
 
 ## Release process — always use the script
 
@@ -45,10 +44,10 @@ The script (`scripts/release.sh`) handles in order:
 6. CHANGELOG.md generation from conventional commits
 7. README.md badge + Latest Changes update
 8. `git commit` + `git tag`
-9. `git push` to **both** `origin` and `upstream`
+9. `git push` to the canonical `origin` repository only
 
 **Hard rules — enforced by this file:**
-- Do not run `git push origin main` alone; the script always pushes both remotes
+- Do not push releases to the legacy upstream remote
 - Do not create a release commit by hand; `chore(release): vX.Y.Z` commits come only from the script
 - Do not edit `package.json` version manually; that is the script's job
 - `--no-build` and `--no-tests` flags exist for CI emergencies only, not routine use

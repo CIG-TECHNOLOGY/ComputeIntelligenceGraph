@@ -108,7 +108,7 @@
               "ManagedBy": "terraform",
               "Name": "cig-terraform-locks",
               "Project": "CIG",
-              "Repository": "edwardcalderon/ComputeIntelligenceGraph",
+              "Repository": "CIG-TECHNOLOGY/ComputeIntelligenceGraph",
               "Stack": "bootstrap-account",
               "cig-managed": "true"
             },
@@ -394,7 +394,7 @@
               "ManagedBy": "terraform",
               "Name": "cig.technology-zone",
               "Project": "CIG",
-              "Repository": "edwardcalderon/ComputeIntelligenceGraph",
+              "Repository": "CIG-TECHNOLOGY/ComputeIntelligenceGraph",
               "Stack": "bootstrap-account",
               "cig-managed": "true"
             },
@@ -472,7 +472,7 @@
               "ManagedBy": "terraform",
               "Name": "cig-terraform-state-520900722378",
               "Project": "CIG",
-              "Repository": "edwardcalderon/ComputeIntelligenceGraph",
+              "Repository": "CIG-TECHNOLOGY/ComputeIntelligenceGraph",
               "Stack": "bootstrap-account",
               "cig-managed": "true"
             },
