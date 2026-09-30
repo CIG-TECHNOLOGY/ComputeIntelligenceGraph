@@ -1,7 +1,7 @@
 "use client";
 
 import { Building2, Check, ChevronDown, LoaderCircle, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type OrganizationSummary,
   type OrganizationWorkspace,
@@ -9,6 +9,7 @@ import {
   listOrganizations,
   selectOrganization,
 } from "../lib/organizations";
+import { formatDashboardApiError } from "../lib/apiErrors";
 
 export function OrganizationSwitcher() {
   const [workspace, setWorkspace] = useState<OrganizationWorkspace | null>(null);
@@ -18,12 +19,26 @@ export function OrganizationSwitcher() {
   const [creatingWorkspace, setCreatingWorkspace] = useState(false);
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceDomain, setWorkspaceDomain] = useState("");
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    void listOrganizations().then(setWorkspace).catch(() => setError("Your workspaces could not be loaded."));
+  const loadWorkspace = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setWorkspace(await listOrganizations());
+    } catch (caught) {
+      setWorkspace(null);
+      setError(formatDashboardApiError(caught instanceof Error ? caught : {}, "workspace"));
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadWorkspace();
+  }, [loadWorkspace]);
 
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
@@ -78,8 +93,12 @@ export function OrganizationSwitcher() {
           <Building2 className="size-3.5" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-xs font-semibold text-cig-primary">{active?.name ?? "Loading workspace"}</span>
-          <span className="block truncate text-[10px] text-cig-muted">{active?.domain ?? "Organization workspace"}</span>
+          <span className="block truncate text-xs font-semibold text-cig-primary">
+            {active?.name ?? (loading ? "Loading workspace" : error ? "Workspace unavailable" : "No workspace")}
+          </span>
+          <span className="block truncate text-[10px] text-cig-muted">
+            {active?.domain ?? (error ? "Retry to reconnect" : "Organization workspace")}
+          </span>
         </span>
         <ChevronDown className={`size-3.5 shrink-0 text-cig-muted transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
@@ -87,7 +106,8 @@ export function OrganizationSwitcher() {
       {open && (
         <div className="absolute bottom-full left-2.5 right-2.5 z-50 mb-1 overflow-hidden rounded-xl border border-cig bg-cig-card py-1 shadow-lg dark:shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
           <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-cig-muted">Workspaces</p>
-          {workspace?.items.map((organization) => {
+          {loading && <p className="px-3 py-3 text-xs text-cig-muted">Loading workspaces…</p>}
+          {!loading && workspace?.items.map((organization) => {
             const selected = organization.id === workspace.activeOrganizationId;
             const isSwitching = switchingId === organization.id;
             return (
@@ -104,14 +124,14 @@ export function OrganizationSwitcher() {
               </button>
             );
           })}
-          <div className="mx-3 my-1 border-t border-cig" />
-          {!creating && (
+          {!loading && workspace && <div className="mx-3 my-1 border-t border-cig" />}
+          {!loading && workspace && !creating && (
             <button type="button" onClick={() => setCreating(true)}
               className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs font-medium text-cyan-700 transition-colors hover:bg-cig-hover dark:text-cyan-300">
               <Plus className="size-3.5" /> Create shared workspace
             </button>
           )}
-          {creating && (
+          {!loading && workspace && creating && (
             <form onSubmit={createWorkspace} className="space-y-2 px-3 py-2">
               <label className="block text-[10px] font-medium text-cig-secondary">
                 Workspace name
@@ -131,7 +151,15 @@ export function OrganizationSwitcher() {
               </div>
             </form>
           )}
-          {error && <p className="px-3 py-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+          {error && (
+            <div role="alert" className="space-y-2 px-3 py-2 text-xs text-red-600 dark:text-red-400">
+              <p>{error}</p>
+              <button type="button" onClick={() => void loadWorkspace()} disabled={loading}
+                className="font-semibold underline underline-offset-2 disabled:cursor-wait disabled:opacity-60">
+                {loading ? "Retrying…" : "Retry loading workspaces"}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

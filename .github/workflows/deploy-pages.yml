@@ -97,7 +97,9 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api.cig.technology
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_DASHBOARD_URL: ${{ secrets.NEXT_PUBLIC_DASHBOARD_URL }}
+          # Keep the public landing handoff on the canonical production app.
+          # A stale repository/org secret must not send users to app.cig.technology.
+          NEXT_PUBLIC_DASHBOARD_URL: https://app.cig.lat
           NEXT_PUBLIC_DOCS_URL: https://cig.lat/documentation
           NEXT_PUBLIC_AUTHENTIK_URL: ${{ vars.NEXT_PUBLIC_AUTHENTIK_URL || 'https://auth.cig.technology' }}
           NEXT_PUBLIC_AUTHENTIK_CLIENT_ID: ${{ vars.NEXT_PUBLIC_AUTHENTIK_CLIENT_ID || 'cig-dashboard' }}

@@ -1,3 +1,14 @@
+## [1.0.34](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.33...v1.0.34) (2026-09-30)
+
+### Bug Fixes
+
+* **workspace:** surface authentication and network failures with retryable workspace loading
+* **release:** pin landing authentication handoff to the canonical `app.cig.lat` dashboard
+
+
+
+
+
 ## [1.0.33](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.32...v1.0.33) (2026-09-30)
 
 

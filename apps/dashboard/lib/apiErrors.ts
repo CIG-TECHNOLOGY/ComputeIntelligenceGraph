@@ -29,6 +29,18 @@ export function formatDashboardApiError(
     return "Workspace services are not available on the current API deployment (HTTP 404). Deploy the latest API, then retry.";
   }
 
+  if (feature === "workspace" && status === 401) {
+    return "Your dashboard session has expired or was not transferred to this app (HTTP 401). Sign in again, then retry loading workspaces.";
+  }
+
+  if (feature === "workspace" && status === 403) {
+    return "Your account is authenticated, but it does not have a verified email for workspace access (HTTP 403). Verify the account email, then retry.";
+  }
+
+  if (!status && /(failed to fetch|networkerror|network request failed|load failed)/.test(normalized)) {
+    return `${feature === "workspace" ? "Workspace service" : "API service"} could not be reached. Check the API deployment or browser network policy, then retry.`;
+  }
+
   if (
     feature === "analytics" &&
     status === 500 &&
