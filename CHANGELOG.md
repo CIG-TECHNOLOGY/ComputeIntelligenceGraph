@@ -1,3 +1,12 @@
+## [1.0.30](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.29...v1.0.30) (2026-09-30)
+
+### Bug Fixes
+
+* allow managed analytics hostnames through the API CORS policy
+* make private signal rooms explicit and require the authenticated workspace
+
+
+
 ## [1.0.29](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.28...v1.0.29) (2026-09-30)
 
 

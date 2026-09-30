@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveCorsOrigins } from './cors.js';
+import { MANAGED_ANALYTICS_CORS_ORIGIN, resolveCorsOrigins } from './cors.js';
 
 describe('resolveCorsOrigins', () => {
   it('accepts an explicit wildcard origin list', () => {
@@ -10,6 +10,7 @@ describe('resolveCorsOrigins', () => {
     expect(
       resolveCorsOrigins({
         CORS_ORIGINS: 'https://app.example.com, https://cig.lat',
+        NODE_ENV: 'test',
       })
     ).toEqual(['https://app.example.com', 'https://cig.lat']);
   });
@@ -18,6 +19,7 @@ describe('resolveCorsOrigins', () => {
     expect(
       resolveCorsOrigins({
         API_CORS_ORIGINS: 'https://dashboard.example.com',
+        NODE_ENV: 'test',
       })
     ).toEqual(['https://dashboard.example.com']);
   });
@@ -45,6 +47,17 @@ describe('resolveCorsOrigins', () => {
       'https://www.cig.lat',
       'https://app.cig.lat',
       'https://cig-technology.github.io',
+      MANAGED_ANALYTICS_CORS_ORIGIN,
     ]);
+  });
+
+  it('allows provisioned analytics hostnames while rejecting look-alike domains', () => {
+    const origins = resolveCorsOrigins({
+      API_CORS_ORIGINS: 'https://app.cig.technology',
+      NODE_ENV: 'production',
+    });
+    expect(origins).toContain(MANAGED_ANALYTICS_CORS_ORIGIN);
+    expect(Array.isArray(origins) && origins.some((origin) => origin instanceof RegExp && origin.test('https://hashpass-tech.analytics.cig.technology'))).toBe(true);
+    expect(Array.isArray(origins) && origins.some((origin) => origin instanceof RegExp && origin.test('https://hashpass-tech.analytics.cig.technology.evil.example'))).toBe(false);
   });
 });

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.29-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.30-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,14 +35,14 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.29)
+## 📋 Latest Changes (v1.0.30)
 
-### Bug Fixes
-
-* **analytics:** route permanent hosts to signal rooms ([dd4eabb](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/dd4eabb42e777db0231408d81d9b9cac013bff95))
-* bind Pages landing to cig.lat ([1997cc1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/1997cc1e9f8c9d8a14f269f2aa1210c639073f0e))
-* keep Pages on verified technology domain ([7efee30](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7efee30788611f368a9c7a64a0a1f9ca5c8254c0))
-* use canonical lat landing host in Pages build ([447513e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/447513e4c1715e389f35a8bb80e3d9a04e680d2e))
+### Detected changes
+- root: CHANGELOG.md
+- apps: apps/dashboard/components/analytics/AnalyticsDashboard.tsx
+- packages: 2 changed file(s)
+  - packages/api/src/cors.test.ts
+  - packages/api/src/cors.ts
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
