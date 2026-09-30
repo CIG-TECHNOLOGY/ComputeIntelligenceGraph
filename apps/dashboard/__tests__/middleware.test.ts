@@ -41,4 +41,31 @@ describe("dashboard middleware", () => {
 
     expect(response.headers.get("location")).toBeNull();
   });
+
+  it("rewrites technology permanent hostnames to the alias view", () => {
+    const response = middleware(makeRequest("https://hashpass-tech.analytics.cig.technology/"));
+
+    expect(response.headers.get("x-middleware-rewrite")).toContain(
+      "/analytics/alias/hashpass-tech?base=analytics.cig.technology",
+    );
+  });
+
+  it("uses the forwarded host when the edge normalizes the request URL", () => {
+    const response = middleware(new NextRequest("https://app.cig.lat/", {
+      headers: {
+        host: "app.cig.lat",
+        "x-forwarded-host": "hashpass-tech.analytics.cig.technology",
+      },
+    }));
+
+    expect(response.headers.get("x-middleware-rewrite")).toContain(
+      "/analytics/alias/hashpass-tech?base=analytics.cig.technology",
+    );
+  });
+
+  it("does not rewrite unsupported lat permanent hostnames", () => {
+    const response = middleware(makeRequest("https://hashpass-tech.analytics.cig.lat/"));
+
+    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  });
 });

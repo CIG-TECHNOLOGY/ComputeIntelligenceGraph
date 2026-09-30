@@ -25,11 +25,10 @@ The primary production delivery path is the GitHub Actions workflow in `.github/
 ## Permanent analytics hostnames
 
 `environments/lean-prod` provisions a 60-second wildcard CNAME and a DNS-
-validated ACM wildcard certificate for `*.analytics.cig.technology`, plus the
-same pair for `*.analytics.cig.lat` when `analytics_lat_zone_id` is supplied.
-Both CNAMEs point at the canonical dashboard hostname
-(`analytics_dashboard_target`, default `app.cig.lat`). Attach the emitted
-certificate ARN to the dashboard edge HTTPS listener (set
+validated ACM wildcard certificate for `*.analytics.cig.technology`. The CNAME
+points at the canonical dashboard hostname (`analytics_dashboard_target`,
+default `app.cig.lat`). Attach the emitted certificate ARN to the dashboard
+edge HTTPS listener (set
 `analytics_dashboard_https_listener_arn` in `lean-prod`); the production
 apply attaches it to the dashboard ALB automatically. The application stores
 and validates aliases but never creates per-user DNS records.

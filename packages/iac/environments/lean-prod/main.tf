@@ -49,15 +49,6 @@ module "analytics_alias_technology_dns" {
   dashboard_https_listener_arn = var.analytics_dashboard_https_listener_arn
 }
 
-module "analytics_alias_lat_dns" {
-  count  = var.analytics_lat_zone_id == "" ? 0 : 1
-  source = "../../modules/analytics-alias-dns"
-
-  route53_zone_id  = var.analytics_lat_zone_id
-  base_domain      = "analytics.cig.lat"
-  dashboard_target = var.analytics_dashboard_target
-}
-
 module "api_host" {
   source = "../../modules/api-host"
 

@@ -23,16 +23,6 @@ output "analytics_technology_wildcard_certificate_arn" {
   value       = module.analytics_alias_technology_dns.certificate_arn
 }
 
-output "analytics_lat_wildcard_hostname" {
-  description = "Wildcard CNAME serving *.analytics.cig.lat, when analytics_lat_zone_id is configured"
-  value       = try(module.analytics_alias_lat_dns[0].wildcard_hostname, null)
-}
-
-output "analytics_lat_wildcard_certificate_arn" {
-  description = "Validated wildcard ACM certificate for *.analytics.cig.lat, when analytics_lat_zone_id is configured"
-  value       = try(module.analytics_alias_lat_dns[0].certificate_arn, null)
-}
-
 output "authentik_issuer_url" {
   description = "Authentik OIDC issuer URL"
   value       = module.authentik_host.issuer_url

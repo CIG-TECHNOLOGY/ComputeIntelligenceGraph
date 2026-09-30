@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const ALLOWED_HOST = /^[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?\.(?:analytics\.cig\.lat|analytics\.cig\.technology)$/i;
+const ALLOWED_HOST = /^[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?\.analytics\.cig\.technology$/i;
 
 export const dynamic = "force-dynamic";
 

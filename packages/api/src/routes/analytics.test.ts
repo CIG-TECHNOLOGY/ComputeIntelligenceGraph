@@ -250,21 +250,21 @@ describe('analytics routes', () => {
       method: 'PUT',
       url: `/api/v1/analytics/sites/${siteId}/public-alias`,
       headers: { authorization: `Bearer ${token}` },
-      payload: { alias: 'hashpass-tech', baseDomain: 'analytics.cig.lat' },
+      payload: { alias: 'hashpass-tech', baseDomain: 'analytics.cig.technology' },
     });
     expect(assigned.statusCode).toBe(200);
     expect(assigned.json().publicAccess).toMatchObject({
       alias: 'hashpass-tech',
-      baseDomain: 'analytics.cig.lat',
-      permanentUrl: 'https://hashpass-tech.analytics.cig.lat',
+      baseDomain: 'analytics.cig.technology',
+      permanentUrl: 'https://hashpass-tech.analytics.cig.technology',
     });
 
     const publicView = await app.inject({
       method: 'GET',
-      url: '/api/v1/analytics/public-alias/hashpass-tech?base=analytics.cig.lat',
+      url: '/api/v1/analytics/public-alias/hashpass-tech?base=analytics.cig.technology',
     });
     expect(publicView.statusCode).toBe(200);
-    expect(publicView.json().site.publicAccess.permanentUrl).toBe('https://hashpass-tech.analytics.cig.lat');
+    expect(publicView.json().site.publicAccess.permanentUrl).toBe('https://hashpass-tech.analytics.cig.technology');
 
     const updated = await app.inject({
       method: 'PUT',
@@ -275,11 +275,19 @@ describe('analytics routes', () => {
     expect(updated.statusCode).toBe(200);
     expect(updated.json().publicAccess.permanentUrl).toBe('https://hashpass-prod.analytics.cig.technology');
 
+    const unsupportedDomain = await app.inject({
+      method: 'PUT',
+      url: `/api/v1/analytics/sites/${siteId}/public-alias`,
+      headers: { authorization: `Bearer ${token}` },
+      payload: { alias: 'hashpass-legacy', baseDomain: 'analytics.cig.lat' },
+    });
+    expect(unsupportedDomain.statusCode).toBe(400);
+
     const invalid = await app.inject({
       method: 'PUT',
       url: `/api/v1/analytics/sites/${siteId}/public-alias`,
       headers: { authorization: `Bearer ${token}` },
-      payload: { alias: 'nested.room', baseDomain: 'analytics.cig.lat' },
+      payload: { alias: 'nested.room', baseDomain: 'analytics.cig.technology' },
     });
     expect(invalid.statusCode).toBe(400);
 

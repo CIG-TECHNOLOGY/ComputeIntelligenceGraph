@@ -1,6 +1,6 @@
 import { AnalyticsDashboard } from "../../../../components/analytics/AnalyticsDashboard";
 
-type BaseDomain = "analytics.cig.lat" | "analytics.cig.technology";
+type BaseDomain = "analytics.cig.technology";
 
 export default function PermanentAnalyticsDashboard({
   params,
@@ -9,8 +9,6 @@ export default function PermanentAnalyticsDashboard({
   params: { alias: string };
   searchParams: { base?: string };
 }) {
-  const baseDomain = searchParams.base === "analytics.cig.technology"
-    ? "analytics.cig.technology"
-    : "analytics.cig.lat";
-  return <AnalyticsDashboard publicAlias={{ alias: params.alias, baseDomain: baseDomain as BaseDomain }} />;
+  const baseDomain: BaseDomain = "analytics.cig.technology";
+  return <AnalyticsDashboard publicAlias={{ alias: params.alias, baseDomain }} />;
 }

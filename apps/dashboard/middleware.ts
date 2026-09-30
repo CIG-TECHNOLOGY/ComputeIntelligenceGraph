@@ -5,6 +5,7 @@ import {
   isProtectedDashboardHostname,
   resolveLandingSignInUrl,
 } from "./lib/siteUrl";
+import { getPermanentAnalyticsAlias } from "./lib/analyticsAlias";
 
 /** Routes that are always public — no session required. */
 const PUBLIC_PATHS = [
@@ -20,16 +21,33 @@ const PUBLIC_PATHS = [
   "/favicon",
 ];
 
-function permanentAnalyticsHost(hostname: string): { alias: string; baseDomain: "analytics.cig.lat" | "analytics.cig.technology" } | null {
-  const match = hostname.toLowerCase().match(/^([a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.((?:analytics\.cig\.lat)|(?:analytics\.cig\.technology))$/);
-  if (!match) return null;
-  return { alias: match[1], baseDomain: match[2] as "analytics.cig.lat" | "analytics.cig.technology" };
+function permanentAnalyticsHost(hostname: string): { alias: string; baseDomain: "analytics.cig.technology" } | null {
+  const alias = getPermanentAnalyticsAlias(hostname);
+  return alias ? { alias, baseDomain: "analytics.cig.technology" } : null;
+}
+
+function permanentAnalyticsHostFromRequest(request: NextRequest) {
+  const candidates = [
+    request.headers.get("x-forwarded-host"),
+    request.headers.get("host"),
+    request.nextUrl.hostname,
+  ]
+    .flatMap((value) => value?.split(",", 1) ?? [])
+    .map((value) => value.trim().replace(/:\d+$/, ""))
+    .filter(Boolean);
+
+  for (const candidate of candidates) {
+    const permanentHost = permanentAnalyticsHost(candidate);
+    if (permanentHost) return permanentHost;
+  }
+
+  return null;
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const permanentHost = permanentAnalyticsHost(request.nextUrl.hostname);
+  const permanentHost = permanentAnalyticsHostFromRequest(request);
   if (permanentHost && (pathname === "/" || pathname === "/analytics")) {
     const rewritten = request.nextUrl.clone();
     rewritten.pathname = `/analytics/alias/${permanentHost.alias}`;

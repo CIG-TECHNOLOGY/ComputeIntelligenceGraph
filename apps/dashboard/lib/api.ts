@@ -159,7 +159,7 @@ export const getAnalyticsSiteInsights = (siteId: string, days = 30): Promise<Ana
 export const setAnalyticsPublicAccess = (siteId: string, enabled: boolean, paused = false, rotate = false): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
   getClient().setAnalyticsPublicAccess(siteId, enabled, paused, rotate);
 
-export const setAnalyticsPublicAlias = (siteId: string, alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology"): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
+export const setAnalyticsPublicAlias = (siteId: string, alias: string, baseDomain: "analytics.cig.technology"): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
   getClient().setAnalyticsPublicAlias(siteId, alias, baseDomain);
 
 export const clearAnalyticsPublicAlias = (siteId: string): Promise<{ publicAccess: AnalyticsPublicAccess }> =>
@@ -168,7 +168,7 @@ export const clearAnalyticsPublicAlias = (siteId: string): Promise<{ publicAcces
 export const getPublicAnalyticsView = (token: string, days = 30): Promise<AnalyticsInsightsResponse> =>
   getClient().getPublicAnalyticsView(token, days);
 
-export const getPublicAnalyticsAlias = (alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology", days = 30): Promise<AnalyticsInsightsResponse> =>
+export const getPublicAnalyticsAlias = (alias: string, baseDomain: "analytics.cig.technology", days = 30): Promise<AnalyticsInsightsResponse> =>
   getClient().getPublicAnalyticsAlias(alias, baseDomain, days);
 
 export const triggerDiscovery = () => getClient().triggerDiscovery();

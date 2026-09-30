@@ -256,7 +256,7 @@ export class CigClient {
     );
   }
 
-  setAnalyticsPublicAlias(siteId: string, alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology"): Promise<{ publicAccess: AnalyticsPublicAccess }> {
+  setAnalyticsPublicAlias(siteId: string, alias: string, baseDomain: "analytics.cig.technology"): Promise<{ publicAccess: AnalyticsPublicAccess }> {
     return this.request<{ publicAccess: AnalyticsPublicAccess }>(
       `/api/v1/analytics/sites/${encodeURIComponent(siteId)}/public-alias`,
       { method: "PUT", body: JSON.stringify({ alias, baseDomain }) },
@@ -276,7 +276,7 @@ export class CigClient {
     );
   }
 
-  getPublicAnalyticsAlias(alias: string, baseDomain: "analytics.cig.lat" | "analytics.cig.technology", days = 30): Promise<AnalyticsInsightsResponse> {
+  getPublicAnalyticsAlias(alias: string, baseDomain: "analytics.cig.technology", days = 30): Promise<AnalyticsInsightsResponse> {
     return this.request<AnalyticsInsightsResponse>(
       `/api/v1/analytics/public-alias/${encodeURIComponent(alias)}?base=${encodeURIComponent(baseDomain)}&days=${encodeURIComponent(days)}`,
     );

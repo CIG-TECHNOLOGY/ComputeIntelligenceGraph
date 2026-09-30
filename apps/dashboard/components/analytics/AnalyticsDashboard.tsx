@@ -13,15 +13,25 @@ import {
   setAnalyticsPublicAlias,
   setAnalyticsPublicAccess,
 } from "../../lib/api";
+import { canSubmitPermanentAlias } from "../../lib/analyticsAlias";
 
-type PublicAlias = { alias: string; baseDomain: "analytics.cig.lat" | "analytics.cig.technology" };
+type PublicAlias = { alias: string; baseDomain: "analytics.cig.technology" };
 type Props = { siteId?: string; publicToken?: string; publicAlias?: PublicAlias };
 type PermanentLinkStatus = "idle" | "checking" | "ready" | "timed_out";
 
 const isPermanentAnalyticsUrl = (value: string) => {
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && /^(?:[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.(?:analytics\.cig\.lat|analytics\.cig\.technology)$/i.test(url.hostname);
+    return url.protocol === "https:" && /^(?:[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.analytics\.cig\.technology$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
+};
+
+const isRetiredPermanentAnalyticsUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && /^(?:[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?)\.analytics\.cig\.lat$/i.test(url.hostname);
   } catch {
     return false;
   }
@@ -42,7 +52,7 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
   const [permanentLinkStatus, setPermanentLinkStatus] = useState<PermanentLinkStatus>("idle");
   const [permanentLinkError, setPermanentLinkError] = useState<string | null>(null);
   const [alias, setAlias] = useState("");
-  const [baseDomain, setBaseDomain] = useState<PublicAlias["baseDomain"]>("analytics.cig.lat");
+  const [baseDomain, setBaseDomain] = useState<PublicAlias["baseDomain"]>("analytics.cig.technology");
   const verificationRun = useRef(0);
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -99,6 +109,7 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
       const stored = window.localStorage.getItem(publicLinkStorageKey);
       if (!stored) return;
       if (isPermanentAnalyticsUrl(stored)) verifyPermanentLink(stored);
+      else if (isRetiredPermanentAnalyticsUrl(stored)) window.localStorage.removeItem(publicLinkStorageKey);
       else setPublicLink(stored);
     } catch {
       // Storage can be unavailable in privacy-restricted browsers.
@@ -169,9 +180,16 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
   useEffect(() => {
     const configured = site?.publicAccess;
     if (!configured) return;
-    if (configured.permanentUrl && configured.permanentUrl !== permanentLink) verifyPermanentLink(configured.permanentUrl);
+    const supportedHostname = configured.baseDomain === "analytics.cig.technology";
+    if (configured.permanentUrl && supportedHostname && configured.permanentUrl !== permanentLink) verifyPermanentLink(configured.permanentUrl);
+    if (configured.permanentUrl && !supportedHostname) {
+      verificationRun.current += 1;
+      setPermanentLink(null);
+      setPermanentLinkStatus("idle");
+      setPermanentLinkError("This legacy .lat hostname is retired. Update it to the managed .technology hostname.");
+    }
     if (configured.alias) setAlias(configured.alias);
-    if (configured.baseDomain) setBaseDomain(configured.baseDomain);
+    if (supportedHostname) setBaseDomain("analytics.cig.technology");
   }, [configuredPermanentUrl, permanentLink, site?.publicAccess, verifyPermanentLink]);
 
   function goBackToAnalytics() {
@@ -281,9 +299,10 @@ export function AnalyticsDashboard({ siteId, publicToken, publicAlias }: Props) 
               <input value={alias} onChange={(event) => setAlias(event.target.value.toLowerCase().replace(/\s+/g, "-"))} placeholder="hashpass-tech" aria-label="Permanent hostname label" className="min-w-0 flex-1 bg-transparent py-2 text-cig-primary outline-none placeholder:text-cig-muted" maxLength={63} />
               <span className="shrink-0 text-xs text-cig-muted">.{baseDomain}</span>
             </div>
-            <button type="button" disabled={!site.publicAccess?.enabled || !aliasIsValid || aliasMutation.isPending || permanentLinkStatus === "checking"} onClick={() => aliasMutation.mutate()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{aliasMutation.isPending || permanentLinkStatus === "checking" ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}{aliasMutation.isPending ? "Saving hostname" : permanentLinkStatus === "checking" ? "Provisioning hostname" : site.publicAccess?.permanentUrl ? "Update hostname" : "Create permanent link"}</button>
+            <button type="button" disabled={!canSubmitPermanentAlias({ publicAccessEnabled: Boolean(site.publicAccess?.enabled), aliasValid: aliasIsValid, mutationPending: aliasMutation.isPending })} onClick={() => aliasMutation.mutate()} className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">{aliasMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}{aliasMutation.isPending ? "Saving hostname" : site.publicAccess?.permanentUrl ? "Update hostname" : "Create permanent link"}</button>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-cig-muted"><label className="inline-flex items-center gap-2"><span>Managed zone</span><select value={baseDomain} onChange={(event) => setBaseDomain(event.target.value as PublicAlias["baseDomain"])} className="rounded-md border border-cig bg-cig-card px-2 py-1 text-cig-secondary"><option value="analytics.cig.lat">analytics.cig.lat (default)</option><option value="analytics.cig.technology">analytics.cig.technology</option></select></label><span>One label only; letters, numbers, - and _.</span></div>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-cig-muted"><span>Managed zone <strong className="font-semibold text-cig-secondary">analytics.cig.technology</strong></span><span>One label only; letters, numbers, - and _.</span></div>
+          {permanentLinkError && !permanentLink && <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">{permanentLinkError}</p>}
           {!site.publicAccess?.enabled && <p className="mt-2 text-xs text-amber-700 dark:text-amber-200">Create a public link first, then assign its permanent hostname.</p>}
           {aliasMutation.isError && <p className="mt-2 text-xs text-red-600">{aliasMutation.error instanceof Error ? aliasMutation.error.message : "Could not assign that hostname."}</p>}
           {removeAliasMutation.isError && <p className="mt-2 text-xs text-red-600">{removeAliasMutation.error instanceof Error ? removeAliasMutation.error.message : "Could not remove that hostname."}</p>}

@@ -1,6 +1,6 @@
 const DOMAIN_PATTERN = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}(?::\d{1,5})?$|^localhost(?::\d{1,5})?$/i;
 
-export const ANALYTICS_PUBLIC_BASE_DOMAINS = ['analytics.cig.lat', 'analytics.cig.technology'] as const;
+export const ANALYTICS_PUBLIC_BASE_DOMAINS = ['analytics.cig.technology'] as const;
 export type AnalyticsPublicBaseDomain = (typeof ANALYTICS_PUBLIC_BASE_DOMAINS)[number];
 const ANALYTICS_PUBLIC_ALIAS_PATTERN = /^[a-z0-9](?:[a-z0-9_-]{0,61}[a-z0-9])?$/i;
 
@@ -74,7 +74,7 @@ export function validateAnalyticsPublicAlias(
     return { valid: false, field: 'alias', message: 'Use one DNS label (1–63 letters, numbers, hyphens, or underscores) without dots.' };
   }
   if (!ANALYTICS_PUBLIC_BASE_DOMAINS.includes(normalizedBase as AnalyticsPublicBaseDomain)) {
-    return { valid: false, field: 'baseDomain', message: 'Choose analytics.cig.lat or analytics.cig.technology.' };
+    return { valid: false, field: 'baseDomain', message: 'Choose analytics.cig.technology.' };
   }
   return { valid: true, alias: normalizedAlias, baseDomain: normalizedBase as AnalyticsPublicBaseDomain };
 }
