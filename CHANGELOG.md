@@ -1,3 +1,14 @@
+## [1.0.29](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.28...v1.0.29) (2026-09-30)
+
+
+### Bug Fixes
+
+* **analytics:** route permanent hosts to signal rooms ([dd4eabb](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/dd4eabb42e777db0231408d81d9b9cac013bff95))
+* bind Pages landing to cig.lat ([1997cc1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/1997cc1e9f8c9d8a14f269f2aa1210c639073f0e))
+* keep Pages on verified technology domain ([7efee30](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7efee30788611f368a9c7a64a0a1f9ca5c8254c0))
+* use canonical lat landing host in Pages build ([447513e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/447513e4c1715e389f35a8bb80e3d9a04e680d2e))
+
+
 ## [1.0.28](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/compare/v1.0.27...v1.0.28) (2026-09-29)
 
 

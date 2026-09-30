@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.28-blue.svg" alt="Version" /></a>
+  <a href="package.json"><img src="https://img.shields.io/badge/version-1.0.29-blue.svg" alt="Version" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen.svg" alt="Node" /></a>
   <a href="package.json"><img src="https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg" alt="pnpm" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
@@ -35,27 +35,14 @@
 - Deployment: [docs/deployment/README.md](docs/deployment/README.md)
 - Authentication: [docs/authentication/README.md](docs/authentication/README.md)
 
-## 📋 Latest Changes (v1.0.28)
+## 📋 Latest Changes (v1.0.29)
 
 ### Bug Fixes
 
-* attach analytics wildcard certificate to dashboard edge ([4495575](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/4495575faa9db22ea6a79f0c07927ab3d3a6b9fc))
-* gate API rollout on database migrations ([67c6fc6](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/67c6fc62b8f2065c60c4e211e7964718d6c498ad))
-* gate permanent links on hostname readiness ([b5036f8](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/b5036f8c350b8440b063834645a267a0109296f2))
-* keep accepted analytics visitors live ([d8ba6c7](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d8ba6c7a098f68e0fc90e2da7d3cb1da3784eee4))
-* keep main dashboard on cig.lat ([53f8f3c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/53f8f3cfbad2a570251aae8ed2f378e438cb093f))
-* maintain public analytics links and canonicalize domains ([133879b](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/133879b0f55897c9195ecb856b2c061ed71e93fe))
-* publish dashboard release marker from build tag ([48a6435](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/48a64356f5a8799dcfde50bee310cb96e43f7ef2))
-* register dashboard auth callback routes ([82e080c](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/82e080c89f3676245b6bd0ba157038cd7ad0bbf5))
-* run API migration and smoke jobs after manual dispatch ([d74b931](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/d74b9313461ac2432c25253a54558998e0d4e30e))
-* run migrations on manual API promotions ([ae46f2e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/ae46f2e98a7813d772d1888f72566c232a0cab94))
-* use canonical product domain in translations ([a253fd9](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/a253fd992c4d5fef74b363663700703d4fcc0661))
-
-
-### Features
-
-* add analytics workspace summary and live map ([befc236](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/befc236c15d034a7951bbb1a89fcf30879de5a32))
-* add permanent analytics signal room aliases ([02bde64](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/02bde646c1da9898383e1c30b0fd636eb083078f))
+* **analytics:** route permanent hosts to signal rooms ([dd4eabb](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/dd4eabb42e777db0231408d81d9b9cac013bff95))
+* bind Pages landing to cig.lat ([1997cc1](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/1997cc1e9f8c9d8a14f269f2aa1210c639073f0e))
+* keep Pages on verified technology domain ([7efee30](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/7efee30788611f368a9c7a64a0a1f9ca5c8254c0))
+* use canonical lat landing host in Pages build ([447513e](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/commit/447513e4c1715e389f35a8bb80e3d9a04e680d2e))
 
 For full version history, see [CHANGELOG.md](./CHANGELOG.md) and [GitHub releases](https://github.com/CIG-TECHNOLOGY/ComputeIntelligenceGraph/releases)
 
